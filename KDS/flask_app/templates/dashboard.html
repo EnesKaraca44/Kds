@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Ana Sayfa{% endblock %}
+{% block page_title %}🏥 Kurum Performans Yönetim Sistemi{% endblock %}
+
+{% block content %}
+<div class="greeting-bar">
+    <span>👋 {{ greeting }}, <strong>{{ logged_in_user }}</strong></span>
+    <span class="greeting-period">Analiz periyodu: {{ start_date.strftime('%d.%m.%Y') }} - {{
+        end_date.strftime('%d.%m.%Y') }}</span>
+</div>
+
+<!-- Finansal Performans Özeti -->
+<h2 class="section-title">🚀 Finansal Performans Özeti</h2>
+
+{% if metrics and 'error' not in metrics %}
+<div class="metrics-grid">
+    <div class="metric-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ metrics.toplam_hasta }} Kişi</div>
+            <div class="metric-label">Toplam Hasta</div>
+            <div class="metric-delta positive">Güncel Kayıt</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ metrics.toplam_tutar|turkish_number }}</div>
+            <div class="metric-label">Toplam Gelir</div>
+            <div class="metric-delta positive">Tahakkuk Eden</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">📊</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ metrics.avg_val|turkish_number }}</div>
+            <div class="metric-label">Hasta Başı Ort.</div>
+            <div class="metric-delta positive">Verimlilik</div>
+        </div>
+    </div>
+</div>
+
+<div class="info-banner">
+    📄 <strong>Sistem Notu:</strong> En son <code>{{ metrics.fatura_no }}</code> nolu fatura grubu işlendi. Veriler bu
+    grup üzerinden konsolide edilmiştir.
+</div>
+{% elif metrics and 'error' in metrics %}
+<div class="alert alert-error">⚠️ Veri yükleme hatası: {{ metrics.error }}</div>
+{% else %}
+<div class="alert alert-warning">⚠️ Seçilen aralıkta fatura verisi bulunamadı.</div>
+{% endif %}
+
+<!-- Sistem Sağlık Durumu -->
+<div class="divider"></div>
+<h2 class="section-title">🛠️ Sistem Sağlık Durumu</h2>
+
+<div class="metrics-grid cols-3">
+    <div class="metric-card">
+        <div class="metric-icon">📡</div>
+        <div class="metric-body">
+            <div class="metric-label">Sunucu Bağlantısı</div>
+            {% if db_status == 'ok' %}
+            <div class="status-badge success">✅ Çalışıyor: Bağlantı Sağlıklı</div>
+            {% else %}
+            <div class="status-badge error">❌ Bağlantı Yok</div>
+            {% endif %}
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">⚡</div>
+        <div class="metric-body">
+            <div class="metric-label">Sorgu Performansı</div>
+            {% if query_time > 0 and query_time < 1.0 %} <div class="status-badge success">🚀 Çok Hızlı: {{ query_time
+                }} sn
+        </div>
+        {% elif query_time >= 1.0 %}
+        <div class="status-badge warning">⏱️ Normal: {{ query_time }} sn</div>
+        {% else %}
+        <div class="status-badge info">Ölçülmedi</div>
+        {% endif %}
+    </div>
+</div>
+<div class="metric-card">
+    <div class="metric-icon">🕒</div>
+    <div class="metric-body">
+        <div class="metric-label">Son Güncelleme</div>
+        <div class="status-badge info">{{ current_time }}</div>
+    </div>
+</div>
+</div>
+{% endblock %}

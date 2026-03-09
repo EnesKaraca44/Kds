@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}Yabancı Hasta{% endblock %}
+{% block page_title %}🌍 Yabancı Hasta Analizi{% endblock %}
+{% block body_class %}theme-dark{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="metrics-grid cols-4">
+    <div class="metric-card">
+        <div class="metric-icon">🌍</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ total_patients|turkish_number(0) }}</div>
+            <div class="metric-label">Toplam Yabancı Hasta</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ total_revenue|turkish_number }}</div>
+            <div class="metric-label">Toplam Gelir</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">📊</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ avg_rev|turkish_number }}</div>
+            <div class="metric-label">Hasta Başı Ort. Gelir</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">🏳️</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ ulke_cesitlilik }}</div>
+            <div class="metric-label">Ülke Çeşitliliği</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs" data-target="#yhTabs">
+    <button class="tab-btn active">📍 Coğrafi Dağılım</button>
+    <button class="tab-btn">📈 Verimlilik Matrisi</button>
+    <button class="tab-btn">👥 Demografi</button>
+</div>
+
+<div id="yhTabs">
+    <!-- Coğrafi Dağılım -->
+    <div class="tab-content active">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title">Gelir Lideri Ülkeler</div>
+                {{ charts.fig_geo_bar | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Hasta Sayısı Dağılımı</div>
+                {{ charts.fig_geo_pie | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Verimlilik Matrisi -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">Ülke Bazlı Verimlilik (Hacim vs. Değer)</div>
+            {{ charts.fig_eff | safe }}
+        </div>
+    </div>
+
+    <!-- Demografi -->
+    <div class="tab-content">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title">Yaş ve Cinsiyet Dağılımı</div>
+                {{ charts.fig_demo_hist | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Cinsiyet Payı</div>
+                {{ charts.fig_demo_pie | safe }}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="insights" style="margin-top: 20px;">
+    <h2 class="section-title">🤖 Akıllı Analiz Notları</h2>
+    {% for item in insights %}
+        {% if item.ulke is defined %}
+        <div class="insight-row">
+            🏆 <strong>{{ item.ulke }}</strong>:
+            {{ item.gelir|turkish_number(2) }} ₺ gelir,
+            {{ item.hasta|turkish_number(0) }} hasta
+        </div>
+        {% elif item.share_pct is defined %}
+        <div class="insight-row">
+            📊 İlk 3 ülke toplam gelirin <strong>%{{ item.share_pct|round(1) }}</strong>'ini oluşturuyor.
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+{% endif %}
+{% endblock %}

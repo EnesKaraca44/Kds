@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Hekim Hizmet Puan{% endblock %}
+{% block page_title %}🏥 Hekim Hizmet & Puan Analizi{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="metrics-grid cols-6">
+    <div class="metric-card">
+        <div class="metric-icon">🏆</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ total_puan|turkish_number(0) }}</div>
+            <div class="metric-label">Toplam Puan</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ total_gelir|turkish_number }}</div>
+            <div class="metric-label">Toplam Gelir</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ total_hasta|turkish_number(0) }}</div>
+            <div class="metric-label">Toplam Hasta</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">👨‍⚕️</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ aktif_hekim }}</div>
+            <div class="metric-label">Aktif Hekim</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">📅</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ avg_calisma_gun|round(1) }} Gün</div>
+            <div class="metric-label">Ort. Çalışma Günü</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">📈</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ genel_cmi_gelir|turkish_number }}</div>
+            <div class="metric-label">Kurum CMI (Ort.)</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs" data-target="#hpTabs">
+    <button class="tab-btn active">📊 Finansal Performans Sıralaması</button>
+    <button class="tab-btn">📈 Pareto & CMI Analizi</button>
+</div>
+<div id="hpTabs">
+    <div class="tab-content active">
+
+        <div class="chart-controls"
+            style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+            <form method="GET" action="{{ url_for('hekim_puan.hekim_puan') }}"
+                style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
+                <!-- Keep date filters same if they exist in query string -->
+                <input type="hidden" name="quick" value="{{ request.args.get('quick', '') }}">
+                <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+                <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Sıralama
+                        Kriteri:</label>
+                    <div style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="sort" value="Toplam_Puan" onchange="this.form.submit()" {% if
+                                current_sort=='Toplam_Puan' %}checked{% endif %}>
+                            <span>Toplam Puan</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="sort" value="Toplam_Gelir" onchange="this.form.submit()" {% if
+                                current_sort=='Toplam_Gelir' %}checked{% endif %}>
+                            <span>Toplam Gelir</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="sort" value="Hasta_Basi_Gelir" onchange="this.form.submit()" {% if
+                                current_sort=='Hasta_Basi_Gelir' %}checked{% endif %}>
+                            <span>Hasta Başı Gelir</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Hekim
+                        Sayısı:</label>
+                    <input type="number" name="limit" value="{{ current_limit }}" min="5" max="50" step="5"
+                        onchange="this.form.submit()"
+                        style="width: 80px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                </div>
+            </form>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container" style="padding: 10px;">{{ charts.fig_max | safe }}</div>
+            <div class="chart-container" style="padding: 10px;">{{ charts.fig_min | safe }}</div>
+        </div>
+    </div>
+    <div class="tab-content">
+        <div class="chart-container">{{ charts.fig_pareto | safe }}</div>
+        <div class="chart-container">{{ charts.fig_cmi | safe }}</div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

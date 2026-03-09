@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KDS{% endblock %} | Kurum Karar Destek Sistemi</title>
+    <meta name="description" content="Kurum Karar Destek Sistemi - Performans Yönetim Paneli">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    {% block head %}{% endblock %}
+</head>
+
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <div>
+                    <div class="logo-text">Kurum Performans<br>Yönetim Sistemi</div>
+                    <div class="logo-subtitle">ENTERPRİSE V2.4</div>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            {% for section_name, items in nav_items.items() %}
+            <div class="nav-section-title">{{ section_name }}</div>
+            {% for item in items %}
+            <a href="{{ item.url }}?{{ request.query_string.decode() }}"
+                class="nav-item {% if request.path == item.url %}active{% endif %}">
+                <span class="nav-icon">{{ item.icon }}</span>
+                <span class="nav-label">{{ item.label }}</span>
+                {% if item.badge %}
+                <span class="nav-badge">{{ item.badge }}</span>
+                {% endif %}
+            </a>
+            {% endfor %}
+            {% endfor %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">{{ logged_in_user }}</span>
+            </div>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn">🚪 Çıkış</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" id="hamburgerBtn">☰</button>
+                <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
+            </div>
+            <div class="topbar-right">
+                <form class="date-filter" id="dateFilter" method="GET">
+                    <select name="quick" id="quickSelect" class="filter-select">
+                        <option value="bugun" {% if request.args.get('quick')=='bugun' %}selected{% endif %}>Bugün
+                        </option>
+                        <option value="dun" {% if request.args.get('quick')=='dun' %}selected{% endif %}>Dün</option>
+                        <option value="son-7" {% if request.args.get('quick')=='son-7' %}selected{% endif %}>Son 7 Gün
+                        </option>
+                        <option value="son-30" {% if request.args.get('quick')=='son-30' %}selected{% endif %}>Son 30
+                            Gün</option>
+                        <option value="bu-ay" {% if request.args.get('quick','bu-ay')=='bu-ay' %}selected{% endif %}>Bu
+                            Ay</option>
+                        <option value="gecen-ay" {% if request.args.get('quick')=='gecen-ay' %}selected{% endif %}>Geçen
+                            Ay</option>
+                        <option value="bu-yil" {% if request.args.get('quick')=='bu-yil' %}selected{% endif %}>Bu Yıl
+                        </option>
+                        <option value="gecen-yil" {% if request.args.get('quick')=='gecen-yil' %}selected{% endif %}>
+                            Geçen Yıl</option>
+                        <option value="ozel" {% if request.args.get('quick')=='ozel' %}selected{% endif %}>Özel</option>
+                    </select>
+                    <div class="custom-dates" id="customDates" style="display:none;">
+                        <input type="date" name="start" class="date-input" value="{{ request.args.get('start', '') }}">
+                        <input type="date" name="end" class="date-input" value="{{ request.args.get('end', '') }}">
+                    </div>
+                    <button type="submit" class="filter-btn">🔄 Filtrele</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Active Period Banner -->
+        {% if start_date and end_date %}
+        <div class="period-banner">
+            📅 Aktif Dönem: <strong>{{ start_date.strftime('%d.%m.%Y') }}</strong> – <strong>{{
+                end_date.strftime('%d.%m.%Y') }}</strong>
+        </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        <div class="content-area">
+            {% block content %}{% endblock %}
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            Kurum Karar Destek Sistemi v2.0 | © 2026 | Seyrani Demirel
+        </footer>
+    </main>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>

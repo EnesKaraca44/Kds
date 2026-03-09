@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block title %}Gelir Analizi{% endblock %}
+{% block page_title %}💰 Kurum Gelir & Fatura Analizi{% endblock %}
+{% block body_class %}theme-dark{% endblock %}
+
+{% block head %}
+<style>
+  .chart-title {
+    color: #cdd9f5;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    letter-spacing: 0.2px;
+  }
+  .download-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    padding: 8px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(148, 163, 184, 0.4);
+    background: rgba(15, 23, 42, 0.85);
+    color: #e5e7eb;
+    font-size: 0.85rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .download-btn:hover {
+    border-color: #60a5fa;
+    color: #bfdbfe;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+
+<div class="metrics-grid cols-4">
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Toplam Gelir (KDV'li)</div>
+            <div class="metric-value">₺{{ t_gelir_kdvli|turkish_number }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Toplam Fatura</div>
+            <div class="metric-value">{{ t_fatura }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Faturalandırılan Kişi</div>
+            <div class="metric-value">{{ t_kisi|turkish_number(0) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Net Gelir</div>
+            <div class="metric-value">₺{{ t_gelir_net|turkish_number }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs" data-target="#gelirTabs">
+    <button class="tab-btn active">🏥 Kurum Performansı</button>
+    <button class="tab-btn">📈 Gelir Trendi</button>
+    <button class="tab-btn">📄 Fatura Listesi</button>
+</div>
+
+<div id="gelirTabs">
+    <!-- Kurum Performansı -->
+    <div class="tab-content active">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title">Kurum Türüne Göre Gelir</div>
+                {{ charts.fig_pie | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">En Çok Ciro Yapan 10 Kurum/İlgili</div>
+                {{ charts.fig_bar | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Gelir Trendi -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">Günlük Fatura Gelir Trendi</div>
+            {{ charts.fig_trend | safe }}
+            <a class="download-btn"
+               href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
+                ⬇️ Tüm Veriyi CSV Olarak İndir
+            </a>
+        </div>
+    </div>
+
+    <!-- Fatura Listesi -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">Son 500 Fatura Kaydı</div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            {% for col in table_cols %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in table_rows %}
+                        <tr>
+                            {% for col in table_cols %}
+                            {% set val = row[col] %}
+                            <td>
+                                {% if col in ['FATURA_KDVLI_TOPLAM_TUTAR','FATURA_TOPLAM_TUTAR','FATURA_TOPLAM_KDV'] %}
+                                    ₺{{ val|turkish_number }}
+                                {% elif col == 'FATURA_KISI_SAYISI' %}
+                                    {{ val|turkish_number(0) }}
+                                {% else %}
+                                    {{ val }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <a class="download-btn"
+               href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
+                ⬇️ Tüm Veriyi CSV Olarak İndir
+            </a>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}

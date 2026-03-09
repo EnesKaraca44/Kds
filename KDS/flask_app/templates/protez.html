@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block title %}Protez Süreç Performansı{% endblock %}
+{% block page_title %}🦷 Protez Süreç Performans Paneli{% endblock %}
+{% block body_class %}theme-dark{% endblock %}
+
+{% block head %}
+<style>
+    .metrics-grid.protez-metrics {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+
+    .metric-card .metric-sub {
+        font-size: 0.75rem;
+        color: #9ca3af;
+        margin-top: 2px;
+    }
+
+    .protez-tabs {
+        margin-top: 24px;
+        margin-bottom: 16px;
+    }
+
+    .protez-tabs .tab-btn {
+        font-size: 0.9rem;
+        padding: 8px 14px;
+    }
+
+    .chart-row {
+        display: grid;
+        grid-template-columns: 2.1fr 1.4fr;
+        gap: 16px;
+    }
+
+    .chart-title {
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+        color: #e5e7eb;
+    }
+
+    .section-title {
+        margin-top: 24px;
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #e5e7eb;
+    }
+
+    .analysis-box {
+        margin-top: 16px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        background: linear-gradient(90deg, rgba(37, 99, 235, 0.12), rgba(8, 47, 73, 0.6));
+        border: 1px solid rgba(59, 130, 246, 0.5);
+        font-size: 0.85rem;
+        color: #e5e7eb;
+    }
+
+    .analysis-box ul {
+        margin: 6px 0 0 18px;
+        padding: 0;
+    }
+
+    .analysis-box li {
+        margin-bottom: 2px;
+    }
+
+    /* Geciken hekim listesi - kritik vaka sayısı ısı haritası (sadece ilgili hücre) */
+    .heat-strong {
+        background: linear-gradient(90deg, #b91c1c 0%, #f97373 70%);
+        color: #f9fafb;
+        font-weight: 600;
+    }
+
+    .heat-medium {
+        background: linear-gradient(90deg, #f97373 0%, #fecaca 80%);
+        color: #111827;
+        font-weight: 500;
+    }
+
+    .heat-light {
+        background: linear-gradient(90deg, rgba(248, 113, 113, 0.18), transparent);
+    }
+
+    .protez-kritik-table th,
+    .protez-kritik-table td {
+        font-size: 0.8rem;
+        padding-top: 6px;
+        padding-bottom: 6px;
+    }
+
+    .protez-kritik-table td:nth-child(2),
+    .protez-kritik-table td:nth-child(3),
+    .protez-kritik-table td:nth-child(4) {
+        text-align: right;
+    }
+
+    .protez-detail-toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .protez-detail-toolbar select {
+        background: #020617;
+        border-radius: 8px;
+        border: 1px solid #1f2937;
+        color: #e5e7eb;
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .protez-detail-toolbar label {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .protez-detail-toolbar input[type="checkbox"] {
+        accent-color: #60a5fa;
+    }
+
+    .protez-settings {
+        margin-top: 20px;
+        margin-bottom: 8px;
+        padding: 12px 16px;
+        border-radius: 12px;
+        background: #020617;
+        border: 1px solid #1e293b;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: center;
+    }
+
+    .protez-settings-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #e5e7eb;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .protez-settings-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        font-size: 0.8rem;
+        color: #9ca3af;
+    }
+
+    .protez-settings-number {
+        display: inline-flex;
+        align-items: center;
+        border-radius: 999px;
+        background: #020617;
+        border: 1px solid #1f2937;
+        overflow: hidden;
+    }
+
+    .protez-settings-number input[type="number"] {
+        width: 70px;
+        padding: 4px 8px;
+        border: none;
+        background: transparent;
+        color: #e5e7eb;
+        text-align: center;
+        font-size: 0.8rem;
+    }
+
+    .protez-settings-number button {
+        width: 28px;
+        border: none;
+        background: #0f172a;
+        color: #e5e7eb;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .protez-settings-number button:hover {
+        background: #1e293b;
+    }
+
+    .protez-settings input[type="range"] {
+        width: 180px;
+        accent-color: #ef4444;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+
+<div class="metrics-grid protez-metrics">
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Filtrelenen Vaka</div>
+            <div class="metric-value">{{ vaka_sayisi|turkish_number(0) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Gecikme Oranı</div>
+            <div class="metric-value">%{{ gecikme_orani|round(1) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Geciken Vaka</div>
+            <div class="metric-value">{{ geciken_vaka|turkish_number(0) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Ort. Teslimat</div>
+            <div class="metric-value">{{ ort_teslim|round(1) }} Gün</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs protez-tabs" data-target="#protezTabs">
+    <button class="tab-btn active">📊 Genel Performans</button>
+    <button class="tab-btn">📍 Geciken Hekim Listesi</button>
+    <button class="tab-btn">🧾 Hasta Detayları</button>
+    <button class="tab-btn">📈 Trend Analizi</button>
+</div>
+
+<form method="GET" class="protez-settings">
+    {% for key, value in request.args.items() %}
+        {% if key not in ['kritik', 'k_hekim'] %}
+            <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+    {% endfor %}
+
+    <div class="protez-settings-title">
+        🔍 Analiz Ayarları
+    </div>
+
+    <div class="protez-settings-group">
+        <span>Kritik Gün Eşiği</span>
+        <div class="protez-settings-number">
+            <button type="button" onclick="var i=this.nextElementSibling; i.stepDown(); this.form.submit();">-</button>
+            <input type="number" name="kritik" min="1" max="365" value="{{ kritik_limit }}">
+            <button type="button" onclick="var i=this.previousElementSibling; i.stepUp(); this.form.submit();">+</button>
+        </div>
+    </div>
+
+    <div class="protez-settings-group">
+        <span>Gösterilecek Hekim Sayısı <strong id="hekimCountLabel">{{ kritik_hekim_sayisi }}</strong></span>
+        <input type="range" name="k_hekim" min="3" max="30" step="1"
+               value="{{ kritik_hekim_sayisi }}"
+               oninput="document.getElementById('hekimCountLabel').textContent=this.value"
+               onchange="this.form.submit()">
+    </div>
+</form>
+
+<div id="protezTabs">
+    <!-- Genel Performans -->
+    <div class="tab-content active">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title">Hekim Bazlı Süre (Hedef vs Gerçek)</div>
+                {{ charts.fig_hekim | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">En Çok Geciken 10 İşlem (Ort. Gün)</div>
+                {{ charts.fig_sut | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Geciken Hekim Listesi -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar</div>
+            <div class="table-wrapper">
+                <table class="data-table protez-kritik-table">
+                    <thead>
+                        <tr>
+                            <th>Hekim</th>
+                            <th>Kritik Vaka Sayısı</th>
+                            <th>Ort. Teslim Süresi</th>
+                            <th>Toplam Gecikme (Gün)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in kritik_rows %}
+                        <tr>
+                            <td>{{ r[kritik_hekim_col] }}</td>
+                            <td class="{% if r.ort_gecikme >= 60 %}heat-strong{% elif r.ort_gecikme >= 45 %}heat-medium{% else %}heat-light{% endif %}">
+                                {{ r.vaka_sayisi|turkish_number(0) }}
+                            </td>
+                            <td>{{ r.ort_gecikme|round(1) }} Gün</td>
+                            <td>{{ r.toplam_gecikme|round(0)|int|turkish_number(0) }} Gün</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hasta Detayları -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">Hekim ve Hasta Bazlı Detay Sorgulama</div>
+            <div class="protez-detail-toolbar">
+                <form method="GET" style="display:flex; align-items:center; gap:10px;">
+                    {% for key, value in request.args.items() %}
+                        {% if key not in ['hekim', 'only_delayed'] %}
+                            <input type="hidden" name="{{ key }}" value="{{ value }}">
+                        {% endif %}
+                    {% endfor %}
+                    <select name="hekim" onchange="this.form.submit()">
+                        {% for h in hekim_list %}
+                        <option value="{{ h }}" {% if h == selected_hekim %}selected{% endif %}>{{ h }}</option>
+                        {% endfor %}
+                    </select>
+                    <label>
+                        <input type="checkbox" name="only_delayed" {% if only_delayed %}checked{% endif %}
+                            onchange="this.form.submit()">
+                        Sadece gecikenleri göster
+                    </label>
+                </form>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        {% if detay_table %}
+                        <tr>
+                            {% for k in detay_table[0].keys() %}
+                            <th>{{ k }}</th>
+                            {% endfor %}
+                        </tr>
+                        {% endif %}
+                    </thead>
+                    <tbody>
+                        {% for row in detay_table %}
+                        <tr>
+                            {% for v in row.values() %}
+                            <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trend Analizi -->
+    <div class="tab-content">
+        <div class="chart-container">
+            <div class="chart-title">Haftalık / Aylık Ortalama Gecikme Trendi</div>
+            {{ charts.fig_trend | safe }}
+        </div>
+    </div>
+</div>
+
+<div class="section-title">Stratejik Analiz Özeti</div>
+<div class="analysis-box">
+    <ul>
+        {% for text in insights %}
+        <li>{{ text }}</li>
+        {% endfor %}
+    </ul>
+</div>
+
+{% endif %}
+{% endblock %}

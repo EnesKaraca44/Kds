@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sevk Analizi | Kurum Karar Destek Sistemi</title>
+    <meta name="description" content="Kurum Karar Destek Sistemi - Performans Yönetim Paneli">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+</head>
+
+<body class="theme-dark">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <span class="logo-icon">📊</span>
+                <div>
+                    <div class="logo-text">Kurum Performans<br>Yönetim Sistemi</div>
+                    <div class="logo-subtitle">ENTERPRİSE V2.4</div>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose">✕</button>
+        </div>
+
+        <nav class="sidebar-nav">
+            
+            <div class="nav-section-title">ANA MODÜLLER</div>
+            
+            <a href="/dashboard?"
+                class="nav-item ">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">Ana Sayfa</span>
+                
+            </a>
+            
+            <a href="/hekim-puan?"
+                class="nav-item ">
+                <span class="nav-icon">🏵️</span>
+                <span class="nav-label">Hekim Hizmet Puan Analiz</span>
+                
+            </a>
+            
+            <a href="/poliklinik?"
+                class="nav-item ">
+                <span class="nav-icon">👥</span>
+                <span class="nav-label">Hekim Poliklinik Hasta</span>
+                
+            </a>
+            
+            <a href="/tedavi?"
+                class="nav-item ">
+                <span class="nav-icon">🩺</span>
+                <span class="nav-label">Tedavi Grupları Analizi</span>
+                
+            </a>
+            
+            <a href="/malzeme?"
+                class="nav-item ">
+                <span class="nav-icon">📦</span>
+                <span class="nav-label">Kurum Malzeme Tüketim</span>
+                
+            </a>
+            
+            <a href="/yabanci-hasta?"
+                class="nav-item ">
+                <span class="nav-icon">🌐</span>
+                <span class="nav-label">Yabancı Hasta Analizi</span>
+                
+                <span class="nav-badge">YENİ</span>
+                
+            </a>
+            
+            <a href="/randevu?"
+                class="nav-item ">
+                <span class="nav-icon">📅</span>
+                <span class="nav-label">Hekim Randevu Analizi</span>
+                
+            </a>
+            
+            <a href="/gelir?"
+                class="nav-item ">
+                <span class="nav-icon">💰</span>
+                <span class="nav-label">Kurum Gelir Analiz</span>
+                
+            </a>
+            
+            <a href="/sterilizasyon?"
+                class="nav-item ">
+                <span class="nav-icon">💉</span>
+                <span class="nav-label">Sterilizasyon Maliyet</span>
+                
+            </a>
+            
+            <a href="/sevk?"
+                class="nav-item active">
+                <span class="nav-icon">📤</span>
+                <span class="nav-label">Hekim Sevk Sayıları</span>
+                
+            </a>
+            
+            
+            <div class="nav-section-title">DİĞER</div>
+            
+            <a href="/tibbi-atik?"
+                class="nav-item ">
+                <span class="nav-icon">⚗️</span>
+                <span class="nav-label">Tıbbi Atık Analizi</span>
+                
+            </a>
+            
+            <a href="/protez?"
+                class="nav-item ">
+                <span class="nav-icon">🦷</span>
+                <span class="nav-label">Protez Analizi</span>
+                
+            </a>
+            
+            <a href="/rontgen?"
+                class="nav-item ">
+                <span class="nav-icon">🩻</span>
+                <span class="nav-label">Röntgen Analizi</span>
+                
+            </a>
+            
+            
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <span class="user-avatar">👤</span>
+                <span class="user-name">test</span>
+            </div>
+            <a href="/logout" class="logout-btn">🚪 Çıkış</a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <!-- Top Bar -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <button class="hamburger" id="hamburgerBtn">☰</button>
+                <h1 class="page-title">🩺 Hekim Sevk & Akıllı Karar Destek</h1>
+            </div>
+            <div class="topbar-right">
+                <form class="date-filter" id="dateFilter" method="GET">
+                    <select name="quick" id="quickSelect" class="filter-select">
+                        <option value="bugun" >Bugün
+                        </option>
+                        <option value="dun" >Dün</option>
+                        <option value="son-7" >Son 7 Gün
+                        </option>
+                        <option value="son-30" >Son 30
+                            Gün</option>
+                        <option value="bu-ay" selected>Bu
+                            Ay</option>
+                        <option value="gecen-ay" >Geçen
+                            Ay</option>
+                        <option value="bu-yil" >Bu Yıl
+                        </option>
+                        <option value="gecen-yil" >
+                            Geçen Yıl</option>
+                        <option value="ozel" >Özel</option>
+                    </select>
+                    <div class="custom-dates" id="customDates" style="display:none;">
+                        <input type="date" name="start" class="date-input" value="">
+                        <input type="date" name="end" class="date-input" value="">
+                    </div>
+                    <button type="submit" class="filter-btn">🔄 Filtrele</button>
+                </form>
+            </div>
+        </header>
+
+        <!-- Active Period Banner -->
+        
+        <div class="period-banner">
+            📅 Aktif Dönem: <strong>01.03.2026</strong> – <strong>06.03.2026</strong>
+        </div>
+        
+
+        <!-- Page Content -->
+        <div class="content-area">
+            
+
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+    var tabs = document.querySelector('.tabs[data-target="#sevkTabs"]');
+    if(!tabs) return;
+    var btns = tabs.querySelectorAll('.tab-btn');
+    var panes = document.querySelectorAll('#sevkTabs > .tab-content');
+    btns.forEach(function(btn, i){
+        btn.addEventListener('click', function(){
+            btns.forEach(function(b){ b.classList.remove('active'); });
+            panes.forEach(function(p){ p.classList.remove('active'); });
+            btn.classList.add('active');
+            if(panes[i]){
+                panes[i].classList.add('active');
+                setTimeout(function(){
+                    panes[i].querySelectorAll('.js-plotly-plot').forEach(function(el){
+                        Plotly.Plots.resize(el);
+                    });
+                }, 100);
+                setTimeout(function(){
+                    panes[i].querySelectorAll('.js-plotly-plot').forEach(function(el){
+                        Plotly.Plots.resize(el);
+                    });
+                }, 500);
+            }
+        });
+    });
+});
+</script>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            Kurum Karar Destek Sistemi v2.0 | © 2026 | Seyrani Demirel
+        </footer>
+    </main>
+
+    <script src="/static/js/main.js"></script>
+    
+</body>
+
+</html>

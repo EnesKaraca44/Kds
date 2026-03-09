@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}Poliklinik Hasta{% endblock %}
+{% block page_title %}👥 Hekim Poliklinik Hasta Analizi{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="metrics-grid cols-4">
+    <div class="metric-card">
+        <div class="metric-icon">📋</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ toplam_kayit|turkish_number(0) }}</div>
+            <div class="metric-label">Toplam Kayıt</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ benzersiz_hasta|turkish_number(0) }}</div>
+            <div class="metric-label">Benzersiz Hasta</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">👨‍⚕️</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ aktif_hekim }}</div>
+            <div class="metric-label">Aktif Hekim</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">🏥</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ brans_sayisi }}</div>
+            <div class="metric-label">Branş Sayısı</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs" data-target="#polTabs">
+    <button class="tab-btn active">📊 Performans (Sıralama Kriterli)</button>
+    <button class="tab-btn">📈 Kurum & Trend</button>
+    <button class="tab-btn">🔥 Yoğunluk Analizi</button>
+    <button class="tab-btn">🔍 Hekim Detay</button>
+</div>
+<div id="polTabs">
+    <div class="tab-content active">
+
+        <div class="chart-controls"
+            style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+            <form method="GET" action="{{ url_for('poliklinik.poliklinik') }}"
+                style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
+                <input type="hidden" name="quick" value="{{ request.args.get('quick', '') }}">
+                <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+                <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Sıralama
+                        Kriteri:</label>
+                    <div style="display: flex; gap: 16px;">
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="sort" value="Kayit_Sayisi" onchange="this.form.submit()" {% if
+                                current_sort=='Kayit_Sayisi' %}checked{% endif %}>
+                            <span>Kayıt Sayısı</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                            <input type="radio" name="sort" value="Benzersiz_Hasta_Sayisi" onchange="this.form.submit()"
+                                {% if current_sort=='Benzersiz_Hasta_Sayisi' %}checked{% endif %}>
+                            <span>Benzersiz Hasta Sayısı</span>
+                        </label>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <div class="chart-row">
+            <div class="chart-container" style="padding: 10px;">{{ charts.fig_top | safe }}</div>
+            <div class="chart-container" style="padding: 10px;">{{ charts.fig_bot | safe }}</div>
+        </div>
+
+        <div class="info-banner" style="border-left-color: var(--accent-primary); background: #eff6ff;">
+            <div
+                style="font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                <span style="font-size:1.3rem">🤖</span> Akıllı Yorumlar
+            </div>
+            <p style="margin:0; font-size: 0.95em; color: var(--text-secondary);">{{ insight_text }}</p>
+        </div>
+
+    </div>
+
+    <div class="tab-content">
+        <div class="chart-row">
+            <div class="chart-container">{{ charts.fig_days | safe }}</div>
+            <div class="chart-container">{{ charts.fig_kurum | safe }}</div>
+        </div>
+        <div class="chart-row" style="margin-top: 24px; grid-template-columns: 1fr;">
+            <div class="chart-container" style="min-height: 400px;">{{ charts.fig_trend | safe }}</div>
+        </div>
+    </div>
+
+    <!-- Yeni Eklendi: Yoğunluk Analizi -->
+    <div class="tab-content">
+        <div class="chart-row" style="grid-template-columns: 1fr;">
+            <div class="chart-container" style="min-height: 400px;">{{ charts.fig_hourly | safe }}</div>
+        </div>
+    </div>
+
+    <!-- Yeni Eklendi: Hekim Detay -->
+    <div class="tab-content">
+        <div class="chart-controls"
+            style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+            <form method="GET" action="{{ url_for('poliklinik.poliklinik') }}"
+                style="display: flex; flex-direction: column; gap: 8px;">
+                <input type="hidden" name="quick" value="{{ request.args.get('quick', '') }}">
+                <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+                <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+                <input type="hidden" name="sort" value="{{ request.args.get('sort', 'Kayit_Sayisi') }}">
+
+                <label
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Analiz
+                    İçin Hekim Seçiniz:</label>
+                <select name="hekim" onchange="this.form.submit()"
+                    style="padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-primary); width: 100%; font-size:1rem;">
+                    <option value="">-- Hekim Seçin --</option>
+                    {% for h in hekim_list %}
+                    <option value="{{ h }}" {% if h==selected_hekim %}selected{% endif %}>{{ h }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </div>
+
+        {% if selected_hekim %}
+        <div style="display: flex; gap: 24px; flex-wrap: wrap;">
+            <div style="flex: 0 0 250px; display: flex; flex-direction: column; gap: 24px;">
+                <div
+                    style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                    <div
+                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;">
+                        Hekim Toplam Kayıt</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: var(--text-primary);">{{
+                        hekim_toplam_kayit|turkish_number(0) }}</div>
+                </div>
+                <div
+                    style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
+                    <div
+                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;">
+                        Branş Sayısı</div>
+                    <div style="font-size: 2.2rem; font-weight: 700; color: var(--text-primary);">{{ hekim_brans_sayisi
+                        }}</div>
+                </div>
+            </div>
+            <div style="flex: 1; min-width: 300px;">
+                <div class="chart-container" style="min-height: 400px; padding: 0;">
+                    {{ charts.fig_hekim_pie | safe }}
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="alert alert-info">Detaylarını görmek için lütfen yukarıdan bir hekim seçin.</div>
+        {% endif %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
