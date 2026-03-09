@@ -1,8 +1,73 @@
 {% extends "base.html" %}
 {% block title %}Sevk Analizi{% endblock %}
 {% block page_title %}🩺 Hekim Sevk & Akıllı Karar Destek{% endblock %}
-{% block body_class %}theme-dark{% endblock %}
+{% block head %}
+<style>
+    .sevkoran-note {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
 
+    .sevkoran-table th,
+    .sevkoran-table td {
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+
+    .sevkoran-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .sevkoran-bar-track {
+        width: 120px;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .sevkoran-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+    }
+
+    .sevkoran-bar-fill.medium {
+        background: linear-gradient(90deg, #d97706, #f59e0b);
+    }
+
+    .sevkoran-bar-fill.high {
+        background: linear-gradient(90deg, #dc2626, #f87171);
+    }
+
+    .sevkoran-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .sevkoran-badge.low {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .sevkoran-badge.medium {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .sevkoran-badge.high {
+        background: #fee2e2;
+        color: #b91c1c;
+    }
+</style>
+{% endblock %}
 {% block content %}
 {% if no_data %}
 <div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
@@ -78,7 +143,43 @@
     <div class="tab-content">
         <div class="chart-container">
             <div class="chart-title">Hekim Bazlı Sevk Verimliliği</div>
-            {{ charts.fig_oran | safe }}
+            {% if oran_table_ui %}
+            <div class="sevkoran-note">En yüksek sevk oranına sahip ilk 30 hekim, hasta ve sevk hacmi ile birlikte listelenmiştir.</div>
+            <div class="table-wrapper">
+                <table class="data-table sevkoran-table">
+                    <thead>
+                        <tr>
+                            <th>Hekim</th>
+                            <th>Toplam Hasta</th>
+                            <th>Toplam Sevk</th>
+                            <th>Oran (%)</th>
+                            <th>Gorsel</th>
+                            <th>Durum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in oran_table_ui %}
+                        <tr>
+                            <td>{{ row.hekim }}</td>
+                            <td>{{ row.hasta|turkish_number(0) }}</td>
+                            <td>{{ row.sevk|turkish_number(0) }}</td>
+                            <td>%{{ row.oran }}</td>
+                            <td>
+                                <div class="sevkoran-bar-track">
+                                    <div class="sevkoran-bar-fill {{ row.seviye }}" style="width: {{ row.bar_width }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="sevkoran-badge {{ row.seviye }}">{{ row.yorum }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">Sevk verimliligi icin veri bulunamadi.</div>
+            {% endif %}
         </div>
         <div class="chart-container">
             <div class="chart-title">Sevk Oran Tablosu</div>

@@ -59,7 +59,7 @@
 
     /* Ölçüler */
     --sidebar-width: 380px;
-    --topbar-height: 60px;
+    --topbar-height: 74px;
 
     /* Tipografi */
     --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
@@ -185,6 +185,47 @@ body {
 
 .theme-dark .footer {
     color: rgba(232, 240, 254, 0.65);
+}
+
+/* Some category pages include dark-only inline styles.
+   Normalize those pieces when the user selects light mode. */
+.theme-light .chart-title,
+.theme-light .section-title {
+    color: var(--text-primary) !important;
+}
+
+.theme-light .download-btn {
+    background: var(--bg-card) !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.theme-light .analysis-box {
+    background: #eff6ff !important;
+    border-color: #bfdbfe !important;
+    color: #1e3a8a !important;
+}
+
+.theme-light .protez-settings,
+.theme-light .protez-settings-number,
+.theme-light .protez-detail-toolbar select,
+.theme-light select[name="dr"] {
+    background: #ffffff !important;
+    border-color: var(--border-color) !important;
+    color: var(--text-primary) !important;
+}
+
+.theme-light .protez-settings-title {
+    color: var(--text-primary) !important;
+}
+
+.theme-light .protez-settings-group {
+    color: var(--text-secondary) !important;
+}
+
+.theme-light .protez-settings-number button {
+    background: #f8fafc !important;
+    color: var(--text-primary) !important;
 }
 
 a {
@@ -435,14 +476,14 @@ a:hover {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 28px;
+    padding: 0 34px;
     z-index: 100;
 }
 
 .topbar-left {
     display: flex;
     align-items: center;
-    gap: 16px;
+    gap: 20px;
 }
 
 .hamburger {
@@ -455,22 +496,51 @@ a:hover {
 }
 
 .page-title {
-    font-size: 1.15rem;
-    font-weight: 600;
+    font-size: 1.3rem;
+    font-weight: 700;
     color: var(--text-primary);
-    letter-spacing: 0.3px;
+    letter-spacing: 0.2px;
 }
 
 .topbar-right {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
+}
+
+.theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-family: var(--font-family);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+    box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle:hover {
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+}
+
+.theme-dark .theme-toggle {
+    background: rgba(15, 23, 42, 0.88);
+    border-color: rgba(45, 74, 138, 0.5);
+    color: #e8f0fe;
 }
 
 .date-filter {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 .filter-select,
@@ -478,10 +548,10 @@ a:hover {
     background: var(--bg-input);
     border: 1px solid var(--border-color);
     color: var(--text-primary);
-    padding: 8px 14px;
+    padding: 10px 16px;
     border-radius: var(--radius-sm);
     font-family: var(--font-family);
-    font-size: 0.87rem;
+    font-size: 0.9rem;
     transition: var(--transition);
     cursor: pointer;
     box-shadow: var(--shadow-sm);
@@ -498,11 +568,11 @@ a:hover {
     background: var(--gradient-primary);
     border: none;
     color: #fff;
-    padding: 8px 20px;
+    padding: 10px 22px;
     border-radius: var(--radius-sm);
     font-family: var(--font-family);
     font-weight: 600;
-    font-size: 0.87rem;
+    font-size: 0.9rem;
     cursor: pointer;
     transition: var(--transition);
     letter-spacing: 0.2px;
@@ -823,12 +893,21 @@ a:hover {
 }
 
 .tab-content {
-    display: none;
+    display: block;
+    height: 0;
+    overflow: hidden;
+    visibility: hidden;
+    opacity: 0;
+    pointer-events: none;
     animation: fadeIn 0.4s ease;
 }
 
 .tab-content.active {
-    display: block;
+    height: auto;
+    overflow: visible;
+    visibility: visible;
+    opacity: 1;
+    pointer-events: auto;
 }
 
 /* ============================================
@@ -1056,7 +1135,7 @@ a:hover {
         margin-left: 0;
     }
 
-    .topbar-right {
+    .date-filter {
         display: none;
     }
 
