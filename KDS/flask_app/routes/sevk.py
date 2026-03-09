@@ -11,6 +11,13 @@ from routes.dashboard import get_date_range
 sevk_bp = Blueprint('sevk', __name__)
 
 
+def _safe_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 @sevk_bp.route('/sevk')
 @login_required
 def sevk():
@@ -163,6 +170,33 @@ def sevk():
         .sort_values('ORAN', ascending=False)
         .to_dict(orient='records')
     )
+    oran_table_ui = []
+    max_oran = max(_safe_float(oran_df['ORAN'].max()), 1.0) if not oran_df.empty else 1.0
+    for row in (
+        oran_df[[COL_EDEN_DR, COL_HASTA, COL_SEVK, 'ORAN']]
+        .sort_values('ORAN', ascending=False)
+        .head(30)
+        .to_dict(orient='records')
+    ):
+        oran = _safe_float(row['ORAN'])
+        if oran >= 100:
+            seviye = 'high'
+            yorum = 'Cok yuksek'
+        elif oran >= 50:
+            seviye = 'medium'
+            yorum = 'Yuksek'
+        else:
+            seviye = 'low'
+            yorum = 'Normal'
+        oran_table_ui.append({
+            'hekim': row[COL_EDEN_DR],
+            'hasta': int(_safe_float(row[COL_HASTA])),
+            'sevk': int(_safe_float(row[COL_SEVK])),
+            'oran': round(oran, 1),
+            'bar_width': max(6, min(int((oran / max_oran) * 100), 100)),
+            'seviye': seviye,
+            'yorum': yorum,
+        })
 
     brans_flow = (
         df.groupby([COL_EDEN_SRV, COL_KABUL_SRV])[COL_SEVK]
@@ -343,6 +377,7 @@ def sevk():
         top_n=top_n,
         charts=charts,
         oran_table=oran_table,
+        oran_table_ui=oran_table_ui,
         brans_top10=brans_top10,
         top_k_br=top_k_br,
         top_e_br=top_e_br,

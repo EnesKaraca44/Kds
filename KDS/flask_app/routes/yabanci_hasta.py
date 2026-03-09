@@ -11,6 +11,13 @@ from routes.dashboard import get_date_range
 yabanci_hasta_bp = Blueprint('yabanci_hasta', __name__)
 
 
+def _safe_float(value):
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
+
+
 @yabanci_hasta_bp.route('/yabanci-hasta')
 @login_required
 def yabanci_hasta():
@@ -49,6 +56,34 @@ def yabanci_hasta():
     country_summary['Hasta_Basi_Gelir'] = country_summary.apply(
         lambda r: r['Toplam_Gelir'] / r['Hasta_Sayisi'] if r['Hasta_Sayisi'] > 0 else 0, axis=1
     ).astype(float)
+    eff_table = []
+    max_country_revenue = max(_safe_float(country_summary['Toplam_Gelir'].max()), 1.0) if not country_summary.empty else 1.0
+    for row in (
+        country_summary
+        .sort_values(['Hasta_Basi_Gelir', 'Toplam_Gelir'], ascending=[False, False])
+        .head(30)
+        .to_dict(orient='records')
+    ):
+        gelir = _safe_float(row['Toplam_Gelir'])
+        hasta_basi = _safe_float(row['Hasta_Basi_Gelir'])
+        if hasta_basi >= 10000:
+            yorum = 'Yuksek deger'
+            seviye = 'high'
+        elif hasta_basi >= 4000:
+            yorum = 'Dengeli'
+            seviye = 'medium'
+        else:
+            yorum = 'Hacim odakli'
+            seviye = 'low'
+        eff_table.append({
+            'ulke': row['Ulke'],
+            'hasta_sayisi': int(_safe_float(row['Hasta_Sayisi'])),
+            'toplam_gelir': gelir,
+            'hasta_basi_gelir': round(hasta_basi, 2),
+            'bar_width': max(6, min(int((gelir / max_country_revenue) * 100), 100)),
+            'seviye': seviye,
+            'yorum': yorum,
+        })
 
     # Coğrafi dağılım
     top_geo_rev = country_summary.nlargest(10, 'Toplam_Gelir').sort_values('Toplam_Gelir')
@@ -180,6 +215,42 @@ def yabanci_hasta():
         showlegend=True,
         margin=dict(l=20, r=20, t=30, b=10),
     )
+    demo_table = []
+    if has_yas:
+        demo_source = df.copy()
+        if 'Cinsiyet' not in demo_source.columns:
+            demo_source['Cinsiyet'] = 'Bilinmiyor'
+        demo_source['YAS_GRUBU'] = pd.cut(
+            demo_source['YAS'],
+            bins=[0, 17, 25, 35, 45, 55, 65, 120],
+            labels=['0-17', '18-25', '26-35', '36-45', '46-55', '56-65', '66+'],
+            include_lowest=True,
+        )
+        demo_summary = (
+            demo_source.groupby(['YAS_GRUBU', 'Cinsiyet'])['HastaAdi']
+            .nunique()
+            .reset_index(name='Hasta_Sayisi')
+        )
+        if not demo_summary.empty:
+            pivot_demo = (
+                demo_summary.pivot(index='YAS_GRUBU', columns='Cinsiyet', values='Hasta_Sayisi')
+                .fillna(0)
+                .sort_index()
+            )
+            gender_cols = list(pivot_demo.columns)
+            max_demo_total = max(_safe_float(pivot_demo.sum(axis=1).max()), 1.0)
+            for age_group, row in pivot_demo.iterrows():
+                toplam = int(_safe_float(row.sum()))
+                cinsiyetler = []
+                for gender in gender_cols:
+                    value = int(_safe_float(row[gender]))
+                    cinsiyetler.append({'ad': str(gender), 'sayi': value})
+                demo_table.append({
+                    'yas_grubu': str(age_group),
+                    'toplam': toplam,
+                    'bar_width': max(6, min(int((toplam / max_demo_total) * 100), 100)),
+                    'cinsiyetler': cinsiyetler,
+                })
 
     charts = {
         'fig_geo_bar': fig_geo_bar.to_html(full_html=False, include_plotlyjs=False),
@@ -210,5 +281,7 @@ def yabanci_hasta():
         total_patients=total_patients, total_revenue=total_revenue,
         avg_rev=avg_rev, ulke_cesitlilik=df['Ulke'].nunique(),
         charts=charts,
+        eff_table=eff_table,
+        demo_table=demo_table,
         insights=insights,
     )

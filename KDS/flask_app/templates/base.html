@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="tr" data-theme="dark">
+<html lang="tr" data-theme="light">
 
 <head>
     <meta charset="UTF-8">
@@ -61,6 +61,11 @@
                 <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
             </div>
             <div class="topbar-right">
+                <button type="button" class="theme-toggle" id="themeToggle" aria-label="Tema değiştir"
+                    aria-pressed="false">
+                    <span id="themeIcon">🌙</span>
+                    <span id="themeLabel">Koyu</span>
+                </button>
                 <form class="date-filter" id="dateFilter" method="GET">
                     <select name="quick" id="quickSelect" class="filter-select">
                         <option value="bugun" {% if request.args.get('quick')=='bugun' %}selected{% endif %}>Bugün

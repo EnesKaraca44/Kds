@@ -1,8 +1,85 @@
 {% extends "base.html" %}
 {% block title %}Yabancı Hasta{% endblock %}
 {% block page_title %}🌍 Yabancı Hasta Analizi{% endblock %}
-{% block body_class %}theme-dark{% endblock %}
+{% block head %}
+<style>
+    .yh-note {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
 
+    .yh-table th,
+    .yh-table td {
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+
+    .yh-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .yh-bar-track {
+        width: 120px;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .yh-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+    }
+
+    .yh-bar-fill.medium {
+        background: linear-gradient(90deg, #d97706, #f59e0b);
+    }
+
+    .yh-bar-fill.high {
+        background: linear-gradient(90deg, #16a34a, #4ade80);
+    }
+
+    .yh-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        white-space: nowrap;
+    }
+
+    .yh-badge.low {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .yh-badge.medium {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .yh-badge.high {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .demo-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 8px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        margin-right: 6px;
+        margin-bottom: 4px;
+        background: #eff6ff;
+        color: #1d4ed8;
+    }
+</style>
+{% endblock %}
 {% block content %}
 {% if no_data %}
 <div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
@@ -63,7 +140,43 @@
     <div class="tab-content">
         <div class="chart-container">
             <div class="chart-title">Ülke Bazlı Verimlilik (Hacim vs. Değer)</div>
-            {{ charts.fig_eff | safe }}
+            {% if eff_table %}
+            <div class="yh-note">Ülkeler hasta başı gelir ve toplam gelir birlikte değerlendirilerek sıralanmıştır.</div>
+            <div class="table-wrapper">
+                <table class="data-table yh-table">
+                    <thead>
+                        <tr>
+                            <th>Ülke</th>
+                            <th>Hasta Sayısı</th>
+                            <th>Toplam Gelir</th>
+                            <th>Hasta Başı Gelir</th>
+                            <th>Hacim / Değer</th>
+                            <th>Yorum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in eff_table %}
+                        <tr>
+                            <td>{{ row.ulke }}</td>
+                            <td>{{ row.hasta_sayisi|turkish_number(0) }}</td>
+                            <td>₺{{ row.toplam_gelir|turkish_number }}</td>
+                            <td>₺{{ row.hasta_basi_gelir|turkish_number }}</td>
+                            <td>
+                                <div class="yh-bar-track">
+                                    <div class="yh-bar-fill {{ row.seviye }}" style="width: {{ row.bar_width }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="yh-badge {{ row.seviye }}">{{ row.yorum }}</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">Verimlilik tablosu için veri bulunamadı.</div>
+            {% endif %}
         </div>
     </div>
 
@@ -72,7 +185,41 @@
         <div class="chart-row">
             <div class="chart-container">
                 <div class="chart-title">Yaş ve Cinsiyet Dağılımı</div>
-                {{ charts.fig_demo_hist | safe }}
+                {% if demo_table %}
+                <div class="yh-note">Yaş grupları benzersiz hasta sayısına göre ve cinsiyet kırılımı ile listelenmiştir.</div>
+                <div class="table-wrapper">
+                    <table class="data-table yh-table">
+                        <thead>
+                            <tr>
+                                <th>Yaş Grubu</th>
+                                <th>Toplam Hasta</th>
+                                <th>Yoğunluk</th>
+                                <th>Cinsiyet Dağılımı</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in demo_table %}
+                            <tr>
+                                <td>{{ row.yas_grubu }}</td>
+                                <td>{{ row.toplam|turkish_number(0) }}</td>
+                                <td>
+                                    <div class="yh-bar-track">
+                                        <div class="yh-bar-fill" style="width: {{ row.bar_width }}%;"></div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% for chip in row.cinsiyetler %}
+                                    <span class="demo-chip">{{ chip.ad }}: {{ chip.sayi|turkish_number(0) }}</span>
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <div class="alert alert-warning">Demografi tablosu için veri bulunamadı.</div>
+                {% endif %}
             </div>
             <div class="chart-container">
                 <div class="chart-title">Cinsiyet Payı</div>

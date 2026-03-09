@@ -1,8 +1,6 @@
 {% extends "base.html" %}
 {% block title %}Röntgen Analizi{% endblock %}
 {% block page_title %}🩻 Röntgen Branş ve Verimlilik Analiz Paneli{% endblock %}
-{% block body_class %}theme-dark{% endblock %}
-
 {% block head %}
 <style>
     .metrics-grid.rontgen-metrics {
@@ -58,6 +56,91 @@
         font-size: 0.8rem;
         padding-top: 6px;
         padding-bottom: 6px;
+    }
+
+    .heatmap-table th,
+    .heatmap-table td,
+    .ratio-table th,
+    .ratio-table td {
+        font-size: 0.8rem;
+        vertical-align: middle;
+    }
+
+    .heatmap-table tbody tr:hover,
+    .ratio-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .heatmap-cell {
+        text-align: center;
+        font-weight: 700;
+        color: #0f172a;
+        border-radius: 8px;
+        min-width: 78px;
+        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+    }
+
+    .heatmap-total {
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .ratio-bar-track {
+        width: 120px;
+        height: 12px;
+        background: #e2e8f0;
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .ratio-bar-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #60a5fa);
+        border-radius: 999px;
+    }
+
+    .ratio-bar-fill.balance {
+        background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    }
+
+    .ratio-bar-fill.panoramik {
+        background: linear-gradient(90deg, #16a34a, #4ade80);
+    }
+
+    .ratio-bar-fill.periapikal {
+        background: linear-gradient(90deg, #ea580c, #fb923c);
+    }
+
+    .ratio-note {
+        font-size: 0.78rem;
+        color: var(--text-muted);
+        margin-bottom: 10px;
+    }
+
+    .ratio-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.74rem;
+        font-weight: 700;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+    }
+
+    .ratio-badge.balance {
+        background: #e0f2fe;
+        color: #0369a1;
+    }
+
+    .ratio-badge.panoramik {
+        background: #dcfce7;
+        color: #166534;
+    }
+
+    .ratio-badge.periapikal {
+        background: #ffedd5;
+        color: #9a3412;
     }
 </style>
 {% endblock %}
@@ -162,7 +245,40 @@
     <div class="tab-content">
         <div class="chart-container">
             <div class="chart-title">Hekim - Tetkik Türü Kullanım Yoğunluğu</div>
-            {{ charts.fig_heat | safe }}
+            {% if heatmap_rows %}
+            <div class="table-wrapper">
+                <table class="data-table table-compact heatmap-table">
+                    <thead>
+                        <tr>
+                            <th>Hekim</th>
+                            {% for col in heatmap_columns %}
+                            <th>{{ col }}</th>
+                            {% endfor %}
+                            <th>Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in heatmap_rows %}
+                        <tr>
+                            <td>{{ row.hekim }}</td>
+                            {% for cell in row.cells %}
+                            <td class="heatmap-cell"
+                                style="background:
+                                linear-gradient(90deg,
+                                rgba(59, 130, 246, {{ 0.14 + (cell.intensity / 100) * 0.28 }}),
+                                rgba(37, 99, 235, {{ 0.18 + (cell.intensity / 100) * 0.58 }}));">
+                                {{ cell.value|turkish_number(0) }}
+                            </td>
+                            {% endfor %}
+                            <td class="heatmap-total">{{ row.toplam|turkish_number(0) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">Yoğunluk tablosu için veri bulunamadı.</div>
+            {% endif %}
         </div>
     </div>
 
@@ -174,10 +290,54 @@
         </div>
         <div class="chart-container" style="margin-top:16px;">
             <div class="chart-title">Panoramik / Periapikal Tercih Dengesi</div>
-            {{ charts.verim_scatter | safe }}
+            {% if ratio_rows %}
+            <div class="ratio-note">En yüksek hacimli 30 hekim için panoramik ve periapikal tercih dengesi listelenmiştir.</div>
+            <div class="table-wrapper">
+                <table class="data-table table-compact ratio-table">
+                    <thead>
+                        <tr>
+                            <th>Hekim</th>
+                            <th>Toplam Film</th>
+                            <th>Panoramik</th>
+                            <th>Periapikal</th>
+                            <th>Oran</th>
+                            <th>Denge</th>
+                            <th>Yorum</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in ratio_rows %}
+                        <tr>
+                            <td>{{ row.hekim }}</td>
+                            <td>{{ row.toplam_film|turkish_number(0) }}</td>
+                            <td>{{ row.panoramik|turkish_number(0) }}</td>
+                            <td>{{ row.periapikal|turkish_number(0) }}</td>
+                            <td>{{ row.oran }}</td>
+                            <td>
+                                <div class="ratio-bar-track">
+                                    <div class="ratio-bar-fill {% if row.yorum == 'Dengeli' %}balance{% elif row.yorum == 'Panoramik agirlikli' %}panoramik{% else %}periapikal{% endif %}"
+                                        style="width: {{ row.bar_width }}%;"></div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="ratio-badge {% if row.yorum == 'Dengeli' %}balance{% elif row.yorum == 'Panoramik agirlikli' %}panoramik{% else %}periapikal{% endif %}">
+                                    {{ row.yorum }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">Tercih dengesi tablosu için veri bulunamadı.</div>
+            {% endif %}
         </div>
     </div>
 </div>
 
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
 {% endblock %}
