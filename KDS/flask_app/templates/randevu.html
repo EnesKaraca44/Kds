@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+{% block title %}Randevu Analizi{% endblock %}
+{% block page_title %}📅 Hekim Randevu & Sadakat Analizi{% endblock %}
+{% block body_class %}theme-dark{% endblock %}
+
+{% block head %}
+<style>
+    .metric-delta {
+        font-size: 0.78rem;
+        font-weight: 600;
+        padding: 3px 10px;
+        border-radius: 6px;
+        display: inline-block;
+        margin-top: 4px;
+    }
+    .metric-delta.negative {
+        background: rgba(239, 68, 68, 0.15);
+        color: #f87171;
+    }
+    .chart-title {
+        color: #cdd9f5;
+        font-size: 0.95rem;
+        font-weight: 700;
+        margin: 0 0 10px;
+        letter-spacing: 0.2px;
+    }
+    .topn-select {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+    .topn-select label {
+        font-size: 0.82rem;
+        color: #8fa8d0;
+        font-weight: 600;
+    }
+    .topn-slider {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 220px;
+        height: 6px;
+        border-radius: 4px;
+        background: linear-gradient(90deg, #dc2626 0%, #dc2626 100%);
+        outline: none;
+    }
+    .topn-slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #dc2626;
+        cursor: pointer;
+        border: 2px solid #fff;
+    }
+    .topn-value {
+        color: #60a5fa;
+        font-weight: 700;
+        font-size: 1rem;
+        min-width: 28px;
+        text-align: center;
+    }
+    .insight-card {
+        border-radius: 10px;
+        padding: 16px 20px;
+        margin-bottom: 12px;
+        font-size: 0.95rem;
+        color: #e0e8ff;
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        line-height: 1.5;
+    }
+    .insight-card.success {
+        background: rgba(22, 163, 74, 0.12);
+        border: 1px solid rgba(22, 163, 74, 0.3);
+    }
+    .insight-card.info {
+        background: rgba(37, 99, 235, 0.12);
+        border: 1px solid rgba(37, 99, 235, 0.3);
+    }
+    .insight-card.warning {
+        background: rgba(234, 88, 12, 0.12);
+        border: 1px solid rgba(234, 88, 12, 0.3);
+    }
+    .insight-icon {
+        font-size: 1.3rem;
+        flex-shrink: 0;
+        margin-top: 1px;
+    }
+    .insights-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    .insights-grid .insight-card:first-child {
+        grid-column: 1 / -1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında randevu verisi bulunamadı.</div>
+{% else %}
+
+<div class="metrics-grid cols-4">
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Toplam Randevu</div>
+            <div class="metric-value">{{ toplam_randevu|turkish_number(0) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Genel Sadakat Oranı</div>
+            <div class="metric-value">%{{ sadakat_orani }}</div>
+            <div class="metric-delta negative">↑ %{{ kayip_orani }} Kayıp</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Hizmete Dönüşen</div>
+            <div class="metric-value">{{ hizmet_alan|turkish_number(0) }}</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-body">
+            <div class="metric-label">Aktif Hekim Sayısı</div>
+            <div class="metric-value">{{ aktif_hekim }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs" data-target="#randevuTabs">
+    <button class="tab-btn active">📊 Hekim Performansı</button>
+    <button class="tab-btn">📍 Kanal & Poliklinik</button>
+    <button class="tab-btn">💡 Akıllı Yorumlar</button>
+</div>
+
+<div id="randevuTabs">
+    <!-- Tab 1: Hekim Performansı -->
+    <div class="tab-content active">
+        <div class="topn-select">
+            <label>Grafikte Gösterilecek Hekim Sayısı:</label>
+            <form method="GET" style="display:flex; align-items:center; gap:10px;">
+                {% for key, value in request.args.items() %}
+                    {% if key != 'top' %}
+                        <input type="hidden" name="{{ key }}" value="{{ value }}">
+                    {% endif %}
+                {% endfor %}
+                <input type="range" name="top" min="5" max="50" step="5" value="{{ top_n }}"
+                       class="topn-slider" id="topSlider"
+                       oninput="document.getElementById('topVal').textContent=this.value"
+                       onchange="this.form.submit()">
+                <span class="topn-value" id="topVal">{{ top_n }}</span>
+            </form>
+        </div>
+
+        <div class="chart-container">
+            <div class="chart-title">Sadakat Oranı En Yüksek {{ top_n }} Hekim</div>
+            {{ charts.fig_sadakat | safe }}
+        </div>
+    </div>
+
+    <!-- Tab 2: Kanal & Poliklinik -->
+    <div class="tab-content">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title">En Yoğun 10 Poliklinik</div>
+                {{ charts.fig_pol | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title">Randevu Kanalları</div>
+                {{ charts.fig_kanal | safe }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 3: Akıllı Yorumlar -->
+    <div class="tab-content">
+        <h2 class="section-title" style="margin-bottom: 16px;">⚙️ Operasyonel İçgörüler</h2>
+        <div class="insights-grid">
+            {% for item in insights %}
+            <div class="insight-card {{ item.type }}">
+                <span class="insight-icon">{{ item.icon }}</span>
+                <span>{{ item.text | safe }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endblock %}

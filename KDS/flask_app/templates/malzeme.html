@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block title %}Malzeme Tüketim{% endblock %}
+{% block page_title %}📦 Kurum Malzeme Tüketim Analizi{% endblock %}
+
+{% block content %}
+{% if no_data %}
+<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="metrics-grid cols-4">
+    <div class="metric-card">
+        <div class="metric-icon">📦</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ toplam_tuketim|turkish_number(0) }}</div>
+            <div class="metric-label">Toplam Tüketim (Adet)</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">👥</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ tekil_hasta|turkish_number(0) }}</div>
+            <div class="metric-label">Tekil Hasta</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">🧪</div>
+        <div class="metric-body">
+            <div class="metric-value">{{ farkli_malzeme }}</div>
+            <div class="metric-label">Farklı Malzeme</div>
+        </div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-icon">💰</div>
+        <div class="metric-body">
+            <div class="metric-value">₺{{ toplam_tutar|turkish_number }}</div>
+            <div class="metric-label">Toplam Tutar</div>
+        </div>
+    </div>
+</div>
+
+<div class="chart-container">{{ charts.fig_trend | safe }}</div>
+<div class="chart-row">
+    <div class="chart-container">{{ charts.fig_branch | safe }}</div>
+    <div class="chart-container">{{ charts.fig_scatter | safe }}</div>
+</div>
+{% endif %}
+{% endblock %}
