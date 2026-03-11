@@ -1,0 +1,28 @@
+import pandas as pd
+from .baglanti import baglanti_olustur
+
+
+def son_fatura_metrikleri_getir():
+    conn = baglanti_olustur()
+    if not conn:
+        return pd.DataFrame()
+
+    sql = """
+        SELECT 
+            FATURA_NO,
+            COUNT(*) AS ToplamHasta, 
+            SUM(HASTA_TOPLAM_TUTAR) AS ToplamTutar
+        FROM TBLFATURAHASTA
+        WHERE FATURA_NO = 2026000005
+        AND HASTA_KURUM_TURU_ID IN (1,2,3,4,5)
+        GROUP BY FATURA_NO;
+    """
+    try:
+        df = pd.read_sql(sql, conn)
+        df['FATURA_NO'] = df['FATURA_NO'].apply(lambda x: str(int(float(x))))
+        return df
+    except Exception as e:
+        print(f"SQL Hatası: {e}")
+        return pd.DataFrame()
+    finally:
+        conn.close()
