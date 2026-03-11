@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.polyclinic_loaders import load_polyclinic_performance_data
+from flask_app.database.poliklinik_sorgular import poliklinik_performans_verisi_yukle
 from routes.dashboard import get_date_range
 
 poliklinik_bp = Blueprint('poliklinik', __name__)
@@ -35,7 +35,7 @@ def _extract_hour(value):
 @login_required
 def poliklinik():
     sd, ed = get_date_range()
-    df_raw = load_polyclinic_performance_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_raw = poliklinik_performans_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
         return render_template('poliklinik.html', start_date=sd, end_date=ed, no_data=True)

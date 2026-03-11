@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.healthcarewaste_loaders import load_medical_waste_data
+from flask_app.database.tıbbi_atık_sorgular import tibbi_atik_verisi_yukle
 from routes.dashboard import get_date_range
 
 tibbi_atik_bp = Blueprint('tibbi_atik', __name__)
@@ -15,7 +15,7 @@ tibbi_atik_bp = Blueprint('tibbi_atik', __name__)
 @login_required
 def tibbi_atik():
     sd, ed = get_date_range()
-    df = load_medical_waste_data(sd, ed)
+    df = tibbi_atik_verisi_yukle(sd, ed)
 
     if df.empty:
         return render_template('tibbi_atik.html', start_date=sd, end_date=ed, no_data=True)

@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.invoice_loaders import load_invoice_revenue_data
+from flask_app.database.fatura_sorgular import fatura_gelir_verisi_yukle
 from routes.dashboard import get_date_range
 
 gelir_bp = Blueprint('gelir', __name__)
@@ -14,7 +14,7 @@ gelir_bp = Blueprint('gelir', __name__)
 def _load_invoice_df():
     """Seçili tarih aralığına göre fatura verisini döndürür."""
     sd, ed = get_date_range()
-    df = load_invoice_revenue_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df = fatura_gelir_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
     if df.empty:
         return sd, ed, df
 

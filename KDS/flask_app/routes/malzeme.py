@@ -6,7 +6,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.stock_loaders import load_stock_consumption_data
+from flask_app.database.malzeme_sorgular import malzeme_tuketim_verisi_yukle
 from routes.dashboard import get_date_range
 
 malzeme_bp = Blueprint('malzeme', __name__)
@@ -16,7 +16,7 @@ malzeme_bp = Blueprint('malzeme', __name__)
 @login_required
 def malzeme():
     sd, ed = get_date_range()
-    df_raw = load_stock_consumption_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_raw = malzeme_tuketim_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw is None or df_raw.empty:
         return render_template('malzeme.html', start_date=sd, end_date=ed, no_data=True)

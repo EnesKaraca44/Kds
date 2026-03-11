@@ -6,7 +6,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.sterilization_loaders import load_sterilization_data
+from flask_app.database.sterilizasyon_sorgular import sterilizasyon_verisi_yukle
 from routes.dashboard import get_date_range
 
 sterilizasyon_bp = Blueprint('sterilizasyon', __name__)
@@ -16,7 +16,7 @@ sterilizasyon_bp = Blueprint('sterilizasyon', __name__)
 @login_required
 def sterilizasyon():
     sd, ed = get_date_range()
-    df_all = load_sterilization_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_all = sterilizasyon_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_all.empty:
         return render_template('sterilizasyon.html', start_date=sd, end_date=ed, no_data=True)

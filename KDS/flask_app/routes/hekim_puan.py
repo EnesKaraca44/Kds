@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.doctor_point import load_doctor_points_data
+from flask_app.database.hekim_puan_sorgular import hekim_puan_verisi_yukle
 from routes.dashboard import get_date_range
 
 hekim_puan_bp = Blueprint('hekim_puan', __name__)
@@ -18,7 +18,7 @@ hekim_puan_bp = Blueprint('hekim_puan', __name__)
 def hekim_puan():
     sd, ed = get_date_range()
 
-    df_raw = load_doctor_points_data(sd, ed)
+    df_raw = hekim_puan_verisi_yukle(sd, ed)
     if df_raw is None or df_raw.empty:
         return render_template('hekim_puan.html', start_date=sd, end_date=ed, no_data=True)
 

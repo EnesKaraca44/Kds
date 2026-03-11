@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.patient_loaders import load_foreign_patient_data
+from flask_app.database.yabanci_hasta_sorgular import yabanci_hasta_verisi_yukle
 from routes.dashboard import get_date_range
 
 yabanci_hasta_bp = Blueprint('yabanci_hasta', __name__)
@@ -22,7 +22,7 @@ def _safe_float(value):
 @login_required
 def yabanci_hasta():
     sd, ed = get_date_range()
-    df_raw = load_foreign_patient_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_raw = yabanci_hasta_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
         return render_template('yabanci_hasta.html', start_date=sd, end_date=ed, no_data=True)

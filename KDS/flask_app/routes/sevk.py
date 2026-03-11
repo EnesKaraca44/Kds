@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.referral_loaders import load_referral_data
+from flask_app.database.sevk_sorgular import sevk_verisi_yukle
 from routes.dashboard import get_date_range
 
 sevk_bp = Blueprint('sevk', __name__)
@@ -22,7 +22,7 @@ def _safe_float(value):
 @login_required
 def sevk():
     sd, ed = get_date_range()
-    df_referrals = load_referral_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_referrals = sevk_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_referrals is None or df_referrals.empty:
         return render_template('sevk.html', start_date=sd, end_date=ed, no_data=True)
