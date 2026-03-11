@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.medical_loaders import load_treatment_group_performance
+from flask_app.database.tedavi_grubu_sorgular import tedavi_grubu_verisi_yukle
 from routes.dashboard import get_date_range
 
 tedavi_bp = Blueprint('tedavi', __name__)
@@ -15,7 +15,7 @@ tedavi_bp = Blueprint('tedavi', __name__)
 @login_required
 def tedavi():
     sd, ed = get_date_range()
-    df_raw = load_treatment_group_performance(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_raw = tedavi_grubu_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
         return render_template('tedavi.html', start_date=sd, end_date=ed, no_data=True, top_n=15)

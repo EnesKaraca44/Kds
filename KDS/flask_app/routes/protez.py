@@ -7,7 +7,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required  # noqa: E402
-from database.denture_loaders import load_prosthetic_performance_data  # noqa: E402
+from flask_app.database.protez_sorgular import protez_verisi_yukle  # noqa: E402
 from routes.dashboard import get_date_range  # noqa: E402
 
 protez_bp = Blueprint("protez", __name__)
@@ -25,7 +25,7 @@ def _find_column(candidates, df_cols):
 @login_required
 def protez():
     sd, ed = get_date_range()
-    df_raw = load_prosthetic_performance_data(sd, ed)
+    df_raw = protez_verisi_yukle(sd, ed)
 
     if df_raw is None or df_raw.empty:
         return render_template("protez.html", start_date=sd, end_date=ed, no_data=True)

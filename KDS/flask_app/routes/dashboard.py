@@ -6,8 +6,8 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.dynamic_income import get_latest_fatura_metrics
-from database.connection import get_db_connection
+from flask_app.database.dinamik_gelir_sorgular import son_fatura_metrikleri_getir
+from flask_app.database.baglanti import baglanti_olustur
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
@@ -65,7 +65,7 @@ def dashboard():
     
     start_perf = time.time()
     try:
-        df_latest = get_latest_fatura_metrics()
+        df_latest = son_fatura_metrikleri_getir()
         query_time = round(time.time() - start_perf, 3)
         
         if not df_latest.empty:
@@ -82,7 +82,7 @@ def dashboard():
     
     # DB bağlantı kontrolü
     try:
-        conn = get_db_connection()
+        conn = baglanti_olustur()
         if conn:
             db_status = 'ok'
             conn.close()

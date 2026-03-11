@@ -9,7 +9,7 @@ import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required  # noqa: E402
-from database.xray_loaders import load_xray_analysis_data  # noqa: E402
+from flask_app.database.rontgen_sorgular import rontgen_verisi_yukle  # noqa: E402
 from routes.dashboard import get_date_range  # noqa: E402
 
 rontgen_bp = Blueprint("rontgen", __name__)
@@ -83,7 +83,7 @@ def _safe_float(value):
 @login_required
 def rontgen():
     sd, ed = get_date_range()
-    df_raw = load_xray_analysis_data(sd, ed)
+    df_raw = rontgen_verisi_yukle(sd, ed)
 
     if df_raw is None or df_raw.empty:
         return render_template("rontgen.html", start_date=sd, end_date=ed, no_data=True)

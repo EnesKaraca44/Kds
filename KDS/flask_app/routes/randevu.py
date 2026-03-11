@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.appointment_loaders import load_appointment_data
+from flask_app.database.randevu_sorgular import randevu_verisi_yukle
 from routes.dashboard import get_date_range
 
 randevu_bp = Blueprint('randevu', __name__)
@@ -15,7 +15,7 @@ randevu_bp = Blueprint('randevu', __name__)
 @login_required
 def randevu():
     sd, ed = get_date_range()
-    df_raw = load_appointment_data(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
+    df_raw = randevu_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
         return render_template('randevu.html', start_date=sd, end_date=ed, no_data=True, top_n=15)
