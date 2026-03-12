@@ -9,7 +9,7 @@ import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required  # noqa: E402
-from flask_app.database.rontgen_sorgular import rontgen_verisi_yukle  # noqa: E402
+from database.rontgen_sorgular import rontgen_verisi_yukle  # noqa: E402
 from routes.dashboard import get_date_range  # noqa: E402
 
 rontgen_bp = Blueprint("rontgen", __name__)

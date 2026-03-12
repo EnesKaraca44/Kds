@@ -6,7 +6,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.malzeme_sorgular import malzeme_tuketim_verisi_yukle
+from database.malzeme_sorgular import malzeme_tuketim_verisi_yukle
 from routes.dashboard import get_date_range
 
 malzeme_bp = Blueprint('malzeme', __name__)

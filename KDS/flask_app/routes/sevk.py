@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.sevk_sorgular import sevk_verisi_yukle
+from database.sevk_sorgular import sevk_verisi_yukle
 from routes.dashboard import get_date_range
 
 sevk_bp = Blueprint('sevk', __name__)

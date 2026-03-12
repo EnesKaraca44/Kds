@@ -7,7 +7,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required  # noqa: E402
-from flask_app.database.protez_sorgular import protez_verisi_yukle  # noqa: E402
+from database.protez_sorgular import protez_verisi_yukle  # noqa: E402
 from routes.dashboard import get_date_range  # noqa: E402
 
 protez_bp = Blueprint("protez", __name__)
