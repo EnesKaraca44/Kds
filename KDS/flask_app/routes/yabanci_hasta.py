@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.yabanci_hasta_sorgular import yabanci_hasta_verisi_yukle
+from database.yabanci_hasta_sorgular import yabanci_hasta_verisi_yukle
 from routes.dashboard import get_date_range
 
 yabanci_hasta_bp = Blueprint('yabanci_hasta', __name__)

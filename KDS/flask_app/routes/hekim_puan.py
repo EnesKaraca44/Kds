@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.hekim_puan_sorgular import hekim_puan_verisi_yukle
+from database.hekim_puan_sorgular import hekim_puan_verisi_yukle
 from routes.dashboard import get_date_range
 
 hekim_puan_bp = Blueprint('hekim_puan', __name__)

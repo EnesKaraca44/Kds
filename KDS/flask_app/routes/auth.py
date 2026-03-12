@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, sessio
 import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from config import CREDENTIALS
+from ayarlar import CREDENTIALS
 
 auth_bp = Blueprint('auth', __name__)
 

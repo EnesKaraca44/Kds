@@ -6,8 +6,8 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.dinamik_gelir_sorgular import son_fatura_metrikleri_getir
-from flask_app.database.baglanti import baglanti_olustur
+from database.dinamik_gelir_sorgular import son_fatura_metrikleri_getir
+from database.baglanti import baglanti_olustur
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
