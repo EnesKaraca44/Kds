@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.tedavi_grubu_sorgular import tedavi_grubu_verisi_yukle
+from database.tedavi_grubu_sorgular import tedavi_grubu_verisi_yukle
 from routes.dashboard import get_date_range
 
 tedavi_bp = Blueprint('tedavi', __name__)

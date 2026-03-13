@@ -7,7 +7,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.poliklinik_sorgular import poliklinik_performans_verisi_yukle
+from database.poliklinik_sorgular import poliklinik_performans_verisi_yukle
 from routes.dashboard import get_date_range
 
 poliklinik_bp = Blueprint('poliklinik', __name__)
