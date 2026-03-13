@@ -6,7 +6,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.sterilizasyon_sorgular import sterilizasyon_verisi_yukle
+from database.sterilizasyon_sorgular import sterilizasyon_verisi_yukle
 from routes.dashboard import get_date_range
 
 sterilizasyon_bp = Blueprint('sterilizasyon', __name__)

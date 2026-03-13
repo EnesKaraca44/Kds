@@ -5,7 +5,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from flask_app.database.fatura_sorgular import fatura_gelir_verisi_yukle
+from database.fatura_sorgular import fatura_gelir_verisi_yukle
 from routes.dashboard import get_date_range
 
 gelir_bp = Blueprint('gelir', __name__)
