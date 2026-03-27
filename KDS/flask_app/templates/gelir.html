@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Gelir Analizi{% endblock %}
-{% block page_title %}💰 Kurum Gelir & Fatura Analizi{% endblock %}
+{% block title %}<span data-t="Gelir Analizi">Gelir Analizi</span>{% endblock %}
+{% block page_title %}<span data-t="💰 Kurum Gelir & Fatura Analizi & Kasa/Vezne Gelirleri">💰 Kurum Gelir & Fatura Analizi & Kasa/Vezne Gelirleri</span>{% endblock %}
 {% block head %}
 <style>
   .chart-title {
@@ -10,6 +10,7 @@
     margin: 0 0 10px;
     letter-spacing: 0.2px;
   }
+
   .download-btn {
     display: inline-flex;
     align-items: center;
@@ -24,9 +25,98 @@
     font-weight: 500;
     text-decoration: none;
   }
+
   .download-btn:hover {
     border-color: #60a5fa;
     color: #bfdbfe;
+  }
+
+  /* KPI cards removed scoped styles to use global */
+
+  /* Vezne tab: modern table styling (scoped) */
+  .vezne-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    align-items: start;
+  }
+
+  .vezne-grid .chart-container {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .vezne-grid .full-width {
+    grid-column: 1 / -1;
+  }
+
+  .vezne-table-wrapper {
+    border: 1px solid var(--border-color);
+    border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
+    border-radius: 14px;
+    overflow: auto;
+    background: var(--bg-card);
+    background: color-mix(in srgb, var(--bg-card) 88%, transparent);
+    box-shadow: var(--shadow-sm);
+  }
+
+  table.data-table.vezne-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+
+  table.data-table.vezne-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: linear-gradient(180deg,
+        color-mix(in srgb, var(--bg-card) 92%, transparent),
+        color-mix(in srgb, var(--bg-card) 82%, transparent));
+    backdrop-filter: blur(6px);
+    border-bottom: 1px solid var(--border-color);
+    font-size: 0.72rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+  }
+
+  table.data-table.vezne-table th,
+  table.data-table.vezne-table td {
+    padding: 10px 12px;
+    vertical-align: middle;
+  }
+
+  table.data-table.vezne-table tbody tr:nth-child(odd) {
+    background: rgba(2, 6, 23, 0.06);
+    background: color-mix(in srgb, var(--bg-body) 45%, transparent);
+  }
+
+  table.data-table.vezne-table tbody tr:hover {
+    background: rgba(59, 130, 246, 0.08);
+  }
+
+  table.data-table.vezne-table tbody tr.is-selected {
+    background: rgba(59, 130, 246, 0.14);
+    outline: 1px solid rgba(59, 130, 246, 0.25);
+  }
+
+  table.data-table.vezne-table td.num,
+  table.data-table.vezne-table th.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table.data-table.vezne-table tfoot th,
+  table.data-table.vezne-table tfoot td {
+    position: sticky;
+    bottom: 0;
+    z-index: 1;
+    background: linear-gradient(0deg,
+        color-mix(in srgb, var(--bg-card) 92%, transparent),
+        color-mix(in srgb, var(--bg-card) 78%, transparent));
+    border-top: 1px solid var(--border-color);
+    font-weight: 800;
   }
 </style>
 {% endblock %}
@@ -36,105 +126,190 @@
 <div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 
-<div class="metrics-grid cols-4">
-    <div class="metric-card">
-        <div class="metric-body">
-            <div class="metric-label">Toplam Gelir (KDV'li)</div>
-            <div class="metric-value">₺{{ t_gelir_kdvli|turkish_number }}</div>
-        </div>
+<div class="metrics-grid cols-4 gelir-kpis">
+  <div class="metric-card card-warm-green">
+    <div class="metric-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
     </div>
-    <div class="metric-card">
-        <div class="metric-body">
-            <div class="metric-label">Toplam Fatura</div>
-            <div class="metric-value">{{ t_fatura }}</div>
-        </div>
+    <div class="metric-body">
+      <div class="metric-label" data-t="Toplam Gelir">Toplam Gelir</div>
+      <div class="metric-value">{{ t_gelir_kdvli|turkish_number }}</div>
     </div>
-    <div class="metric-card">
-        <div class="metric-body">
-            <div class="metric-label">Faturalandırılan Kişi</div>
-            <div class="metric-value">{{ t_kisi|turkish_number(0) }}</div>
-        </div>
+  </div>
+  <div class="metric-card card-orange">
+    <div class="metric-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
     </div>
-    <div class="metric-card">
-        <div class="metric-body">
-            <div class="metric-label">Net Gelir</div>
-            <div class="metric-value">₺{{ t_gelir_net|turkish_number }}</div>
-        </div>
+    <div class="metric-body">
+      <div class="metric-label" data-t="Toplam Fatura">Toplam Fatura</div>
+      <div class="metric-value">{{ t_fatura }}</div>
     </div>
+  </div>
+  <div class="metric-card card-blue">
+    <div class="metric-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+    </div>
+    <div class="metric-body">
+      <div class="metric-label" data-t="Faturalandırılan Kişi">Faturalandırılan Kişi</div>
+      <div class="metric-value">{{ t_kisi|turkish_number(0) }}</div>
+    </div>
+  </div>
+  <div class="metric-card card-cool-green">
+    <div class="metric-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="12" x="2" y="6" rx="2"/><circle cx="12" cy="12" r="2"/><path d="M6 12h.01M18 12h.01"/></svg>
+    </div>
+    <div class="metric-body">
+      <div class="metric-label" data-t="Vezne Geliri (Tahsilat)">Vezne Geliri (Tahsilat)</div>
+      <div class="metric-value">{{ t_vezne_gelir|turkish_number }}</div>
+    </div>
+  </div>
 </div>
 
 <div class="tabs" data-target="#gelirTabs">
-    <button class="tab-btn active">🏥 Kurum Performansı</button>
-    <button class="tab-btn">📈 Gelir Trendi</button>
-    <button class="tab-btn">📄 Fatura Listesi</button>
+  <button class="tab-btn active" data-t="🏥 Kurum Performansı">🏥 Kurum Performansı</button>
+  <button class="tab-btn" data-t="📈 Gelir Trendi">📈 Gelir Trendi</button>
+  <button class="tab-btn" data-t="📄 Fatura Listesi">📄 Fatura Listesi</button>
+  <button class="tab-btn" data-t="🏦 Vezne">🏦 Vezne</button>
 </div>
 
 <div id="gelirTabs">
-    <!-- Kurum Performansı -->
-    <div class="tab-content active">
-        <div class="chart-row">
-            <div class="chart-container">
-                <div class="chart-title">Kurum Türüne Göre Gelir</div>
-                {{ charts.fig_pie | safe }}
-            </div>
-            <div class="chart-container">
-                <div class="chart-title">En Çok Ciro Yapan 10 Kurum/İlgili</div>
-                {{ charts.fig_bar | safe }}
-            </div>
-        </div>
+  <!-- Kurum Performansı -->
+  <div class="tab-content active">
+    <div class="chart-row">
+      <div class="chart-container">
+        <div class="chart-title" data-t="Kurum Türüne Göre Gelir">Kurum Türüne Göre Gelir</div>
+        {% if charts.fig_pie is defined %}
+        {{ charts.fig_pie | safe }}
+        {% else %}
+        <div class="alert alert-info" data-t="Grafik için fatura verisi bulunamadı.">Grafik için fatura verisi bulunamadı.</div>
+        {% endif %}
+      </div>
+      <div class="chart-container">
+        <div class="chart-title" data-t="En Çok Ciro Yapan 10 Kurum/İlgili">En Çok Ciro Yapan 10 Kurum/İlgili</div>
+        {% if charts.fig_bar is defined %}
+        {{ charts.fig_bar | safe }}
+        {% else %}
+        <div class="alert alert-info" data-t="Grafik için fatura verisi bulunamadı.">Grafik için fatura verisi bulunamadı.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <!-- Gelir Trendi -->
+  <div class="tab-content">
+    <div class="chart-container">
+      <div class="chart-title" data-t="Günlük Fatura Gelir Trendi">Günlük Fatura Gelir Trendi</div>
+      {% if charts.fig_trend is defined %}
+      {{ charts.fig_trend | safe }}
+      {% else %}
+      <div class="alert alert-info" data-t="Grafik için fatura verisi bulunamadı.">Grafik için fatura verisi bulunamadı.</div>
+      {% endif %}
+      <a class="download-btn"
+        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}" data-t="⬇️ Tüm Veriyi CSV Olarak İndir">
+        ⬇️ Tüm Veriyi CSV Olarak İndir
+      </a>
+    </div>
+  </div>
+
+  <!-- Fatura Listesi -->
+  <div class="tab-content">
+    <div class="chart-container">
+      <div class="chart-title" data-t="Son 500 Fatura Kaydı">Son 500 Fatura Kaydı</div>
+      <div class="table-wrapper">
+        {% if table_rows %}
+        <table class="data-table">
+          <thead>
+            <tr>
+              {% for col in table_cols %}
+              <th>{{ col }}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in table_rows %}
+            <tr>
+              {% for col in table_cols %}
+              {% set val = row[col] %}
+              <td>
+                {% if col in ['FATURA_KDVLI_TOPLAM_TUTAR','FATURA_TOPLAM_TUTAR','FATURA_TOPLAM_KDV'] %}
+                {{ val|turkish_number }}
+                {% elif col == 'FATURA_KISI_SAYISI' %}
+                {{ val|turkish_number(0) }}
+                {% else %}
+                {{ val }}
+                {% endif %}
+              </td>
+              {% endfor %}
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        {% else %}
+        <div class="alert alert-info" data-t="Listelenecek fatura kaydı bulunamadı.">Listelenecek fatura kaydı bulunamadı.</div>
+        {% endif %}
+      </div>
+      <a class="download-btn"
+        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
+        ⬇️ Tüm Veriyi CSV Olarak İndir
+      </a>
+    </div>
+  </div>
+
+  <!-- Vezne -->
+  <div class="tab-content">
+    <div class="chart-controls"
+      style="background: var(--bg-card); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 16px; box-shadow: var(--shadow-sm);">
+      <form method="GET" action="{{ url_for('gelir.gelir') }}"
+        style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+        {% for key, value in request.args.items() %}
+        {% if key not in ['kasaId'] %}
+        <input type="hidden" name="{{ key }}" value="{{ value }}">
+        {% endif %}
+        {% endfor %}
+        <label style="font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;" data-t="Kasa Seç:">
+          Kasa Seç:
+        </label>
+        <select name="kasaId" onchange="this.form.submit()"
+          style="padding: 10px 12px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-primary); min-width: 260px;">
+          {% for r in vezne_kasa_rows %}
+          {% set kid = (r.kasaId|string) %}
+          <option value="{{ kid }}" {% if kid==selected_kasa_id %}selected{% endif %} data-t="{{ r.kasaAd }}">
+            {{ r.kasaAd }}
+          </option>
+          {% endfor %}
+        </select>
+      </form>
     </div>
 
-    <!-- Gelir Trendi -->
-    <div class="tab-content">
-        <div class="chart-container">
-            <div class="chart-title">Günlük Fatura Gelir Trendi</div>
-            {{ charts.fig_trend | safe }}
-            <a class="download-btn"
-               href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
-                ⬇️ Tüm Veriyi CSV Olarak İndir
-            </a>
-        </div>
-    </div>
+    <div class="vezne-grid">
+      <div class="chart-container">
+        <div class="chart-title" data-t="Kasa Hareketleri Dağılımı">Kasa Hareketleri Dağılımı</div>
+        {% if charts.fig_vezne_kasa is defined %}
+        {{ charts.fig_vezne_kasa | safe }}
+        {% else %}
+        <div class="alert alert-info" data-t="Grafik için vezne verisi bulunamadı.">Grafik için vezne verisi bulunamadı.</div>
+        {% endif %}
+      </div>
 
-    <!-- Fatura Listesi -->
-    <div class="tab-content">
-        <div class="chart-container">
-            <div class="chart-title">Son 500 Fatura Kaydı</div>
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        <tr>
-                            {% for col in table_cols %}
-                            <th>{{ col }}</th>
-                            {% endfor %}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for row in table_rows %}
-                        <tr>
-                            {% for col in table_cols %}
-                            {% set val = row[col] %}
-                            <td>
-                                {% if col in ['FATURA_KDVLI_TOPLAM_TUTAR','FATURA_TOPLAM_TUTAR','FATURA_TOPLAM_KDV'] %}
-                                    ₺{{ val|turkish_number }}
-                                {% elif col == 'FATURA_KISI_SAYISI' %}
-                                    {{ val|turkish_number(0) }}
-                                {% else %}
-                                    {{ val }}
-                                {% endif %}
-                            </td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <a class="download-btn"
-               href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
-                ⬇️ Tüm Veriyi CSV Olarak İndir
-            </a>
-        </div>
+      <div class="chart-container">
+        <div class="chart-title" data-t="Aylara Göre Tahsilat">Aylara Göre Tahsilat</div>
+        {% if charts.fig_vezne_aylik is defined %}
+        {{ charts.fig_vezne_aylik | safe }}
+        {% else %}
+        <div class="alert alert-info" data-t="Seçili kasa için aylık veri bulunamadı.">Seçili kasa için aylık veri bulunamadı.</div>
+        {% endif %}
+      </div>
+
+      <div class="chart-container full-width">
+        <div class="chart-title" data-t="Hareket Türü Tanımlı Kasa Bilgileri">Hareket Türü Tanımlı Kasa Bilgileri</div>
+        {% if charts.fig_vezne_hareket is defined %}
+        {{ charts.fig_vezne_hareket | safe }}
+        {% else %}
+        <div class="alert alert-info" data-t="Grafik için hareket türü verisi bulunamadı.">Grafik için hareket türü verisi bulunamadı.</div>
+        {% endif %}
+      </div>
     </div>
+  </div>
 </div>
 
 {% endif %}

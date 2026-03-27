@@ -1,47 +1,98 @@
 {% extends "base.html" %}
-{% block title %}Poliklinik Hasta{% endblock %}
-{% block page_title %}👥 Hekim Poliklinik Hasta Analizi{% endblock %}
+{% block title %}<span data-t="Poliklinik Hasta">Poliklinik Hasta</span>{% endblock %}
+{% block page_title %}<span data-t="Hekim Poliklinik Hasta Analizi">👥 Hekim Poliklinik Hasta Analizi</span>{% endblock %}
+{% block head %}
+<style>
+  /* Metric card styles moved to global style.css */
+
+  /* KPI card styles moved to global style.css */
+
+  /* Segmented Radio Pills (Copied from hekim_puan) */
+  .radio-pill input[type="radio"] {
+    display: none;
+  }
+  
+  .radio-pill span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  
+  .radio-pill input[type="radio"]:checked + span {
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+  }
+  
+  .radio-pill:hover span {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .radio-pill input[type="radio"]:checked:hover + span {
+    background: linear-gradient(135deg, #2563EB, #1E40AF);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 {% if no_data %}
 <div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
-<div class="metrics-grid cols-4">
-    <div class="metric-card">
-        <div class="metric-icon">📋</div>
+<div class="metrics-grid cols-4 pol-kpis">
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><line x1="10" y1="9" x2="8" y2="9"/></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ toplam_kayit|turkish_number(0) }}</div>
-            <div class="metric-label">Toplam Kayıt</div>
+            <div class="metric-label" data-t="Toplam Kayıt">Toplam Kayıt</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">👥</div>
+    <div class="metric-card card-warm-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ benzersiz_hasta|turkish_number(0) }}</div>
-            <div class="metric-label">Benzersiz Hasta</div>
+            <div class="metric-label" data-t="Benzersiz Hasta">Benzersiz Hasta</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">👨‍⚕️</div>
+    <div class="metric-card card-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ aktif_hekim }}</div>
-            <div class="metric-label">Aktif Hekim</div>
+            <div class="metric-label" data-t="Aktif Hekim">Aktif Hekim</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">🏥</div>
+    <div class="metric-card card-purple">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9h18v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9Z"/><path d="m3 9 2.45-4.9A2 2 0 0 1 7.24 3h9.52a2 2 0 0 1 1.8 1.1L21 9"/><path d="M12 3v6"/></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ brans_sayisi }}</div>
-            <div class="metric-label">Branş Sayısı</div>
+            <div class="metric-label" data-t="Branş Sayısı">Branş Sayısı</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#polTabs">
-    <button class="tab-btn active">📊 Performans (Sıralama Kriterli)</button>
-    <button class="tab-btn">📈 Kurum & Trend</button>
-    <button class="tab-btn">🔥 Yoğunluk Analizi</button>
-    <button class="tab-btn">🔍 Hekim Detay</button>
+    <button class="tab-btn active" data-t="📊 Performans (Sıralama Kriterli)">📊 Performans (Sıralama Kriterli)</button>
+    <button class="tab-btn" data-t="📈 Kurum & Trend">📈 Kurum & Trend</button>
+    <button class="tab-btn" data-t="🔥 Yoğunluk Analizi">🔥 Yoğunluk Analizi</button>
+    <button class="tab-btn" data-t="🔍 Hekim Detay">🔍 Hekim Detay</button>
 </div>
 <div id="polTabs">
     <div class="tab-content active">
@@ -56,32 +107,66 @@
 
                 <div style="display: flex; flex-direction: column; gap: 8px;">
                     <label
-                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Sıralama
+                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;" data-t="SIRALAMA KRİTERİ:">Sıralama
                         Kriteri:</label>
-                    <div style="display: flex; gap: 16px;">
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="radio" name="sort" value="Kayit_Sayisi" onchange="this.form.submit()" {% if
-                                current_sort=='Kayit_Sayisi' %}checked{% endif %}>
-                            <span>Kayıt Sayısı</span>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Kayit_Sayisi" onchange="this.form.submit()" {% if current_sort=='Kayit_Sayisi' %}checked{% endif %}>
+                            <span data-t="📋 Kayıt Sayısı">📋 Kayıt Sayısı</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="radio" name="sort" value="Benzersiz_Hasta_Sayisi" onchange="this.form.submit()"
-                                {% if current_sort=='Benzersiz_Hasta_Sayisi' %}checked{% endif %}>
-                            <span>Benzersiz Hasta Sayısı</span>
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Benzersiz_Hasta_Sayisi" onchange="this.form.submit()" {% if current_sort=='Benzersiz_Hasta_Sayisi' %}checked{% endif %}>
+                            <span data-t="👥 Benzersiz Hasta Sayısı">👥 Benzersiz Hasta Sayısı</span>
+                        </label>
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Hekim_Bazli_Hasta_Sayilari" onchange="this.form.submit()" {% if current_sort=='Hekim_Bazli_Hasta_Sayilari' %}checked{% endif %}>
+                            <span data-t="👨‍⚕️ Hekim Bazlı Hasta Sayıları">👨‍⚕️ Hekim Bazlı Hasta Sayıları</span>
                         </label>
                     </div>
                 </div>
             </form>
         </div>
 
+        {% if current_sort == 'Hekim_Bazli_Hasta_Sayilari' %}
+        <div class="chart-container" style="padding: 0;">
+            <div style="padding: 16px 16px 8px; font-weight: 700; color: var(--text-primary);" data-t="Hekim Bazlı Hasta Sayıları">
+                Hekim Bazlı Hasta Sayıları
+            </div>
+            <div class="table-wrapper" style="max-height: 520px; overflow:auto;">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th data-t="Ad">Ad</th>
+                            <th style="text-align:right;" data-t="Toplam">Toplam</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in hekim_hasta_table %}
+                        <tr>
+                            <td>{{ r.ad }}</td>
+                            <td style="text-align:right;">{{ r.toplam|turkish_number(0) }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th data-t="Toplam">Toplam</th>
+                            <th style="text-align:right;">{{ hekim_hasta_toplam|turkish_number(0) }}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        {% else %}
         <div class="chart-row">
             <div class="chart-container" style="padding: 10px;">{{ charts.fig_top | safe }}</div>
             <div class="chart-container" style="padding: 10px;">{{ charts.fig_bot | safe }}</div>
         </div>
+        {% endif %}
 
         <div class="info-banner" style="border-left-color: var(--accent-primary); background: #eff6ff;">
             <div
-                style="font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                style="font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;" data-t="🤖 Akıllı Yorumlar">
                 <span style="font-size:1.3rem">🤖</span> Akıllı Yorumlar
             </div>
             <p style="margin:0; font-size: 0.95em; color: var(--text-secondary);">{{ insight_text }}</p>
@@ -116,13 +201,14 @@
                 <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
                 <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
                 <input type="hidden" name="sort" value="{{ request.args.get('sort', 'Kayit_Sayisi') }}">
+                <input type="hidden" name="tab" value="3">
 
                 <label
-                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Analiz
+                    style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;" data-t="Analiz İçin Hekim Seçiniz:">Analiz
                     İçin Hekim Seçiniz:</label>
                 <select name="hekim" onchange="this.form.submit()"
                     style="padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); background: var(--bg-body); color: var(--text-primary); width: 100%; font-size:1rem;">
-                    <option value="">-- Hekim Seçin --</option>
+                    <option value="" data-t="-- Hekim Seçin --">-- Hekim Seçin --</option>
                     {% for h in hekim_list %}
                     <option value="{{ h }}" {% if h==selected_hekim %}selected{% endif %}>{{ h }}</option>
                     {% endfor %}
@@ -136,7 +222,7 @@
                 <div
                     style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
                     <div
-                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;">
+                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;" data-t="Hekim Toplam Kayıt">
                         Hekim Toplam Kayıt</div>
                     <div style="font-size: 2.2rem; font-weight: 700; color: var(--text-primary);">{{
                         hekim_toplam_kayit|turkish_number(0) }}</div>
@@ -144,7 +230,7 @@
                 <div
                     style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); box-shadow: var(--shadow-sm);">
                     <div
-                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;">
+                        style="font-size: 0.85rem; color: var(--text-secondary); font-weight: 600; text-transform:uppercase; margin-bottom: 5px;" data-t="Branş Sayısı">
                         Branş Sayısı</div>
                     <div style="font-size: 2.2rem; font-weight: 700; color: var(--text-primary);">{{ hekim_brans_sayisi
                         }}</div>
@@ -157,9 +243,34 @@
             </div>
         </div>
         {% else %}
-        <div class="alert alert-info">Detaylarını görmek için lütfen yukarıdan bir hekim seçin.</div>
+        <div class="alert alert-info" data-t="Detaylarını görmek için lütfen yukarıdan bir hekim seçin.">Detaylarını görmek için lütfen yukarıdan bir hekim seçin.</div>
         {% endif %}
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    const tabIndex = parseInt(params.get('tab'));
+    if (!isNaN(tabIndex) && tabIndex > 0) {
+        const tabContainer = document.querySelector('.tabs[data-target="#polTabs"]');
+        if (tabContainer) {
+            const buttons = tabContainer.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('#polTabs .tab-content');
+            if (buttons[tabIndex] && contents[tabIndex]) {
+                buttons.forEach(b => b.classList.remove('active'));
+                contents.forEach(c => c.classList.remove('active'));
+                buttons[tabIndex].classList.add('active');
+                contents[tabIndex].classList.add('active');
+                setTimeout(function() {
+                    tabContainer.scrollIntoView({ behavior: 'auto', block: 'start' });
+                }, 100);
+            }
+        }
+    }
+})();
+</script>
 {% endblock %}

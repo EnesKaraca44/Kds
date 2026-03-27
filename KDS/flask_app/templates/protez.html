@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Protez Süreç Performansı{% endblock %}
-{% block page_title %}🦷 Protez Süreç Performans Paneli{% endblock %}
+{% block title %}<span data-t="Protez Süreç Performansı">Protez Süreç Performansı</span>{% endblock %}
+{% block page_title %}<span data-t="🦷 Protez Süreç Performans Paneli">🦷 Protez Süreç Performans Paneli</span>{% endblock %}
 {% block head %}
 <style>
     .metrics-grid.protez-metrics {
@@ -195,41 +195,41 @@
 
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 
 <div class="metrics-grid protez-metrics">
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Filtrelenen Vaka</div>
+            <div class="metric-label" data-t="Filtrelenen Vaka">Filtrelenen Vaka</div>
             <div class="metric-value">{{ vaka_sayisi|turkish_number(0) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Gecikme Oranı</div>
+            <div class="metric-label" data-t="Gecikme Oranı">Gecikme Oranı</div>
             <div class="metric-value">%{{ gecikme_orani|round(1) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Geciken Vaka</div>
+            <div class="metric-label" data-t="Geciken Vaka">Geciken Vaka</div>
             <div class="metric-value">{{ geciken_vaka|turkish_number(0) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Ort. Teslimat</div>
-            <div class="metric-value">{{ ort_teslim|round(1) }} Gün</div>
+            <div class="metric-label" data-t="Ort. Teslimat">Ort. Teslimat</div>
+            <div class="metric-value">{{ ort_teslim|round(1) }} <span data-t="Gün">Gün</span></div>
         </div>
     </div>
 </div>
 
 <div class="tabs protez-tabs" data-target="#protezTabs">
-    <button class="tab-btn active">📊 Genel Performans</button>
-    <button class="tab-btn">📍 Geciken Hekim Listesi</button>
-    <button class="tab-btn">🧾 Hasta Detayları</button>
-    <button class="tab-btn">📈 Trend Analizi</button>
+    <button class="tab-btn active" data-t="📊 Genel Performans">📊 Genel Performans</button>
+    <button class="tab-btn" data-t="📍 Geciken Hekim Listesi">📍 Geciken Hekim Listesi</button>
+    <button class="tab-btn" data-t="🧾 Hasta Detayları">🧾 Hasta Detayları</button>
+    <button class="tab-btn" data-t="📈 Trend Analizi">📈 Trend Analizi</button>
 </div>
 
 <form method="GET" class="protez-settings">
@@ -239,12 +239,12 @@
         {% endif %}
     {% endfor %}
 
-    <div class="protez-settings-title">
+    <div class="protez-settings-title" data-t="🔍 Analiz Ayarları">
         🔍 Analiz Ayarları
     </div>
 
     <div class="protez-settings-group">
-        <span>Kritik Gün Eşiği</span>
+        <span data-t="Kritik Gün Eşiği">Kritik Gün Eşiği</span>
         <div class="protez-settings-number">
             <button type="button" onclick="var i=this.nextElementSibling; i.stepDown(); this.form.submit();">-</button>
             <input type="number" name="kritik" min="1" max="365" value="{{ kritik_limit }}">
@@ -253,7 +253,7 @@
     </div>
 
     <div class="protez-settings-group">
-        <span>Gösterilecek Hekim Sayısı <strong id="hekimCountLabel">{{ kritik_hekim_sayisi }}</strong></span>
+        <span data-t="Gösterilecek Hekim Sayısı">Gösterilecek Hekim Sayısı <strong id="hekimCountLabel">{{ kritik_hekim_sayisi }}</strong></span>
         <input type="range" name="k_hekim" min="3" max="30" step="1"
                value="{{ kritik_hekim_sayisi }}"
                oninput="document.getElementById('hekimCountLabel').textContent=this.value"
@@ -266,11 +266,11 @@
     <div class="tab-content active">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">Hekim Bazlı Süre (Hedef vs Gerçek)</div>
+                <div class="chart-title" data-t="Hekim Bazlı Süre (Hedef vs Gerçek)">Hekim Bazlı Süre (Hedef vs Gerçek)</div>
                 {{ charts.fig_hekim | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">En Çok Geciken 10 İşlem (Ort. Gün)</div>
+                <div class="chart-title" data-t="En Çok Geciken 10 İşlem (Ort. Gün)">En Çok Geciken 10 İşlem (Ort. Gün)</div>
                 {{ charts.fig_sut | safe }}
             </div>
         </div>
@@ -279,15 +279,15 @@
     <!-- Geciken Hekim Listesi -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar</div>
+            <div class="chart-title" data-t="⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar">⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar</div>
             <div class="table-wrapper">
                 <table class="data-table protez-kritik-table">
                     <thead>
                         <tr>
-                            <th>Hekim</th>
-                            <th>Kritik Vaka Sayısı</th>
-                            <th>Ort. Teslim Süresi</th>
-                            <th>Toplam Gecikme (Gün)</th>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="Kritik Vaka Sayısı">Kritik Vaka Sayısı</th>
+                            <th data-t="Ort. Teslim Süresi">Ort. Teslim Süresi</th>
+                            <th data-t="Toplam Gecikme (Gün)">Toplam Gecikme (Gün)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -297,8 +297,8 @@
                             <td class="{% if r.ort_gecikme >= 60 %}heat-strong{% elif r.ort_gecikme >= 45 %}heat-medium{% else %}heat-light{% endif %}">
                                 {{ r.vaka_sayisi|turkish_number(0) }}
                             </td>
-                            <td>{{ r.ort_gecikme|round(1) }} Gün</td>
-                            <td>{{ r.toplam_gecikme|round(0)|int|turkish_number(0) }} Gün</td>
+                            <td>{{ r.ort_gecikme|round(1) }} <span data-t="Gün">Gün</span></td>
+                            <td>{{ r.toplam_gecikme|round(0)|int|turkish_number(0) }} <span data-t="Gün">Gün</span></td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -310,7 +310,7 @@
     <!-- Hasta Detayları -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Hekim ve Hasta Bazlı Detay Sorgulama</div>
+            <div class="chart-title" data-t="Hekim ve Hasta Bazlı Detay Sorgulama">Hekim ve Hasta Bazlı Detay Sorgulama</div>
             <div class="protez-detail-toolbar">
                 <form method="GET" style="display:flex; align-items:center; gap:10px;">
                     {% for key, value in request.args.items() %}
@@ -326,7 +326,7 @@
                     <label>
                         <input type="checkbox" name="only_delayed" {% if only_delayed %}checked{% endif %}
                             onchange="this.form.submit()">
-                        Sadece gecikenleri göster
+                        <span data-t="Sadece gecikenleri göster">Sadece gecikenleri göster</span>
                     </label>
                 </form>
             </div>
@@ -358,13 +358,13 @@
     <!-- Trend Analizi -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Haftalık / Aylık Ortalama Gecikme Trendi</div>
+            <div class="chart-title" data-t="Haftalık / Aylık Ortalama Gecikme Trendi">Haftalık / Aylık Ortalama Gecikme Trendi</div>
             {{ charts.fig_trend | safe }}
         </div>
     </div>
 </div>
 
-<div class="section-title">Stratejik Analiz Özeti</div>
+<div class="section-title" data-t="Stratejik Analiz Özeti">Stratejik Analiz Özeti</div>
 <div class="analysis-box">
     <ul>
         {% for text in insights %}

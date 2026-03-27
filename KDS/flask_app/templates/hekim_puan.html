@@ -1,115 +1,664 @@
 {% extends "base.html" %}
-{% block title %}Hekim Hizmet Puan{% endblock %}
-{% block page_title %}🏥 Hekim Hizmet & Puan Analizi{% endblock %}
+{% block title %}<span data-t="Hekim Hizmet Puan">Hekim Hizmet Puan</span>{% endblock %}
+{% block page_title %}<span data-t="🏥 Hekim Hizmet & Puan Analizi">🏥 Hekim Hizmet & Puan Analizi</span>{% endblock %}
+{% block head %}
+<style>
+  /* KPI cards scoped for hekim puan */
+  .hp-kpis {
+    margin-bottom: 24px;
+  }
+
+  .hp-kpis .metric-card {
+    border-radius: 16px; /* Hafif yuvarlatılmış köşeler */
+    border: 1px solid rgba(255, 255, 255, 0.1); /* Minimalist border */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    position: relative;
+    padding: 20px 16px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  
+  .hp-kpis .metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .hp-kpis .metric-body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .hp-kpis .metric-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+  }
+
+  .hp-kpis .metric-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: #ffffff;
+    line-height: 1.2;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .hp-kpis .metric-icon {
+      position: absolute;
+      right: -5px;
+      bottom: -15px;
+      opacity: 0.15;
+      z-index: 1;
+      transform: rotate(-10deg);
+      color: #ffffff;
+  }
+  
+  .hp-kpis .metric-icon svg {
+      width: 90px;
+      height: 90px;
+      stroke-width: 1.5;
+  }
+
+  /* Renk Körlüğü Dostu (Yüksek Kontrastlı) ve Dengeli Palet */
+  /* Altın Sarısı (Puan) - Belirgin sıcaklık ve yüksek kontrast */
+  .hp-kpis .metric-card.kpi-amber { background: linear-gradient(135deg, #D97706, #92400E); }
+  
+  /* Turuncu (Aktif Hekim) - Altın Sarısından kesin çizgilerle ayrılan daha kırmızımsı derin turuncu */
+  .hp-kpis .metric-card.kpi-orange { background: linear-gradient(135deg, #EA580C, #9A3412); }
+  
+  /* Yeşil (Gelir) - Sıcak, Canlı ve Koyu Zümrüt Yeşili */
+  .hp-kpis .metric-card.kpi-green { background: linear-gradient(135deg, #059669, #064E3B); }
+  
+  /* Teal (Çalışma Günü) - Yeşilden ayrışan soğuk, derin okyanus mavisi / camgöbeği */
+  .hp-kpis .metric-card.kpi-teal { background: linear-gradient(135deg, #0891B2, #155E75); }
+  
+  /* Mavi (Toplam Hasta) - Yüksek Kontrastlı Net Mavi */
+  .hp-kpis .metric-card.kpi-blue { background: linear-gradient(135deg, #2563EB, #1E40AF); }
+  
+  /* Mor (CMI) - Belirgin İndigo/Mor */
+  .hp-kpis .metric-card.kpi-purple { background: linear-gradient(135deg, #7C3AED, #4C1D95); }
+
+  /* Hizmet Dağılımı table alignment fixes (scoped) */
+  #hekimTableContainer .table-wrapper {
+    max-height: 520px;
+  }
+
+  table#hizmetTable.data-table {
+    table-layout: fixed;
+  }
+
+  table#hizmetTable.data-table th:nth-child(1),
+  table#hizmetTable.data-table td:nth-child(1) {
+    width: 55%;
+    word-break: break-word;
+  }
+
+  table#hizmetTable.data-table th:nth-child(2),
+  table#hizmetTable.data-table td:nth-child(2) {
+    width: 12%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table#hizmetTable.data-table th:nth-child(3),
+  table#hizmetTable.data-table td:nth-child(3) {
+    width: 16%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  table#hizmetTable.data-table th:nth-child(4),
+  table#hizmetTable.data-table td:nth-child(4) {
+    width: 17%;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+
+  /* Premium Form Controls */
+  .modern-input {
+    width: 90px;
+    padding: 10px 14px;
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #f8fafc;
+    background: rgba(15, 23, 42, 0.4);
+    border: 1px solid rgba(148, 163, 184, 0.3);
+    border-radius: 12px;
+    transition: all 0.2s ease;
+    outline: none;
+    text-align: center;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+  
+  .modern-input:focus, .modern-input:hover {
+    border-color: #3B82F6;
+    background: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2), inset 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  /* Segmented Radio Pills */
+  .radio-pill input[type="radio"] {
+    display: none;
+  }
+  
+  .radio-pill span {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+  }
+  
+  .radio-pill input[type="radio"]:checked + span {
+    background: linear-gradient(135deg, #3B82F6, #1D4ED8);
+    color: white;
+    border-color: transparent;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.35);
+    transform: translateY(-1px);
+  }
+  
+  .radio-pill:hover span {
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .radio-pill input[type="radio"]:checked:hover + span {
+    background: linear-gradient(135deg, #2563EB, #1E40AF);
+  }
+
+  /* Modern Range Slider */
+  .modern-slider {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: rgba(148, 163, 184, 0.2);
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+  
+  .modern-slider:hover {
+    background: rgba(148, 163, 184, 0.3);
+  }
+  
+  .modern-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3B82F6;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    border: 2px solid #fff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .modern-slider::-moz-range-thumb {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #3B82F6;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.4);
+    border: 2px solid #fff;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .modern-slider::-webkit-slider-thumb:hover, .modern-slider:active::-webkit-slider-thumb {
+    transform: scale(1.15);
+    background: #2563EB;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  }
+  
+  .modern-slider::-moz-range-thumb:hover, .modern-slider:active::-moz-range-thumb {
+    transform: scale(1.15);
+    background: #2563EB;
+    box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
-<div class="metrics-grid cols-6">
-    <div class="metric-card">
-        <div class="metric-icon">🏆</div>
+<div class="metrics-grid cols-6 hp-kpis">
+    <div class="metric-card kpi-amber">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="7"></circle><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ total_puan|turkish_number(0) }}</div>
-            <div class="metric-label">Toplam Puan</div>
+            <div class="metric-label" data-t="Toplam Puan">Toplam Puan</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">💰</div>
+    <div class="metric-card kpi-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ total_gelir|turkish_number }}</div>
-            <div class="metric-label">Toplam Gelir</div>
+            <div class="metric-value">{{ total_gelir|turkish_number }}</div>
+            <div class="metric-label" data-t="Toplam Gelir">Toplam Gelir</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">👥</div>
+    <div class="metric-card kpi-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ total_hasta|turkish_number(0) }}</div>
-            <div class="metric-label">Toplam Hasta</div>
+            <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">👨‍⚕️</div>
+    <div class="metric-card kpi-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ aktif_hekim }}</div>
-            <div class="metric-label">Aktif Hekim</div>
+            <div class="metric-label" data-t="Aktif Hekim">Aktif Hekim</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">📅</div>
+    <div class="metric-card kpi-teal">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">{{ avg_calisma_gun|round(1) }} Gün</div>
-            <div class="metric-label">Ort. Çalışma Günü</div>
+            <div class="metric-value">{{ avg_calisma_gun|round(1) }} <span data-t="Gün">Gün</span></div>
+            <div class="metric-label" data-t="Ort. Çalışma Günü">Ort. Çalışma Günü</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">📈</div>
+    <div class="metric-card kpi-purple">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ genel_cmi_gelir|turkish_number }}</div>
-            <div class="metric-label">Kurum CMI (Ort.)</div>
+            <div class="metric-value">{{ genel_cmi_gelir|turkish_number }}</div>
+            <div class="metric-label" data-t="Kurum CMI (Ort.)">Kurum CMI (Ort.)</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#hpTabs">
-    <button class="tab-btn active">📊 Finansal Performans Sıralaması</button>
-    <button class="tab-btn">📈 Pareto & CMI Analizi</button>
+    <button class="tab-btn active" data-t="📊 Finansal Performans Sıralaması">📊 Finansal Performans Sıralaması</button>
+    <button class="tab-btn" data-t="📈 Pareto & CMI Analizi">📈 Pareto & CMI Analizi</button>
+    <button class="tab-btn" data-t="🚀 Hizmet & Puan Analizi">🚀 Hizmet & Puan Analizi</button>
+    <button class="tab-btn" data-t="📋 Detaylı Liste">📋 Detaylı Liste</button>
+    <button class="tab-btn" data-t="🎯 Akıllı Kıyas & Risk Analizi">🎯 Akıllı Kıyas & Risk Analizi</button>
 </div>
 <div id="hpTabs">
     <div class="tab-content active">
 
         <div class="chart-controls"
-            style="background: var(--bg-card); padding: 20px; border-radius: var(--radius-md); border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm);">
+            style="background: var(--bg-card); padding: 24px; border-radius: 16px; border: 1px solid var(--border-color); margin-bottom: 24px; box-shadow: var(--shadow-sm);">
             <form method="GET" action="{{ url_for('hekim_puan.hekim_puan') }}"
-                style="display: flex; flex-wrap: wrap; gap: 24px; align-items: center;">
+                style="display: flex; flex-wrap: wrap; gap: 32px; align-items: center;">
                 <!-- Keep date filters same if they exist in query string -->
                 <input type="hidden" name="quick" value="{{ request.args.get('quick', '') }}">
                 <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
                 <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
 
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label
-                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Sıralama
-                        Kriteri:</label>
-                    <div style="display: flex; gap: 16px;">
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="radio" name="sort" value="Toplam_Puan" onchange="this.form.submit()" {% if
-                                current_sort=='Toplam_Puan' %}checked{% endif %}>
-                            <span>Toplam Puan</span>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em;" data-t="SIRALAMA KRİTERİ">
+                        Sıralama Kriteri
+                    </label>
+                    <div style="display: flex; gap: 12px;">
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Toplam_Puan" onchange="this.form.submit()" {% if current_sort=='Toplam_Puan' %}checked{% endif %}>
+                            <span data-t="🏆 Toplam Puan">🏆 Toplam Puan</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="radio" name="sort" value="Toplam_Gelir" onchange="this.form.submit()" {% if
-                                current_sort=='Toplam_Gelir' %}checked{% endif %}>
-                            <span>Toplam Gelir</span>
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Toplam_Gelir" onchange="this.form.submit()" {% if current_sort=='Toplam_Gelir' %}checked{% endif %}>
+                            <span data-t="💰 Toplam Gelir">💰 Toplam Gelir</span>
                         </label>
-                        <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
-                            <input type="radio" name="sort" value="Hasta_Basi_Gelir" onchange="this.form.submit()" {% if
-                                current_sort=='Hasta_Basi_Gelir' %}checked{% endif %}>
-                            <span>Hasta Başı Gelir</span>
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Hasta_Basi_Gelir" onchange="this.form.submit()" {% if current_sort=='Hasta_Basi_Gelir' %}checked{% endif %}>
+                            <span data-t="🎯 Hasta Başı Gelir">🎯 Hasta Başı Gelir</span>
                         </label>
                     </div>
                 </div>
 
-                <div style="display: flex; flex-direction: column; gap: 8px;">
-                    <label
-                        style="font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase;">Hekim
-                        Sayısı:</label>
-                    <input type="number" name="limit" value="{{ current_limit }}" min="5" max="50" step="5"
-                        onchange="this.form.submit()"
-                        style="width: 80px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: var(--radius-sm);">
+                <div style="display: flex; flex-direction: column; gap: 12px; border-left: 1px solid rgba(255,255,255,0.1); padding-left: 32px; min-width: 260px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <label style="font-size: 0.8rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin: 0;" data-t="Hekim Sayısı">
+                            Hekim Sayısı
+                        </label>
+                        <span id="hekimSayisiGorunum" style="font-size: 1.05rem; font-weight: 800; color: #60A5FA; background: rgba(59, 130, 246, 0.15); padding: 4px 12px; border-radius: 8px; border: 1px solid rgba(59, 130, 246, 0.3);">
+                            {{ current_limit }}
+                        </span>
+                    </div>
+                    
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 700;">5</span>
+                        <input type="range" name="limit" id="limitSlider" value="{{ current_limit }}" min="5" max="50" step="5"
+                            oninput="document.getElementById('hekimSayisiGorunum').innerText = this.value"
+                            onchange="this.form.submit()" class="modern-slider" style="flex: 1;">
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.4); font-weight: 700;">50</span>
+                    </div>
                 </div>
             </form>
         </div>
 
         <div class="chart-row">
-            <div class="chart-container" style="padding: 10px;">{{ charts.fig_max | safe }}</div>
-            <div class="chart-container" style="padding: 10px;">{{ charts.fig_min | safe }}</div>
+            <div class="chart-container" style="padding: 10px;">
+                <div class="chart-title" data-t="En Yüksek {{ current_sort }} Üretenler">En Yüksek {{ current_sort }} Üretenler</div>
+                {{ charts.fig_max | safe }}
+            </div>
+            <div class="chart-container" style="padding: 10px;">
+                <div class="chart-title" data-t="En Düşük {{ current_sort }} Üretenler">En Düşük {{ current_sort }} Üretenler</div>
+                {{ charts.fig_min | safe }}
+            </div>
         </div>
     </div>
     <div class="tab-content">
-        <div class="chart-container">{{ charts.fig_pareto | safe }}</div>
-        <div class="chart-container">{{ charts.fig_cmi | safe }}</div>
+        <div class="chart-container">
+            <div class="chart-title" data-t="📈 Pareto & CMI Analizi">📈 Pareto & CMI Analizi</div>
+            {{ charts.fig_pareto | safe }}
+        </div>
+        <div class="chart-container">
+            <div class="chart-title" data-t="Kurum CMI Ortalaması">Kurum CMI Ortalaması</div>
+            {{ charts.fig_cmi | safe }}
+        </div>
+    </div>
+    
+    <div class="tab-content">
+        <div style="background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); margin-bottom:20px;">
+            <label style="font-weight:bold; margin-bottom:10px; display:block;" data-t="Hekim Seçin:">Hekim Seçin:</label>
+            <select id="hekimSelect" class="form-select" style="width:100%; max-width:400px; padding:10px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-body); color:var(--text-main);">
+                <option value="" data-t="-- Hekim Seçin --">-- Hekim Seçin --</option>
+                {% for h in hekimler %}
+                <option value="{{ h }}">{{ h }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="metrics-grid cols-4 hp-kpis" id="hekimKpis" style="display:none; margin-bottom:20px;">
+            <div class="metric-card kpi-teal"><div class="metric-body"><div class="metric-value" id="kpiGun">-</div><div class="metric-label" data-t="Çalışma Günü">Çalışma Günü</div></div></div>
+            <div class="metric-card kpi-amber"><div class="metric-body"><div class="metric-value" id="kpiPuan">-</div><div class="metric-label" data-t="Toplam Puan">Toplam Puan</div></div></div>
+            <div class="metric-card kpi-green"><div class="metric-body"><div class="metric-value" id="kpiGelir">-</div><div class="metric-label" data-t="Toplam Gelir">Toplam Gelir</div></div></div>
+            <div class="metric-card kpi-purple"><div class="metric-body"><div class="metric-value" id="kpiKiyas">-</div><div class="metric-label" data-t="Kurum Ort. Kıyas">Kurum Ort. Kıyas</div></div></div>
+        </div>
+
+        <div id="hekimBarChartContainer" style="display:none; background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); margin-bottom:20px;">
+            <div id="hekimBarChart" style="height:200px; width:100%;"></div>
+        </div>
+
+        <div id="hekimTableContainer" style="display:none; background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
+            <h4 style="margin-top:0; margin-bottom:15px;" id="hekimTableName" data-t="Hizmet Dağılımı">Hizmet Dağılımı</h4>
+            <div class="table-wrapper">
+                <table class="data-table" id="hizmetTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th data-t="TETKİK ADI">TETKİK ADI</th>
+                            <th data-t="ADET">ADET</th>
+                            <th data-t="TOPLAM PUAN">TOPLAM PUAN</th>
+                            <th data-t="TOPLAM GELİR">TOPLAM GELİR</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="table-responsive" style="background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
+            <table class="data-table" id="detayliListeTable" style="width:100%">
+                <thead>
+                        <tr>
+                            <th data-t="DOKTOR ADI">DOKTOR ADI</th>
+                            <th data-t="HASTA ADI SOYADI">HASTA ADI SOYADI</th>
+                            <th data-t="TETKİK ADI">TETKİK ADI</th>
+                            <th data-t="ADET">ADET</th>
+                            <th data-t="TOPLAM PUAN">TOPLAM PUAN</th>
+                            <th data-t="TOPLAM GELİR">TOPLAM GELİR</th>
+                            <th data-t="TARİH">TARİH</th>
+                        </tr>
+                </thead>
+                <tbody>
+                    {% for row in df_detayli_records %}
+                    <tr>
+                        <td>{{ row.TETKIK_DOKTOR_ADI }}</td>
+                        <td>{{ row.HASTA_ADI_SOYADI }}</td>
+                        <td>{{ row.TETKIK_ADI }}</td>
+                        <td>{{ row.TETKIK_ADET }}</td>
+                        <td>{{ row.TETKIK_TOPLAM_PUAN|turkish_number(0) }}</td>
+                        <td>{{ row.TOPLAM_GELIR|turkish_number }}</td>
+                        <td>{{ row.TETKIK_TARIHI }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div style="background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm); margin-bottom:20px;">
+            <h4 style="margin-top:0; margin-bottom:15px;" data-t="Risk ve Potansiyel Skorlama">Risk ve Potansiyel Skorlama</h4>
+            <div class="table-responsive">
+                <table class="data-table" id="riskTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="Toplam Gelir">Toplam Gelir</th>
+                            <th data-t="HASTA BAŞI GELİR">HASTA BAŞI GELİR</th>
+                            <th data-t="Durum Analizi">Durum Analizi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in hekim_perf_records %}
+                        <tr>
+                            <td>{{ row.Hekim }}</td>
+                            <td>{{ row.Toplam_Gelir|turkish_number }}</td>
+                            <td>{{ row.Hasta_Basi_Gelir|turkish_number }}</td>
+                            <td>
+                                {% if '🌟' in row.Durum_Analizi %}
+                                    🌟 <span data-t="Premium Hizmet Üretimi">Premium Hizmet Üretimi</span>
+                                {% elif '⚠️' in row.Durum_Analizi %}
+                                    ⚠️ <span data-t="Düşük CMI Riski">Düşük CMI Riski</span>
+                                {% else %}
+                                    ✅ <span data-t="Dengeli">Dengeli</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="chart-container" style="margin-bottom:20px; padding:10px;">
+            <div class="chart-title" data-t="Akran Grubu (Peer Group) Karşılaştırması">Akran Grubu (Peer Group) Karşılaştırması</div>
+            {{ charts.fig_peer | safe }}
+        </div>
+
+        <div style="background:var(--bg-card); padding:20px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm);">
+            <h4 style="margin-top:0; margin-bottom:15px;" data-t="Karşılaştırmalı Veri Tablosu">Karşılaştırmalı Veri Tablosu</h4>
+            <div class="table-responsive">
+                <table class="data-table" id="kiyasTable" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="Çalışma Günü">Çalışma Günü</th>
+                            <th data-t="Toplam Hasta">Toplam Hasta</th>
+                            <th data-t="HASTA BAŞI GELİR">HASTA BAŞI GELİR</th>
+                            <th data-t="Toplam Gelir">Toplam Gelir</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in hekim_perf_records %}
+                         <tr>
+                            <td>{{ row.Hekim }}</td>
+                            <td>{{ row.Calisma_Gun }}</td>
+                            <td>{{ row.Toplam_Hasta }}</td>
+                            <td>{{ row.Hasta_Basi_Gelir|turkish_number }}</td>
+                            <td>{{ row.Toplam_Gelir|turkish_number }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script>
+const hekimStats = {{ hekim_stats_dict|tojson|safe }};
+const hekimHizmet = {{ hekim_hizmet_dict|tojson|safe }};
+const kurumOrtGelir = {{ genel_cmi_gelir|default(0) }};
+
+document.getElementById('hekimSelect')?.addEventListener('change', function() {
+    const scrollY = window.scrollY;
+    const hekim = this.value;
+    const kpis = document.getElementById('hekimKpis');
+    const tblContainer = document.getElementById('hekimTableContainer');
+    
+    if(!hekim || !hekimStats[hekim]) {
+        kpis.style.display = 'none';
+        tblContainer.style.display = 'none';
+        document.getElementById('hekimBarChartContainer').style.display = 'none';
+        window.scrollTo(0, scrollY);
+        return;
+    }
+    
+    kpis.style.display = 'grid';
+    tblContainer.style.display = 'block';
+    document.getElementById('hekimBarChartContainer').style.display = 'block';
+    
+    const stats = hekimStats[hekim];
+    document.getElementById('kpiGun').innerText = stats.Calisma_Gun + ' ' + (window.KDS_i18n ? window.KDS_i18n.get('Gün') : 'Gün');
+    document.getElementById('kpiPuan').innerText = new Intl.NumberFormat('tr-TR').format(stats.Toplam_Puan);
+    document.getElementById('kpiGelir').innerText = '₺ ' + new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}).format(stats.Toplam_Gelir);
+    
+    const avgHekimGelir = {{ (total_gelir / aktif_hekim) if aktif_hekim else 0 }};
+    const kiyasFark = stats.Toplam_Gelir - avgHekimGelir;
+    const kiyasYuzde = avgHekimGelir > 0 ? (kiyasFark / avgHekimGelir) * 100 : 0;
+    
+    document.getElementById('kpiKiyas').innerHTML = `₺ ${new Intl.NumberFormat('tr-TR', {minimumFractionDigits:0}).format(avgHekimGelir)} <br><span style="font-size:14px;color:${kiyasFark>0?'#4ade80':'#f87171'}">${kiyasFark>0?'+':''}${kiyasYuzde.toFixed(1)}%</span>`;
+    
+    const hData = hekimHizmet[hekim] || [];
+    const tableHeaderBase = window.KDS_i18n ? window.KDS_i18n.get('Hizmet Dağılımı') : 'Hizmet Dağılımı';
+    document.getElementById('hekimTableName').innerText = hekim + ' - ' + tableHeaderBase + ' (' + hData.length + ' ' + (window.KDS_i18n ? window.KDS_i18n.get('Kayıt') : 'Kayıt') + ')';
+    
+    const trace1 = {
+        x: [stats.Toplam_Gelir],
+        y: [hekim],
+        type: 'bar',
+        orientation: 'h',
+        marker: { color: stats.Toplam_Gelir >= avgHekimGelir ? '#e74c3c' : '#e74c3c' },
+        text: ['₺ ' + new Intl.NumberFormat('tr-TR', {minimumFractionDigits:0}).format(stats.Toplam_Gelir)],
+        textposition: 'auto',
+        hoverinfo: 'none'
+    };
+    
+    const layout = {
+        margin: { t: 20, l: 150, r: 20, b: 40 },
+        height: 150,
+        xaxis: { 
+            range: [0, Math.max(stats.Toplam_Gelir, avgHekimGelir) * 1.3],
+            showgrid: false,
+            zeroline: false
+        },
+        yaxis: { title: '', fixedrange: true },
+        shapes: [
+            {
+                type: 'line',
+                x0: avgHekimGelir,
+                y0: -0.5,
+                x1: avgHekimGelir,
+                y1: 0.5,
+                line: { color: 'grey', width: 2, dash: 'dash' }
+            }
+        ],
+        annotations: [
+            {
+                x: avgHekimGelir,
+                y: 0.5,
+                xref: 'x',
+                yref: 'y',
+                text: window.KDS_i18n ? window.KDS_i18n.get('Kurum Ort.') : 'Kurum Ort.',
+                showarrow: false,
+                yshift: 15
+            }
+        ],
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)'
+    };
+    
+    if (typeof Plotly !== 'undefined') {
+        Plotly.newPlot('hekimBarChart', [trace1], layout, {displayModeBar: false}).then(function() {
+            window.scrollTo(0, scrollY);
+        });
+    }
+
+    try {
+        let rowsHtml = '';
+        if (hData && hData.length > 0) {
+            hData.forEach(r => {
+                let name = r.TETKIK_ADI || '-';
+                let cnt = r.TETKIK_ADET || 0;
+                let pnt = new Intl.NumberFormat('tr-TR').format(r.TETKIK_TOPLAM_PUAN || 0);
+                let gel = '₺ ' + new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}).format(r.TOPLAM_GELIR || 0);
+                rowsHtml += `<tr><td>${name}</td><td>${cnt}</td><td>${pnt}</td><td>${gel}</td></tr>`;
+            });
+        } else {
+            const noDataMsg = window.KDS_i18n ? window.KDS_i18n.get('Tabloda kayıt bulunamadı / Veri yok') : 'Tabloda kayıt bulunamadı / Veri yok';
+            rowsHtml = `<tr><td colspan="4" style="text-align:center;">${noDataMsg}</td></tr>`;
+        }
+        
+        const tb = document.querySelector('#hizmetTable tbody');
+        if (!tb) {
+            document.getElementById('hekimTableName').innerText += ' | Hata: tbody bulunamadı!';
+        } else {
+            tb.innerHTML = rowsHtml;
+        }
+    } catch(err) {
+        document.getElementById('hekimTableName').innerText += ' | Hata: ' + err.message;
+    }
+    
+    window.scrollTo(0, scrollY);
+});
+
+$(document).ready(function() {
+    const currentLang = localStorage.getItem('kds-language') || 'tr';
+    const dtLangUrl = currentLang === 'en' ? '//cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json' : '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json';
+
+    $('#detayliListeTable').DataTable({
+        language: { url: dtLangUrl },
+        pageLength: 25
+    });
+    $('#riskTable').DataTable({
+        language: { url: dtLangUrl },
+        pageLength: 25,
+        order: [[1, 'desc']]
+    });
+    $('#kiyasTable').DataTable({
+        language: { url: dtLangUrl },
+        pageLength: 25,
+        order: [[3, 'desc']]
+    });
+});
+</script>
 {% endblock %}

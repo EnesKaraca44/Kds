@@ -46,11 +46,12 @@ def create_app():
             nav_items={
                 'ANA MODÜLLER': [
                     {'url': '/dashboard', 'icon': '🏠', 'label': 'Ana Sayfa'},
+                    {'url': '/personel-sorgulama', 'icon': '👤', 'label': 'Personel Sorgulama'},
                     {'url': '/hekim-puan', 'icon': '🏵️', 'label': 'Hekim Hizmet Puan Analiz'},
                     {'url': '/poliklinik', 'icon': '👥', 'label': 'Hekim Poliklinik Hasta'},
                     {'url': '/tedavi', 'icon': '🩺', 'label': 'Tedavi Grupları Analizi'},
                     {'url': '/malzeme', 'icon': '📦', 'label': 'Kurum Malzeme Tüketim'},
-                    {'url': '/yabanci-hasta', 'icon': '🌐', 'label': 'Yabancı Hasta Analizi', 'badge': 'YENİ'},
+                    {'url': '/yabanci-hasta', 'icon': '🌐', 'label': 'Yabancı Hasta Analizi'},
                     {'url': '/randevu', 'icon': '📅', 'label': 'Hekim Randevu Analizi'},
                     {'url': '/gelir', 'icon': '💰', 'label': 'Kurum Gelir Analiz'},
                     {'url': '/sterilizasyon', 'icon': '💉', 'label': 'Sterilizasyon Maliyet'},
@@ -79,6 +80,7 @@ def create_app():
     from routes.tibbi_atik import tibbi_atik_bp
     from routes.protez import protez_bp
     from routes.rontgen import rontgen_bp
+    from routes.personel_sorgulama import personel_sorgulama_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -94,6 +96,7 @@ def create_app():
     app.register_blueprint(tibbi_atik_bp)
     app.register_blueprint(protez_bp)
     app.register_blueprint(rontgen_bp)
+    app.register_blueprint(personel_sorgulama_bp)
 
     # Kök URL yönlendirmesi
     @app.route('/')

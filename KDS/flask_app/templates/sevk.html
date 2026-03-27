@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Sevk Analizi{% endblock %}
-{% block page_title %}🩺 Hekim Sevk & Akıllı Karar Destek{% endblock %}
+{% block title %}<span data-t="Sevk Analizi">Sevk Analizi</span>{% endblock %}
+{% block page_title %}<span data-t="Hekim Sevk & Akıllı Karar Destek">🩺 Hekim Sevk & Akıllı Karar Destek</span>{% endblock %}
 {% block head %}
 <style>
     .sevkoran-note {
@@ -70,51 +70,51 @@
 {% endblock %}
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 
 <div class="metrics-grid cols-4">
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Toplam Hasta</div>
+            <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
             <div class="metric-value">{{ total_h|turkish_number(0) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Toplam Sevk</div>
+            <div class="metric-label" data-t="Toplam Sevk">Toplam Sevk</div>
             <div class="metric-value">{{ total_s|turkish_number(0) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Genel Sevk Oranı</div>
+            <div class="metric-label" data-t="Genel Sevk Oranı">Genel Sevk Oranı</div>
             <div class="metric-value">%{{ genel_ort|round(1) }}</div>
         </div>
     </div>
     <div class="metric-card">
         <div class="metric-body">
-            <div class="metric-label">Aktif Hekim Sayısı</div>
+            <div class="metric-label" data-t="Aktif Hekim Sayısı">Aktif Hekim Sayısı</div>
             <div class="metric-value">{{ aktif_hekim }}</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#sevkTabs">
-    <button class="tab-btn active">📊 Genel Trafik</button>
-    <button class="tab-btn">📈 Sevk Oranları</button>
-    <button class="tab-btn">🏥 Branş Analizi</button>
-    <button class="tab-btn">🧩 Hekim-Branş Eşleşmesi</button>
-    <button class="tab-btn">🔗 Eşleşmeler</button>
-    <button class="tab-btn">🔍 Hekim Detaylı Arama</button>
-    <button class="tab-btn">📄 Ham Veri</button>
+    <button class="tab-btn active" data-t="Genel Trafik">📊 Genel Trafik</button>
+    <button class="tab-btn" data-t="Sevk Oranları">📈 Sevk Oranları</button>
+    <button class="tab-btn" data-t="Branş Analizi">🏥 Branş Analizi</button>
+    <button class="tab-btn" data-t="Hekim-Branş Eşleşmesi">🧩 Hekim-Branş Eşleşmesi</button>
+    <button class="tab-btn" data-t="Eşleşmeler">🔗 Eşleşmeler</button>
+    <button class="tab-btn" data-t="Hekim Detaylı Arama">🔍 Hekim Detaylı Arama</button>
+    <button class="tab-btn" data-t="Ham Veri">📄 Ham Veri</button>
 </div>
 
 <div id="sevkTabs">
     <!-- Genel Trafik -->
     <div class="tab-content active">
         <div style="margin-bottom:14px; display:flex; align-items:center; gap:10px;">
-            <span style="font-size:0.85rem; color:#9ca3af;">Hekim Sayısı:</span>
+            <span style="font-size:0.85rem; color:#9ca3af;" data-t="Hekim Sayısı:">Hekim Sayısı:</span>
             <form method="GET" style="display:flex; align-items:center; gap:8px;">
                 {% for key, value in request.args.items() %}
                     {% if key != 'top' %}
@@ -129,11 +129,11 @@
         </div>
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">En Çok Sevk Yapanlar</div>
+                <div class="chart-title" data-t="En Çok Sevk Yapanlar">En Çok Sevk Yapanlar</div>
                 {{ charts.fig_eden | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">En Çok Sevk Kabul Edenler</div>
+                <div class="chart-title" data-t="En Çok Sevk Kabul Edenler">En Çok Sevk Kabul Edenler</div>
                 {{ charts.fig_kabul | safe }}
             </div>
         </div>
@@ -142,19 +142,19 @@
     <!-- Sevk Oranları -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Hekim Bazlı Sevk Verimliliği</div>
+            <div class="chart-title" data-t="Hekim Bazlı Sevk Verimliliği">Hekim Bazlı Sevk Verimliliği</div>
             {% if oran_table_ui %}
-            <div class="sevkoran-note">En yüksek sevk oranına sahip ilk 30 hekim, hasta ve sevk hacmi ile birlikte listelenmiştir.</div>
+            <div class="sevkoran-note" data-t="En yüksek sevk oranına sahip ilk 30 hekim, hasta ve sevk hacmi ile birlikte listelenmiştir.">En yüksek sevk oranına sahip ilk 30 hekim, hasta ve sevk hacmi ile birlikte listelenmiştir.</div>
             <div class="table-wrapper">
                 <table class="data-table sevkoran-table">
                     <thead>
                         <tr>
-                            <th>Hekim</th>
-                            <th>Toplam Hasta</th>
-                            <th>Toplam Sevk</th>
-                            <th>Oran (%)</th>
-                            <th>Gorsel</th>
-                            <th>Durum</th>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="Toplam Hasta">Toplam Hasta</th>
+                            <th data-t="Toplam Sevk">Toplam Sevk</th>
+                            <th data-t="Oran (%)">Oran (%)</th>
+                            <th data-t="Gorsel">Gorsel</th>
+                            <th data-t="Durum">Durum</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -178,19 +178,19 @@
                 </table>
             </div>
             {% else %}
-            <div class="alert alert-warning">Sevk verimliligi icin veri bulunamadi.</div>
+            <div class="alert alert-warning" data-t="Sevk verimliligi icin veri bulunamadi.">Sevk verimliligi icin veri bulunamadi.</div>
             {% endif %}
         </div>
         <div class="chart-container">
-            <div class="chart-title">Sevk Oran Tablosu</div>
+            <div class="chart-title" data-t="Sevk Oran Tablosu">Sevk Oran Tablosu</div>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Hekim</th>
-                            <th>Toplam Hasta</th>
-                            <th>Toplam Sevk</th>
-                            <th>Oran (%)</th>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="Toplam Hasta">Toplam Hasta</th>
+                            <th data-t="Toplam Sevk">Toplam Sevk</th>
+                            <th data-t="Oran (%)">Oran (%)</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -211,7 +211,7 @@
     <!-- Branş Analizi -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Servisler Arası Sevk Trafiği</div>
+            <div class="chart-title" data-t="Servisler Arası Sevk Trafiği">Servisler Arası Sevk Trafiği</div>
             <p style="font-size:0.9rem; color:#9ca3af; margin-bottom:8px;">
                 Stratejik özet: En çok sevk <strong>{{ top_e_br }}</strong> servisinden,
                 sevklerin ana toplama merkezi <strong>{{ top_k_br }}</strong> branşıdır.
@@ -219,14 +219,14 @@
             {{ charts.fig_brans | safe }}
         </div>
         <div class="chart-container">
-            <div class="chart-title">En Yoğun 10 Akış</div>
+            <div class="chart-title" data-t="En Yoğun 10 Akış">En Yoğun 10 Akış</div>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Kaynak</th>
-                            <th>Hedef</th>
-                            <th>Adet</th>
+                            <th data-t="Kaynak">Kaynak</th>
+                            <th data-t="Hedef">Hedef</th>
+                            <th data-t="Adet">Adet</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -246,18 +246,18 @@
     <!-- Hekim-Branş Eşleşmesi -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Hekimlerin Hedef Branş Dağılımı</div>
+            <div class="chart-title" data-t="Hekimlerin Hedef Branş Dağılımı">Hekimlerin Hedef Branş Dağılımı</div>
             {{ charts.fig_drs_map | safe }}
         </div>
         <div class="chart-container">
-            <div class="chart-title">Hekimlerin 'Favori' Sevk Branşları</div>
+            <div class="chart-title" data-t="Hekimlerin 'Favori' Sevk Branşları">Hekimlerin 'Favori' Sevk Branşları</div>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>
                         <tr>
-                            <th>Hekim</th>
-                            <th>En Çok Sevk Branş</th>
-                            <th>Adet</th>
+                            <th data-t="Hekim">Hekim</th>
+                            <th data-t="En Çok Sevk Branş">En Çok Sevk Branş</th>
+                            <th data-t="Adet">Adet</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -277,7 +277,7 @@
     <!-- Eşleşmeler -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Kritik Konsültasyon Kanalları</div>
+            <div class="chart-title" data-t="Kritik Konsültasyon Kanalları">Kritik Konsültasyon Kanalları</div>
             {{ charts.fig_pair | safe }}
         </div>
     </div>
@@ -291,7 +291,7 @@
                         <input type="hidden" name="{{ key }}" value="{{ value }}">
                     {% endif %}
                 {% endfor %}
-                <label style="font-size:0.85rem; color:#9ca3af;">Sevk analizi için hekim seçiniz:</label>
+                <label style="font-size:0.85rem; color:#9ca3af;" data-t="Sevk analizi için hekim seçiniz:">Sevk analizi için hekim seçiniz:</label>
                 <select name="dr" onchange="this.form.submit()"
                         style="padding:8px 12px; border-radius:8px; border:1px solid rgba(148,163,184,0.5); background:#020617; color:#e5e7eb; min-width:260px;">
                     {% for dr in hekim_list %}
@@ -304,19 +304,19 @@
             <div class="metrics-grid cols-3" style="margin-bottom:16px;">
                 <div class="metric-card">
                     <div class="metric-body">
-                        <div class="metric-label">Toplam Hasta</div>
+                        <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
                         <div class="metric-value">{{ detail_metrics.hasta|turkish_number(0) }}</div>
                     </div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-body">
-                        <div class="metric-label">Toplam Sevk</div>
+                        <div class="metric-label" data-t="Toplam Sevk">Toplam Sevk</div>
                         <div class="metric-value">{{ detail_metrics.sevk|turkish_number(0) }}</div>
                     </div>
                 </div>
                 <div class="metric-card">
                     <div class="metric-body">
-                        <div class="metric-label">Sevk Oranı</div>
+                        <div class="metric-label" data-t="Sevk Oranı">Sevk Oranı</div>
                         <div class="metric-value">%{{ detail_metrics.oran|round(1) }}</div>
                     </div>
                 </div>
@@ -324,17 +324,19 @@
 
             <div class="chart-row">
                 <div class="chart-container">
-                    <div class="chart-title">{{ selected_dr }} - Hekim Sevk Dağılımı</div>
+                    <div class="chart-title">
+                        {{ selected_dr }} - <span data-t="Hekim Sevk Dağılımı">Hekim Sevk Dağılımı</span>
+                    </div>
                     {{ charts.detail_pie | safe }}
                 </div>
                 <div class="chart-container">
-                    <div class="chart-title">Hekimin Tercih Ettiği Branşlar</div>
+                    <div class="chart-title" data-t="Hekimin Tercih Ettiği Branşlar">Hekimin Tercih Ettiği Branşlar</div>
                     {{ charts.detail_bars | safe }}
                 </div>
             </div>
 
             <div class="chart-container">
-                <div class="chart-title">Kabul Eden Hekimler</div>
+                <div class="chart-title" data-t="Kabul Eden Hekimler">Kabul Eden Hekimler</div>
                 <div class="table-wrapper">
                     <table class="data-table">
                         <thead>
@@ -355,7 +357,7 @@
                 </div>
             </div>
             {% else %}
-            <div class="alert alert-info">Seçilen hekim için sevk kaydı bulunamadı.</div>
+            <div class="alert alert-info" data-t="Seçilen hekim için sevk kaydı bulunamadı.">Seçilen hekim için sevk kaydı bulunamadı.</div>
             {% endif %}
         </div>
     </div>
@@ -363,7 +365,7 @@
     <!-- Ham Veri -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Ham Sevk Verisi (İlk 500 Kayıt)</div>
+            <div class="chart-title" data-t="Ham Sevk Verisi (İlk 500 Kayıt)">Ham Sevk Verisi (İlk 500 Kayıt)</div>
             <div class="table-wrapper">
                 <table class="data-table">
                     <thead>

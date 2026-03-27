@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Randevu Analizi{% endblock %}
-{% block page_title %}📅 Hekim Randevu & Sadakat Analizi{% endblock %}
+{% block title %}<span data-t="Randevu Analizi">Randevu Analizi</span>{% endblock %}
+{% block page_title %}<span data-t="Hekim Randevu & Sadakat Analizi">📅 Hekim Randevu & Sadakat Analizi</span>{% endblock %}
 {% block head %}
 <style>
     .metric-delta {
@@ -60,88 +60,104 @@
         text-align: center;
     }
     .insight-card {
-        border-radius: 10px;
+        border-radius: 12px;
         padding: 16px 20px;
         margin-bottom: 12px;
         font-size: 0.95rem;
-        color: #e0e8ff;
+        color: #1e293b; /* Koyu kontrast eklendi (Silik görünüm düzeltildi) */
         display: flex;
         align-items: flex-start;
         gap: 12px;
         line-height: 1.5;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.02);
     }
     .insight-card.success {
-        background: rgba(22, 163, 74, 0.12);
-        border: 1px solid rgba(22, 163, 74, 0.3);
+        background: rgba(22, 163, 74, 0.15);
+        border: 1px solid rgba(22, 163, 74, 0.4);
     }
     .insight-card.info {
-        background: rgba(37, 99, 235, 0.12);
-        border: 1px solid rgba(37, 99, 235, 0.3);
+        background: rgba(37, 99, 235, 0.15);
+        border: 1px solid rgba(37, 99, 235, 0.4);
     }
     .insight-card.warning {
-        background: rgba(234, 88, 12, 0.12);
-        border: 1px solid rgba(234, 88, 12, 0.3);
+        background: rgba(234, 88, 12, 0.15);
+        border: 1px solid rgba(234, 88, 12, 0.4);
     }
     .insight-icon {
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         flex-shrink: 0;
         margin-top: 1px;
     }
     .insights-grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 12px;
+        gap: 16px;
     }
     .insights-grid .insight-card:first-child {
         grid-column: 1 / -1;
     }
+    
+    /* Metric card styles moved to global style.css */
+
 </style>
 {% endblock %}
 
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında randevu verisi bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında randevu verisi bulunamadı.">⚠️ Seçilen tarih aralığında randevu verisi bulunamadı.</div>
 {% else %}
 
 <div class="metrics-grid cols-4">
-    <div class="metric-card">
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Toplam Randevu</div>
             <div class="metric-value">{{ toplam_randevu|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Toplam Randevu">Toplam Randevu</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-amber">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Genel Sadakat Oranı</div>
             <div class="metric-value">%{{ sadakat_orani }}</div>
-            <div class="metric-delta negative">↑ %{{ kayip_orani }} Kayıp</div>
+            <div class="metric-label" data-t="Genel Sadakat Oranı">Genel Sadakat Oranı</div>
+            <div class="metric-delta negative">↑ %{{ kayip_orani }} <span data-t="Kayıp">Kayıp</span></div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Hizmete Dönüşen</div>
             <div class="metric-value">{{ hizmet_alan|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Hizmete Dönüşen">Hizmete Dönüşen</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Aktif Hekim Sayısı</div>
             <div class="metric-value">{{ aktif_hekim }}</div>
+            <div class="metric-label" data-t="Aktif Hekim Sayısı">Aktif Hekim Sayısı</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#randevuTabs">
-    <button class="tab-btn active">📊 Hekim Performansı</button>
-    <button class="tab-btn">📍 Kanal & Poliklinik</button>
-    <button class="tab-btn">💡 Akıllı Yorumlar</button>
+    <button class="tab-btn active" data-t="Hekim Performansı">📊 Hekim Performansı</button>
+    <button class="tab-btn" data-t="Kanal & Poliklinik">📍 Kanal & Poliklinik</button>
+    <button class="tab-btn" data-t="Akıllı Yorumlar">💡 Akıllı Yorumlar</button>
 </div>
 
 <div id="randevuTabs">
     <!-- Tab 1: Hekim Performansı -->
     <div class="tab-content active">
         <div class="topn-select">
-            <label>Grafikte Gösterilecek Hekim Sayısı:</label>
+            <label data-t="Grafik için Hekim Sayısı:">Grafik için Hekim Sayısı:</label>
             <form method="GET" style="display:flex; align-items:center; gap:10px;">
                 {% for key, value in request.args.items() %}
                     {% if key != 'top' %}
@@ -157,7 +173,9 @@
         </div>
 
         <div class="chart-container">
-            <div class="chart-title">Sadakat Oranı En Yüksek {{ top_n }} Hekim</div>
+            <div class="chart-title">
+                <span data-t="Sadakat Oranı En Yüksek">Sadakat Oranı En Yüksek</span> {{ top_n }} <span data-t="Hekim">Hekim</span>
+            </div>
             {{ charts.fig_sadakat | safe }}
         </div>
     </div>
@@ -166,11 +184,11 @@
     <div class="tab-content">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">En Yoğun 10 Poliklinik</div>
+                <div class="chart-title" data-t="En Yoğun 10 Poliklinik">En Yoğun 10 Poliklinik</div>
                 {{ charts.fig_pol | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">Randevu Kanalları</div>
+                <div class="chart-title" data-t="Randevu Kanalları">Randevu Kanalları</div>
                 {{ charts.fig_kanal | safe }}
             </div>
         </div>
@@ -178,7 +196,7 @@
 
     <!-- Tab 3: Akıllı Yorumlar -->
     <div class="tab-content">
-        <h2 class="section-title" style="margin-bottom: 16px;">⚙️ Operasyonel İçgörüler</h2>
+        <h2 class="section-title" style="margin-bottom: 16px;" data-t="⚙️ Operasyonel İçgörüler">⚙️ Operasyonel İçgörüler</h2>
         <div class="insights-grid">
             {% for item in insights %}
             <div class="insight-card {{ item.type }}">

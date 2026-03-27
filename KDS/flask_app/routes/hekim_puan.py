@@ -23,7 +23,8 @@ def hekim_puan():
         return render_template('hekim_puan.html', start_date=sd, end_date=ed, no_data=True)
 
     df = df_raw.copy()
-    df['TETKIK_TOPLAM_PUAN'] = pd.to_numeric(df['TETKIK_TOPLAM_PUAN'], errors='coerce').fillna(0)
+    puan_col = 'TETKIK_TOPLAM_PUAN' if 'TETKIK_TOPLAM_PUAN' in df.columns else 'Toplampuan'
+    df['TETKIK_TOPLAM_PUAN'] = pd.to_numeric(df[puan_col], errors='coerce').fillna(0)
     df['TETKIK_ADET'] = pd.to_numeric(df['TETKIK_ADET'], errors='coerce').fillna(0)
     df['TETKIK_BIRIM_UCRET'] = pd.to_numeric(df['TETKIK_BIRIM_UCRET'], errors='coerce').fillna(0)
     df['TOPLAM_GELIR'] = df['TETKIK_ADET'] * df['TETKIK_BIRIM_UCRET']
@@ -33,7 +34,8 @@ def hekim_puan():
         'TETKIK_TOPLAM_PUAN': 'sum', 'TOPLAM_GELIR': 'sum'
     }).reset_index()
     hekim_perf.columns = ['Hekim', 'Calisma_Gun', 'Toplam_Hasta', 'Toplam_Puan', 'Toplam_Gelir']
-    hekim_perf['Hasta_Basi_Gelir'] = (hekim_perf['Toplam_Gelir'] / hekim_perf['Toplam_Hasta']).round(2)
+    import numpy as np
+    hekim_perf['Hasta_Basi_Gelir'] = (hekim_perf['Toplam_Gelir'] / hekim_perf['Toplam_Hasta']).round(2).replace([np.inf, -np.inf], 0).fillna(0)
 
     total_puan = hekim_perf['Toplam_Puan'].sum()
     total_gelir = hekim_perf['Toplam_Gelir'].sum()
@@ -53,20 +55,20 @@ def hekim_puan():
     # Tab 1: Finansal Performans (Top/Bottom Bar Charts)
     top_df = hekim_perf.nlargest(limit, sort_by).sort_values(sort_by, ascending=True)
     fig_max = px.bar(top_df, x=sort_by, y='Hekim', orientation='h',
-                     title=f"En Yüksek {sort_by} Üretenler",
+                     title="",
                      color=sort_by, color_continuous_scale='Greens', text_auto='.3s')
     
     if sort_by in ['Toplam_Gelir', 'Hasta_Basi_Gelir']:
-        fig_max.update_layout(xaxis_tickprefix="₺ ")
+        fig_max.update_layout(xaxis_tickprefix="")
     fig_max.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
     bottom_df = hekim_perf.nsmallest(limit, sort_by).sort_values(sort_by, ascending=False)
     fig_min = px.bar(bottom_df, x=sort_by, y='Hekim', orientation='h',
-                     title=f"En Düşük {sort_by} Üretenler",
+                     title="",
                      color=sort_by, color_continuous_scale='Reds', text_auto='.3s')
     
     if sort_by in ['Toplam_Gelir', 'Hasta_Basi_Gelir']:
-        fig_min.update_layout(xaxis_tickprefix="₺ ")
+        fig_min.update_layout(xaxis_tickprefix="")
     fig_min.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
     # Tab 2: Pareto
@@ -74,22 +76,65 @@ def hekim_puan():
     pareto_df['Kumulatif_Yuzde'] = 100 * pareto_df['Toplam_Gelir'].cumsum() / total_gelir
     fig_p = px.bar(pareto_df, x='Hekim', y='Toplam_Gelir', text_auto='.2s')
     fig_p.add_scatter(x=pareto_df['Hekim'], y=pareto_df['Kumulatif_Yuzde'], name='Kümülatif %', yaxis='y2', line=dict(color="#f39c12"))
-    fig_p.update_layout(yaxis2=dict(anchor='x', overlaying='y', side='right', range=[0, 105]), yaxis_tickprefix="₺ ",
+    fig_p.update_layout(yaxis2=dict(anchor='x', overlaying='y', side='right', range=[0, 105]), yaxis_tickprefix="",
                         template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
     # Tab 2: CMI Scatter
     fig_cmi = px.scatter(hekim_perf, x="Toplam_Hasta", y="Hasta_Basi_Gelir", size="Toplam_Puan",
                          color="Hasta_Basi_Gelir", hover_name="Hekim", text="Hekim", color_continuous_scale='Viridis')
     fig_cmi.update_traces(textposition='top center')
-    fig_cmi.update_yaxes(tickprefix="₺ ")
-    fig_cmi.add_hline(y=genel_cmi_gelir, line_dash="dash", line_color="red", annotation_text="Kurum CMI Ortalaması")
+    fig_cmi.update_yaxes(tickprefix="")
+    fig_cmi.add_hline(y=genel_cmi_gelir, line_dash="dash", line_color="red", annotation_text="")
     fig_cmi.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+
+    # 1. Hizmet & Puan Analizi
+    hizmet_dagilimi = df.groupby(['TETKIK_DOKTOR_ADI', 'TETKIK_ADI']).agg({
+        'TETKIK_ADET': 'sum',
+        'TETKIK_TOPLAM_PUAN': 'sum',
+        'TOPLAM_GELIR': 'sum'
+    }).reset_index()
+    
+    hekim_hizmet_dict = {}
+    for hekim in hekim_perf['Hekim'].unique():
+        hizmetler = hizmet_dagilimi[hizmet_dagilimi['TETKIK_DOKTOR_ADI'] == hekim]
+        hekim_hizmet_dict[hekim] = hizmetler.to_dict('records')
+        
+    hekim_stats_dict = hekim_perf.set_index('Hekim').to_dict('index')
+
+    # 2. Detaylı Liste
+    df_detayli = df[['TETKIK_DOKTOR_ADI', 'HASTA_ADI_SOYADI', 'TETKIK_ADI', 'TETKIK_ADET', 'TETKIK_TOPLAM_PUAN', 'TOPLAM_GELIR', 'TETKIK_TARIHI']].copy()
+    if pd.api.types.is_datetime64_any_dtype(df_detayli['TETKIK_TARIHI']):
+        df_detayli['TETKIK_TARIHI'] = df_detayli['TETKIK_TARIHI'].dt.strftime('%Y-%m-%d')
+    else:
+        df_detayli['TETKIK_TARIHI'] = df_detayli['TETKIK_TARIHI'].astype(str)
+        
+    df_detayli.fillna('', inplace=True)
+    df_detayli_records = df_detayli.to_dict('records')
+
+    # 3. Akıllı Kıyas & Risk Analizi
+    def get_risk_status(row):
+        if row['Hasta_Basi_Gelir'] > genel_cmi_gelir * 1.2:
+            return '🌟 Premium Hizmet Üretimi'
+        elif row['Hasta_Basi_Gelir'] < genel_cmi_gelir * 0.8:
+            return '⚠️ Düşük CMI Riski'
+        else:
+            return '✅ Dengeli'
+            
+    hekim_perf['Durum_Analizi'] = hekim_perf.apply(get_risk_status, axis=1)
+    hekim_perf_records = hekim_perf.to_dict('records')
+
+    # Akran Grafik
+    fig_peer = px.bar(hekim_perf, x='Hekim', y='Hasta_Basi_Gelir', 
+                      title="",
+                      color='Hasta_Basi_Gelir', color_continuous_scale='Spectral')
+    fig_peer.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
     charts = {
         'fig_max': fig_max.to_html(full_html=False, include_plotlyjs=False),
         'fig_min': fig_min.to_html(full_html=False, include_plotlyjs=False),
         'fig_pareto': fig_p.to_html(full_html=False, include_plotlyjs=False),
         'fig_cmi': fig_cmi.to_html(full_html=False, include_plotlyjs=False),
+        'fig_peer': fig_peer.to_html(full_html=False, include_plotlyjs=False),
     }
 
     return render_template('hekim_puan.html',
@@ -97,5 +142,10 @@ def hekim_puan():
         total_puan=total_puan, total_gelir=total_gelir,
         total_hasta=total_hasta, aktif_hekim=len(hekim_perf),
         avg_calisma_gun=avg_calisma_gun, genel_cmi_gelir=genel_cmi_gelir,
+        hekimler=hekim_perf['Hekim'].tolist(),
+        hekim_stats_dict=hekim_stats_dict,
+        hekim_hizmet_dict=hekim_hizmet_dict,
+        df_detayli_records=df_detayli_records,
+        hekim_perf_records=hekim_perf_records,
         charts=charts, current_sort=sort_by, current_limit=limit
     )

@@ -9,27 +9,41 @@ def fatura_gelir_verisi_yukle(start_date_str, end_date_str):
         return pd.DataFrame()
 
     sql_query = """
-        SELECT
-            F.FATURA_NO,
-            F.FATURA_TARIHI,
-            '(' + LTRIM(CAST(F.FATURA_KURUM_ID AS NVARCHAR(MAX))) + ') ' + F.FATURA_ILGILI AS FATURA_ILGILI,
-            KT.tad AS KURUM_TURU,
-            F.FATURA_TOPLAM_TUTAR,
-            F.FATURA_KISI_SAYISI,
-            F.FATURA_ACIKLAMA,
-            F.FATURA_TOPLAM_KDV,
-            F.FATURA_TOPLAM_KDV + F.FATURA_TOPLAM_TUTAR AS FATURA_KDVLI_TOPLAM_TUTAR
-        FROM
-            TBLFATURA F (NOLOCK)
-        INNER JOIN
-            TblKurum K (NOLOCK) ON F.FATURA_KURUM_ID = K.KrmKodu
-        INNER JOIN
-            TblKurumTur KT (NOLOCK) ON K.KrmSecim = KT.tkod
-        WHERE
-            F.FATURA_TARIHI BETWEEN ? AND ? 
-            AND F.FATURA_TURU <= 2
-        ORDER BY
-            KT.tad, F.FATURA_ILGILI, F.FATURA_NO;
+        select 
+f.FATURA_NO as FATURA_NO
+,f.FATURA_TARIHI as FATURA_TARIHI 
+, ck.CARI_KART_KODU as cariKartKodu
+, ck.CARI_KART_ADI as cariKartAdi
+, F.FATURA_TOPLAM_KDV + F.FATURA_TOPLAM_TUTAR as FATURA_KDVLI_TOPLAM_TUTAR 
+,f.FATURA_ILGILI as FATURA_ILGILI
+,f.FATURA_ACIKLAMA as FATURA_ACIKLAMA
+,ckt.KURUM_TUR_TANIM  as KURUM_TURU
+,f.FATURA_TOPLAM_TUTAR as FATURA_TOPLAM_TUTAR
+,f.FATURA_TOPLAM_KDV as FATURA_TOPLAM_KDV 
+,f.FATURA_KISI_SAYISI as FATURA_KISI_SAYISI
+     from SBS_FATURA as f with(nolock) 
+       left join SBS_FATURA_HASTA  as fh with(nolock) 
+         on fh.SBS_FATURA_ID = f.SBS_FATURA_ID  and  ISNULL(fh.PSF_ID,0) = 0 
+       left join  SBS_FATURA_HASTA_DETAY as sfhd with(nolock) 
+         on sfhd.SBS_FATURA_HASTA_ID = fh.SBS_FATURA_HASTA_ID and ISNULL(sfhd.PSF_ID,0) = 0 
+       left join  CARI_KART as ck  with(nolock) 
+        on ck.CARI_KART_ID = f.FATURA_CARI_KART_ID and ISNULL(ck.PSF_ID,0) = 0 
+       left join  CARI_KURUM_TUR as ckt  with(nolock) 
+        on ck.CARI_KURUM_TURU  = ckt.KURUM_TUR_ID  and ISNULL(ckt.PSF_ID,0) = 0 
+    where ISNULL(f.PSF_ID,0) = 0 
+      and f.FATURA_TARIHI BETWEEN ? AND ?
+   group by 
+ f.FATURA_NO
+,f.FATURA_TARIHI
+, ck.CARI_KART_KODU 
+, ck.CARI_KART_ADI
+, F.FATURA_TOPLAM_KDV + F.FATURA_TOPLAM_TUTAR  
+,f.FATURA_ILGILI 
+,f.FATURA_ACIKLAMA
+,ckt.KURUM_TUR_TANIM 
+,f.FATURA_TOPLAM_TUTAR
+,f.FATURA_TOPLAM_KDV 
+,f.FATURA_KISI_SAYISI
     """
 
     try:

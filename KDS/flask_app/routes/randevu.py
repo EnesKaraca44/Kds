@@ -89,9 +89,7 @@ def randevu():
         showlegend=True,
         legend=dict(
             x=1.01, y=1,
-            bgcolor='rgba(13,27,62,0.85)',
-            bordercolor='#2d4a8a',
-            borderwidth=1,
+            bgcolor='rgba(0,0,0,0)',
             font=dict(size=9),
         ),
         margin=dict(l=20, r=180, t=10, b=10),

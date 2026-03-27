@@ -10,17 +10,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
+    
+    <!-- Flatpickr (Modern Datepicker) CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" type="text/css" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css">
+    
+    <style>
+      /* Flatpickr Custom Styling to fit theme */
+      .flatpickr-calendar { font-family: 'Inter', sans-serif; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); border: 1px solid rgba(148,163,184,0.2); }
+      .flatpickr-input[readonly] { cursor: pointer; background-color: var(--bg-body) !important; color: var(--text-primary) !important; font-weight: 600; font-size: 0.9rem; padding: 10px 14px; border: 1px solid rgba(148,163,184,0.3); border-radius: 8px; transition: all 0.2s ease; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);}
+      .flatpickr-input[readonly]:hover { border-color: #3B82F6; }
+    </style>
     {% block head %}{% endblock %}
 </head>
 
 <body class="{% block body_class %}{% endblock %}">
+    <!-- Page Loading Overlay -->
+    <div class="page-loading" id="pageLoading">
+        <div class="spinner"></div>
+        <div style="margin-top: 15px; font-weight: 600; color: var(--accent-primary);" data-t="Yükleniyor, lütfen bekleyin...">Yükleniyor, lütfen bekleyin...</div>
+    </div>
+
     <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
                 <span class="logo-icon">📊</span>
                 <div>
-                    <div class="logo-text">Kurum Performans<br>Yönetim Sistemi</div>
+                    <div class="logo-text" data-t="Kurum Performans Yönetim Sistemi">Kurum Performans<br>Yönetim Sistemi</div>
                     <div class="logo-subtitle">ENTERPRİSE V2.4</div>
                 </div>
             </div>
@@ -29,12 +46,12 @@
 
         <nav class="sidebar-nav">
             {% for section_name, items in nav_items.items() %}
-            <div class="nav-section-title">{{ section_name }}</div>
+            <div class="nav-section-title" data-t="{{ section_name }}">{{ section_name }}</div>
             {% for item in items %}
             <a href="{{ item.url }}?{{ request.query_string.decode() }}"
                 class="nav-item {% if request.path == item.url %}active{% endif %}">
                 <span class="nav-icon">{{ item.icon }}</span>
-                <span class="nav-label">{{ item.label }}</span>
+                <span class="nav-label" data-t="{{ item.label }}">{{ item.label }}</span>
                 {% if item.badge %}
                 <span class="nav-badge">{{ item.badge }}</span>
                 {% endif %}
@@ -48,7 +65,7 @@
                 <span class="user-avatar">👤</span>
                 <span class="user-name">{{ logged_in_user }}</span>
             </div>
-            <a href="{{ url_for('auth.logout') }}" class="logout-btn">🚪 Çıkış</a>
+            <a href="{{ url_for('auth.logout') }}" class="logout-btn" data-t="Çıkış">🚪 Çıkış</a>
         </div>
     </aside>
 
@@ -61,35 +78,51 @@
                 <h1 class="page-title">{% block page_title %}Dashboard{% endblock %}</h1>
             </div>
             <div class="topbar-right">
+                <!-- Language Switcher -->
+                <div class="lang-switcher" id="langSwitcher">
+                    <button class="lang-btn" id="langBtn" aria-label="Dil seçimi">
+                        <span id="currentLangFlag">🇹🇷</span>
+                        <span id="currentLangText">TR</span>
+                    </button>
+                    <div class="lang-dropdown" id="langDropdown">
+                        <a href="#" data-lang="tr" class="lang-option active">
+                            <span>🇹🇷</span> Türkçe
+                        </a>
+                        <a href="#" data-lang="en" class="lang-option">
+                            <span>🇺🇸</span> English
+                        </a>
+                    </div>
+                </div>
+
                 <button type="button" class="theme-toggle" id="themeToggle" aria-label="Tema değiştir"
                     aria-pressed="false">
                     <span id="themeIcon">🌙</span>
-                    <span id="themeLabel">Koyu</span>
+                    <span id="themeLabel" data-t="Koyu">Koyu</span>
                 </button>
                 <form class="date-filter" id="dateFilter" method="GET">
                     <select name="quick" id="quickSelect" class="filter-select">
-                        <option value="bugun" {% if request.args.get('quick')=='bugun' %}selected{% endif %}>Bugün
+                        <option value="bugun" {% if request.args.get('quick')=='bugun' %}selected{% endif %} data-t="Bugün">Bugün
                         </option>
-                        <option value="dun" {% if request.args.get('quick')=='dun' %}selected{% endif %}>Dün</option>
-                        <option value="son-7" {% if request.args.get('quick')=='son-7' %}selected{% endif %}>Son 7 Gün
+                        <option value="dun" {% if request.args.get('quick')=='dun' %}selected{% endif %} data-t="Dün">Dün</option>
+                        <option value="son-7" {% if request.args.get('quick')=='son-7' %}selected{% endif %} data-t="Son 7 Gün">Son 7 Gün
                         </option>
-                        <option value="son-30" {% if request.args.get('quick')=='son-30' %}selected{% endif %}>Son 30
+                        <option value="son-30" {% if request.args.get('quick')=='son-30' %}selected{% endif %} data-t="Son 30 Gün">Son 30
                             Gün</option>
-                        <option value="bu-ay" {% if request.args.get('quick','bu-ay')=='bu-ay' %}selected{% endif %}>Bu
+                        <option value="bu-ay" {% if request.args.get('quick','bu-ay')=='bu-ay' %}selected{% endif %} data-t="Bu Ay">Bu
                             Ay</option>
-                        <option value="gecen-ay" {% if request.args.get('quick')=='gecen-ay' %}selected{% endif %}>Geçen
+                        <option value="gecen-ay" {% if request.args.get('quick')=='gecen-ay' %}selected{% endif %} data-t="Geçen Ay">Geçen
                             Ay</option>
-                        <option value="bu-yil" {% if request.args.get('quick')=='bu-yil' %}selected{% endif %}>Bu Yıl
+                        <option value="bu-yil" {% if request.args.get('quick')=='bu-yil' %}selected{% endif %} data-t="Bu Yıl">Bu Yıl
                         </option>
-                        <option value="gecen-yil" {% if request.args.get('quick')=='gecen-yil' %}selected{% endif %}>
+                        <option value="gecen-yil" {% if request.args.get('quick')=='gecen-yil' %}selected{% endif %} data-t="Geçen Yıl">
                             Geçen Yıl</option>
-                        <option value="ozel" {% if request.args.get('quick')=='ozel' %}selected{% endif %}>Özel</option>
+                        <option value="ozel" {% if request.args.get('quick')=='ozel' %}selected{% endif %} data-t="Özel">Özel</option>
                     </select>
                     <div class="custom-dates" id="customDates" style="display:none;">
                         <input type="date" name="start" class="date-input" value="{{ request.args.get('start', '') }}">
                         <input type="date" name="end" class="date-input" value="{{ request.args.get('end', '') }}">
                     </div>
-                    <button type="submit" class="filter-btn">🔄 Filtrele</button>
+                    <button type="submit" class="filter-btn" data-t="Filtrele">🔄 Filtrele</button>
                 </form>
             </div>
         </header>
@@ -97,7 +130,7 @@
         <!-- Active Period Banner -->
         {% if start_date and end_date %}
         <div class="period-banner">
-            📅 Aktif Dönem: <strong>{{ start_date.strftime('%d.%m.%Y') }}</strong> – <strong>{{
+            📅 <span data-t="Aktif Dönem">Aktif Dönem</span>: <strong>{{ start_date.strftime('%d.%m.%Y') }}</strong> – <strong>{{
                 end_date.strftime('%d.%m.%Y') }}</strong>
         </div>
         {% endif %}
@@ -108,12 +141,28 @@
         </div>
 
         <!-- Footer -->
-        <footer class="footer">
-            Kurum Karar Destek Sistemi v2.0 | © 2026 | Seyrani Demirel
+        <footer class="footer" data-t="Kurum Karar Destek Sistemi v2.0 | © 2026 | MetaSoft">
+            Kurum Karar Destek Sistemi v2.0 | © 2026 | MetaSoft
         </footer>
     </main>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- Flatpickr JS & Turkish Locale -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function() {
+        flatpickr(".date-input", {
+          locale: "tr",
+          dateFormat: "Y-m-d",       // Backend'in beklediği YYYY-MM-DD
+          altInput: true,            // Kullanıcıya şık metin göster (+ gizli input)
+          altFormat: "j F Y, l",     // Örn: 17 Mart 2026, Salı
+          allowInput: false,         // Elle yazmayı kapat, sadece takvimden seçsin (daha güvenli)
+          disableMobile: true        // Mobilde de bu şık takvim UI'ı kullanılsın
+        });
+      });
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 

@@ -57,34 +57,69 @@ def poliklinik():
 
     # Query Parameters for sorting
     sort_by = request.args.get('sort', 'Kayit_Sayisi')
-    if sort_by not in ['Kayit_Sayisi', 'Benzersiz_Hasta_Sayisi']:
+    if sort_by not in ['Kayit_Sayisi', 'Benzersiz_Hasta_Sayisi', 'Hekim_Bazli_Hasta_Sayilari']:
         sort_by = 'Kayit_Sayisi'
 
     # Tab 1: Performans Sıralaması (Top / Bottom 15)
-    if not doc_perf.empty:
+    hekim_hasta_table = []
+    hekim_hasta_toplam = 0
+
+    if not doc_perf.empty and sort_by != 'Hekim_Bazli_Hasta_Sayilari':
         top_data = doc_perf.nlargest(15, sort_by).sort_values(sort_by, ascending=True)
-        fig_top = px.bar(top_data, x=sort_by, y='DOKTOR_ADI', orientation='h', 
-                         color=sort_by, color_continuous_scale='Blues', text_auto='.0f',
-                         title=f"En Çok Hasta Bakan Hekimler")
+        fig_top = px.bar(
+            top_data,
+            x=sort_by,
+            y='DOKTOR_ADI',
+            orientation='h',
+            color=sort_by,
+            color_continuous_scale='Blues',
+            text_auto='.0f',
+            title="En Çok Hasta Bakan Hekimler",
+        )
         fig_top.update_layout(
-            template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            template='plotly_white',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
             yaxis=dict(showgrid=False, zeroline=False, title=""),
             coloraxis_showscale=False,
-            margin=dict(l=20, r=20, t=40, b=20)
+            margin=dict(l=20, r=20, t=40, b=20),
         )
 
         bot_data = doc_perf[doc_perf[sort_by] > 0].nsmallest(15, sort_by).sort_values(sort_by, ascending=False)
-        fig_bot = px.bar(bot_data, x=sort_by, y='DOKTOR_ADI', orientation='h', 
-                         color=sort_by, color_continuous_scale='Reds', text_auto='.0f',
-                         title=f"En Düşük Hasta Bakan Hekimler")
+        fig_bot = px.bar(
+            bot_data,
+            x=sort_by,
+            y='DOKTOR_ADI',
+            orientation='h',
+            color=sort_by,
+            color_continuous_scale='Reds',
+            text_auto='.0f',
+            title="En Düşük Hasta Bakan Hekimler",
+        )
         fig_bot.update_layout(
-            template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+            template='plotly_white',
+            paper_bgcolor='rgba(0,0,0,0)',
+            plot_bgcolor='rgba(0,0,0,0)',
             xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
             yaxis=dict(showgrid=False, zeroline=False, title=""),
             coloraxis_showscale=False,
-            margin=dict(l=20, r=20, t=40, b=20)
+            margin=dict(l=20, r=20, t=40, b=20),
         )
+    elif sort_by == 'Hekim_Bazli_Hasta_Sayilari':
+        # Resimdeki tablo: tüm hekimler + benzersiz hasta sayısı
+        table_df = (
+            doc_perf[['DOKTOR_ADI', 'Benzersiz_Hasta_Sayisi']]
+            .sort_values(['Benzersiz_Hasta_Sayisi', 'DOKTOR_ADI'], ascending=[False, True])
+            .copy()
+        )
+        hekim_hasta_toplam = int(table_df['Benzersiz_Hasta_Sayisi'].sum()) if not table_df.empty else 0
+        hekim_hasta_table = [
+            {"ad": str(r["DOKTOR_ADI"]), "toplam": int(r["Benzersiz_Hasta_Sayisi"])}
+            for _, r in table_df.iterrows()
+        ]
+        fig_top = px.bar(title="").update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)')
+        fig_bot = px.bar(title="").update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)')
     else:
         fig_top = px.bar(title="Veri Bulunamadı").update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)')
         fig_bot = px.bar(title="Veri Bulunamadı").update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)')
@@ -343,11 +378,17 @@ def poliklinik():
 
     insight_text = ""
     if not doc_perf.empty:
-        top_data_sorted = doc_perf.sort_values(sort_by, ascending=False)
-        top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
-        top_doc_val = top_data_sorted.iloc[0][sort_by]
-        metric_label = "Kayıt Sayısı" if sort_by == 'Kayit_Sayisi' else "Benzersiz Hasta Sayısı"
-        insight_text = f"Seçili dönemde en yüksek performansı gösteren hekim {top_doc_val} {metric_label} ile {top_doc_name} olmuştur."
+        if sort_by == 'Hekim_Bazli_Hasta_Sayilari':
+            top_data_sorted = doc_perf.sort_values(['Benzersiz_Hasta_Sayisi', 'DOKTOR_ADI'], ascending=[False, True])
+            top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
+            top_doc_val = int(top_data_sorted.iloc[0]['Benzersiz_Hasta_Sayisi'])
+            insight_text = f"Seçili dönemde benzersiz hasta sayısına göre en yüksek değer {top_doc_val} ile {top_doc_name} olmuştur."
+        else:
+            top_data_sorted = doc_perf.sort_values(sort_by, ascending=False)
+            top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
+            top_doc_val = int(top_data_sorted.iloc[0][sort_by])
+            metric_label = "Kayıt Sayısı" if sort_by == 'Kayit_Sayisi' else "Benzersiz Hasta Sayısı"
+            insight_text = f"Seçili dönemde en yüksek performansı gösteren hekim {top_doc_val} {metric_label} ile {top_doc_name} olmuştur."
 
     return render_template('poliklinik.html',
         start_date=sd, end_date=ed, no_data=False,
@@ -355,5 +396,6 @@ def poliklinik():
         aktif_hekim=aktif_hekim, brans_sayisi=brans_sayisi,
         charts=charts, current_sort=sort_by, insight_text=insight_text,
         hekim_list=hekim_list, selected_hekim=selected_hekim, 
-        hekim_toplam_kayit=hekim_toplam_kayit, hekim_brans_sayisi=hekim_brans_sayisi
+        hekim_toplam_kayit=hekim_toplam_kayit, hekim_brans_sayisi=hekim_brans_sayisi,
+        hekim_hasta_table=hekim_hasta_table, hekim_hasta_toplam=hekim_hasta_toplam
     )

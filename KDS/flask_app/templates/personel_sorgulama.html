@@ -1,0 +1,856 @@
+{% extends "base.html" %}
+{% block title %}<span data-t="Personel Sorgulama">Personel Sorgulama</span>{% endblock %}
+{% block page_title %}<span data-t="👤 Personel Sorgulama">👤 Personel Sorgulama</span>{% endblock %}
+
+{% block head %}
+<style>
+    /* ── Personel Sorgulama Özel Stiller ── */
+    .ps-tab-container {
+        animation: fadeInUp 0.4s ease forwards;
+    }
+    
+    .chart-row {
+        display: grid;
+        grid-template-columns: 450px 1fr !important; /* Tablo solda sabit genişlik, grafik sağda esnek */
+        gap: 24px;
+        align-items: flex-start;
+    }
+
+    .table-wrapper {
+        max-height: 550px !important; /* Uzun unvan listeleri için scroll */
+    }
+
+    .data-table tfoot td {
+        font-weight: 800;
+        background: #f8fafc;
+        border-top: 2px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .data-table tfoot td:last-child {
+        text-align: right;
+        color: var(--accent-primary);
+        font-size: 1.1rem;
+    }
+
+    /* Tab butonları için ikonlar */
+    .tab-btn {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* Personel Listesi Arama Kutusu */
+    .ps-search-bar {
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: #f8fafc;
+        padding: 10px 16px;
+        border-radius: var(--radius-md);
+        border: 1px solid var(--border-color);
+    }
+
+    .ps-search-bar input {
+        border: none;
+        background: transparent;
+        flex: 1;
+        font-size: 0.9rem;
+        outline: none;
+        color: var(--text-primary);
+    }
+
+    .ps-search-bar svg {
+        color: var(--text-muted);
+        width: 18px;
+        height: 18px;
+    }
+
+    .theme-dark .ps-search-bar {
+        background: rgba(15, 23, 42, 0.4);
+        border-color: rgba(45, 74, 138, 0.5);
+    }
+    .theme-dark .ps-search-bar input {
+        color: #e2e8f0;
+    }
+
+    @media (max-width: 1200px) {
+        .chart-row {
+            grid-template-columns: 1fr !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<style>
+    .panels-grid-4 {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+    
+    .summary-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        display: flex;
+        flex-direction: column;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+    }
+    
+    .summary-panel:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 18px 35px rgba(15, 23, 42, 0.14);
+        border-color: rgba(37, 99, 235, 0.25);
+    }
+
+    .summary-panel::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(160deg, rgba(37, 99, 235, 0.03), transparent 45%);
+        pointer-events: none;
+    }
+    
+    .panel-header {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        padding: 8px 18px;
+        font-weight: 700;
+        font-size: 0.88rem;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.15);
+        letter-spacing: 0.02em;
+        box-shadow: inset 0 -1px 0 rgba(255,255,255,0.08);
+    }
+
+    /* Her panel başlığına canlı, farklı renk */
+    .panels-grid-4 .summary-panel:nth-child(1) .panel-header {
+        background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    }
+    .panels-grid-4 .summary-panel:nth-child(2) .panel-header {
+        background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    }
+    .panels-grid-4 .summary-panel:nth-child(3) .panel-header {
+        background: linear-gradient(135deg, #0ea5e9, #0369a1);
+    }
+    .panels-grid-4 .summary-panel:nth-child(4) .panel-header {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+    }
+    
+    .theme-dark .panel-header {
+        background: linear-gradient(135deg, #1e3a8a, #172554);
+        border-bottom-color: rgba(0,0,0,0.2);
+    }
+    
+    .summary-panel .table-wrapper {
+        min-height: 80px;
+        max-height: 180px;
+        overflow-y: auto;
+        scrollbar-width: thin;
+    }
+    
+    .summary-panel .data-table th {
+        background: rgba(248, 250, 252, 0.8);
+        -webkit-backdrop-filter: blur(4px);
+        backdrop-filter: blur(4px);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        padding: 8px 14px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: #64748b;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+    }
+    
+    .summary-panel .data-table td {
+        padding: 6px 14px;
+        font-size: 0.82rem;
+    }
+    
+    .summary-panel .data-table tbody tr:nth-child(even) {
+        background: rgba(148, 163, 184, 0.06);
+    }
+    
+    .summary-panel .data-table tbody tr:hover {
+        background: rgba(59, 130, 246, 0.09);
+        transform: translateX(2px);
+    }
+    
+    /* ── DARK MODE CALIBRATION ── */
+    .theme-dark .summary-panel,
+    .theme-dark .detail-list-panel,
+    .theme-dark .table-wrapper,
+    .theme-dark .detail-table-wrapper,
+    .theme-dark .data-table,
+    .theme-dark .detail-table {
+        background-color: #1a2235 !important;
+        background: #1a2235 !important;
+        color: #f1f5f9 !important;
+        border-color: #2d3748 !important;
+    }
+
+    .theme-dark .panel-header {
+        background: linear-gradient(135deg, #1e3a8a, #172554) !important;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .theme-dark .panels-grid-4 .summary-panel:nth-child(1) .panel-header {
+        background: linear-gradient(135deg, #1e40af, #1e3a8a) !important;
+    }
+    .theme-dark .panels-grid-4 .summary-panel:nth-child(2) .panel-header {
+        background: linear-gradient(135deg, #6d28d9, #4c1d95) !important;
+    }
+    .theme-dark .panels-grid-4 .summary-panel:nth-child(3) .panel-header {
+        background: linear-gradient(135deg, #0369a1, #0c4a6e) !important;
+    }
+    .theme-dark .panels-grid-4 .summary-panel:nth-child(4) .panel-header {
+        background: linear-gradient(135deg, #b45309, #92400e) !important;
+    }
+
+    .theme-dark .data-table th,
+    .theme-dark .detail-table th {
+        background: #111827 !important;
+        color: #94a3b8 !important;
+        border-bottom: 2px solid #2d3748 !important;
+    }
+
+    .theme-dark .data-table td,
+    .theme-dark .detail-table td {
+        color: #e2e8f0 !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .theme-dark .summary-row:hover,
+    .theme-dark .detail-table tr:hover {
+        background: rgba(59, 130, 246, 0.15) !important;
+    }
+
+    .theme-dark .summary-row.selected {
+        background: rgba(59, 130, 246, 0.25) !important;
+        border-left: 5px solid #60a5fa !important;
+    }
+
+    /* BADGE STYLES */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        white-space: nowrap;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    
+    .badge-success { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+    .badge-warning { background: #fef9c3; color: #a16207; border: 1px solid #fef08a; }
+    .badge-danger { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+    .badge-neutral { background: #e2e8f0; color: #334155; border: 1px solid #cbd5e1; }
+    .badge-info { background: #dbeafe; color: #1d4ed8; border: 1px solid #bfdbfe; }
+
+    .theme-dark .badge-success { background: rgba(34, 197, 94, 0.2) !important; color: #4ade80 !important; border-color: rgba(74, 222, 128, 0.3) !important; }
+    .theme-dark .badge-warning { background: rgba(234, 179, 8, 0.2) !important; color: #facc15 !important; border-color: rgba(250, 204, 21, 0.3) !important; }
+    .theme-dark .badge-danger { background: rgba(239, 68, 68, 0.2) !important; color: #f87171 !important; border-color: rgba(248, 113, 113, 0.3) !important; }
+    .theme-dark .badge-neutral { background: rgba(148, 163, 184, 0.22) !important; color: #cbd5e1 !important; border-color: rgba(148, 163, 184, 0.35) !important; }
+    .theme-dark .badge-info { background: rgba(59, 130, 246, 0.22) !important; color: #93c5fd !important; border-color: rgba(96, 165, 250, 0.35) !important; }
+
+    .bottom-section {
+        display: grid;
+        grid-template-columns: 500px 1fr;
+        gap: 24px;
+        margin-top: 24px;
+    }
+    
+    .detail-list-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .detail-header {
+        padding: 16px 20px;
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .theme-dark .detail-header {
+        background: #1e293b;
+    }
+    
+    .search-container {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        position: relative;
+        background: #ffffff;
+        border: 2px solid #bfdbfe;
+        border-radius: 12px;
+        padding: 4px 6px 4px 36px;
+        box-shadow: 0 8px 20px rgba(59, 130, 246, 0.12);
+    }
+
+    .search-container::before {
+        content: '🔎';
+        position: absolute;
+        left: 12px;
+        font-size: 1rem;
+        opacity: 0.85;
+    }
+    
+    .search-input {
+        padding: 9px 16px;
+        border: none;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        width: 300px;
+        transition: all 0.2s;
+        background: var(--bg-main);
+        color: var(--text-main);
+        box-shadow: none;
+        font-weight: 500;
+    }
+    
+    .search-input:focus {
+        box-shadow: none;
+        width: 340px;
+    }
+    
+    .btn-clear {
+        padding: 8px 16px;
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .btn-clear:hover {
+        background: #fecaca;
+        transform: translateY(-1px);
+    }
+
+    .detail-table-wrapper {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 500px;
+    }
+    
+    .detail-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    
+    .detail-table th {
+        background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+        padding: 14px 20px;
+        text-align: left;
+        font-size: 0.75rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #64748b;
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        border-bottom: 1px solid var(--border-color);
+        box-shadow: 0 1px 0 rgba(15, 23, 42, 0.05);
+    }
+    
+    .theme-dark .detail-table th {
+        background: #0f172a;
+        color: #94a3b8;
+    }
+    
+    .detail-table td {
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-color);
+        font-size: 0.85rem;
+        vertical-align: middle;
+    }
+    
+    .detail-table tbody tr:nth-child(even) {
+        background: rgba(148, 163, 184, 0.05);
+    }
+    
+    .detail-table tr:hover {
+        background: rgba(59, 130, 246, 0.08);
+    }
+    
+    .theme-dark .detail-table tr:hover {
+        background: rgba(255,255,255,0.02);
+    }
+    
+    .theme-dark .summary-panel {
+        background: #1e293b; /* Darker slate color */
+        border-color: #334155;
+    }
+
+    .theme-dark .data-table, 
+    .theme-dark .detail-table {
+        background: transparent !important;
+        color: #e2e8f0;
+    }
+
+    .theme-dark .detail-header {
+        background: #111827 !important;
+        border-bottom: 2px solid #2d3748 !important;
+    }
+
+    .theme-dark .data-table tfoot td {
+        background: #0f172a !important;
+        color: #f8fafc !important;
+        border-top: 2px solid #2d3748 !important;
+    }
+
+    .theme-dark .summary-panel .data-table tbody tr:nth-child(even),
+    .theme-dark .detail-table tbody tr:nth-child(even) {
+        background: rgba(148, 163, 184, 0.08);
+    }
+
+    .theme-dark .summary-panel {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .theme-dark .detail-list-panel {
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .theme-dark .search-input {
+        background: #0f172a !important;
+        color: #f1f5f9 !important;
+    }
+
+    .theme-dark .search-container {
+        background: rgba(15, 23, 42, 0.88);
+        border-color: rgba(59, 130, 246, 0.45);
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+    }
+
+    @media (max-width: 992px) {
+        .search-input {
+            width: 220px;
+        }
+        .search-input:focus {
+            width: 240px;
+        }
+    }
+
+    .theme-dark .theme-dark-text-blue {
+        color: #93c5fd !important; /* Brighter blue for dark mode */
+    }
+    
+    @media (max-width: 1400px) {
+        .panels-grid-4 { grid-template-columns: repeat(2, 1fr); }
+        .bottom-section { grid-template-columns: 1fr; }
+    }
+</style>
+
+<!-- ÜST BÖLÜM: 4 Tablo Yan Yana -->
+<div class="panels-grid-4">
+    <!-- 1. Çalışma Durumu -->
+    <div class="summary-panel">
+        <div class="panel-header clickable-header" data-cat="calisma" style="cursor: pointer;" data-t="📋 Çalışma Durumu">
+            📋 Çalışma Durumu <span style="font-size: 0.75rem; font-weight:normal; opacity:0.8; margin-left:auto;" data-t="(Tümünü Gör)">(Tümünü Gör)</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th data-t="Çalışma Türü">Çalışma Türü</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in calisma_durumu %}
+                    <tr class="summary-row" data-cat="calisma" data-val="{{ item.tur }}">
+                        <td>{{ item.tur }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><td style="font-size:0.8rem;" data-t="Toplam Kayıt:">Toplam Kayıt:</td><td style="text-align:right; color:#2563eb;">{{ toplam_personel }}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- 2. Kadro Unvan -->
+    <div class="summary-panel">
+        <div class="panel-header clickable-header" data-cat="kadro" style="cursor: pointer;" data-t="🏷️ Kadro Unvanı">
+            🏷️ Kadro Unvanı <span style="font-size: 0.75rem; font-weight:normal; opacity:0.8; margin-left:auto;" data-t="(Tümünü Gör)">(Tümünü Gör)</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th data-t="Kadro Unvanı">Kadro Unvanı</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in kadro_unvan %}
+                    <tr class="summary-row" data-cat="kadro" data-val="{{ item.tur }}">
+                        <td>{{ item.tur }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><td style="font-size:0.8rem;" data-t="Toplam Unvan:">Toplam Unvan:</td><td style="text-align:right; color:#2563eb;">{{ kadro_unvan|length }}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- 3. Personel Türü -->
+    <div class="summary-panel">
+        <div class="panel-header clickable-header" data-cat="personel_tur" style="cursor: pointer;" data-t="📊 Personel Türü">
+            📊 Personel Türü <span style="font-size: 0.75rem; font-weight:normal; opacity:0.8; margin-left:auto;" data-t="(Tümünü Gör)">(Tümünü Gör)</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th data-t="Personel Türü">Personel Türü</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in personel_tur %}
+                    <tr class="summary-row" data-cat="personel_tur" data-val="{{ item.tur }}">
+                        <td>{{ item.tur }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><td style="font-size:0.8rem;" data-t="Toplam Tür:">Toplam Tür:</td><td style="text-align:right; color:#2563eb;">{{ personel_tur|length }}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- 4. Hizmet Sınıfı -->
+    <div class="summary-panel">
+        <div class="panel-header clickable-header" data-cat="hizmet" style="cursor: pointer;" data-t="🏢 Hizmet Sınıfı">
+            🏢 Hizmet Sınıfı <span style="font-size: 0.75rem; font-weight:normal; opacity:0.8; margin-left:auto;" data-t="(Tümünü Gör)">(Tümünü Gör)</span>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr><th data-t="Hizmet Sınıfı">Hizmet Sınıfı</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                </thead>
+                <tbody>
+                    {% for item in hizmet_sinifi %}
+                    <tr class="summary-row" data-cat="hizmet" data-val="{{ item.tur }}">
+                        <td>{{ item.tur }}</td>
+                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr><td style="font-size:0.8rem;" data-t="Toplam Sınıf:">Toplam Sınıf:</td><td style="text-align:right; color:#2563eb;">{{ hizmet_sinifi|length }}</td></tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ALT BÖLÜM: Seçime Göre Değişen Grafik ve Liste -->
+<div class="bottom-section">
+    <!-- Sol: Çubuk Grafik -->
+    <div class="summary-panel">
+        <div class="panel-header" id="chartTitle" style="background: var(--bg-card); color: var(--text-main); border-bottom: 1px solid var(--border-color); font-weight: 800; font-size: 0.85rem;" data-t="📈 Seçilen Kategori Grafiği">
+            📈 Seçilen Kategori Grafiği
+        </div>
+        <div id="dynamicChart" style="width:100%; height:450px; padding: 10px;"></div>
+    </div>
+
+    <!-- Sağ: Personel Listesi -->
+    <div class="detail-list-panel">
+        <div class="detail-header">
+            <div style="display:flex; align-items:center; gap:12px;">
+                <span style="font-size: 1.2rem;">📄</span>
+                <span style="font-weight: 800; font-size: 0.9rem; letter-spacing: 0.02em; color: var(--text-main);" data-t="📄 PERSONEL DETAY LİSTESİ">📄 PERSONEL DETAY LİSTESİ</span>
+                <span id="detailBadge" class="status-badge" style="background: rgba(37, 99, 235, 0.1); color: #2563eb; border: none; font-size: 0.65rem;" data-t="(Tüm Personel)">(Tüm Personel)</span>
+            </div>
+            <div class="search-container">
+                <input type="text" id="psListSearch" class="search-input" placeholder="İsim veya Kurum ara..." data-t-placeholder="İsim veya Kurum ara...">
+                <button id="clearFilterBtn" class="btn-clear" style="display:none;" data-t="Temizle">Temizle</button>
+            </div>
+        </div>
+        <div class="detail-table-wrapper">
+            <table class="detail-table" id="personelListTable">
+                <thead>
+                    <tr>
+                        <th style="width: 60px; text-align: center;">#</th>
+                        <th data-t="Personel Adı">Personel Adı</th>
+                        <th data-t="Görev Kurumu">Görev Kurumu</th>
+                        <th style="text-align: center;" data-t="Durum">Durum</th>
+                        <th data-t="Unvan (Görev)">Unvan (Görev)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for p in personel_listesi %}
+                    <tr class="detail-row summary-row" 
+                        data-calisma="{{ p.calisma_durumu }}" 
+                        data-kadro="{{ p.kadro_unvan }}" 
+                        data-personel_tur="{{ p.personel_turu }}" 
+                        data-hizmet="{{ p.hizmet_sinifi }}">
+                        <td class="row-num" style="text-align: center; color: var(--text-muted); font-weight: 600;">{{ loop.index }}</td>
+                        <td style="font-weight: 700; color: #1e40af;" class="theme-dark-text-blue">{{ p.ad }}</td>
+                        <td style="font-size: 0.8rem; color: var(--text-muted);">{{ p.kurum }}</td>
+                        <td style="text-align: center;">
+                            <span class="status-badge {% if p.calisma_durumu == 'ÇALIŞIYOR' %}badge-success{% elif p.calisma_durumu == 'İZİNLİ' %}badge-warning{% elif p.calisma_durumu == 'RAPORLU' %}badge-danger{% elif p.calisma_durumu == 'GÖREVLENDİRME' %}badge-info{% else %}badge-neutral{% endif %}" 
+                                  style="min-width: 85px; justify-content: center;"
+                                  data-t="{{ p.calisma_durumu }}">
+                                {{ p.calisma_durumu }}
+                            </span>
+                        </td>
+                        <td style="font-size: 0.8rem; font-weight: 500;">{{ p.unvan }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <div id="noResultsDetail" style="display:none; text-align:center; padding: 60px 20px; color: var(--text-muted);">
+                <div style="font-size: 3rem; margin-bottom: 10px; opacity: 0.3;">🔍</div>
+                <div style="font-weight: 600;" data-t="Aradığınız kriterlere uygun personel bulunamadı.">Aradığınız kriterlere uygun personel bulunamadı.</div>
+                <div style="font-size: 0.8rem; margin-top: 5px;" data-t="Lütfen filtrelerinizi kontrol edin veya arama terimini değiştirin.">Lütfen filtrelerinizi kontrol edin veya arama terimini değiştirin.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    // Grafik verileri (Tüm kategoriler aynı div'de çizilecek)
+    const datasets = {
+        calisma: {
+            title: 'Çalışma Durumu Analizi',
+            labels: {{ calisma_durumu | map(attribute='tur') | list | tojson }},
+            values: {{ calisma_durumu | map(attribute='toplam') | list | tojson }},
+            colors: ['#10b981', '#f59e0b', '#ef4444', '#3b82f6'] 
+        },
+        kadro: {
+            title: 'Kadro Unvan Dağılımı',
+            labels: {{ kadro_unvan | map(attribute='tur') | list | tojson }},
+            values: {{ kadro_unvan | map(attribute='toplam') | list | tojson }},
+            colors: null
+        },
+        personel_tur: {
+            title: 'Personel Tür Analizi',
+            labels: {{ personel_tur | map(attribute='tur') | list | tojson }},
+            values: {{ personel_tur | map(attribute='toplam') | list | tojson }},
+            colors: ['#2563eb', '#8b5cf6', '#14b8a6', '#f59e0b', '#ef4444']
+        },
+        hizmet: {
+            title: 'Hizmet Sınıfı Dağılımı',
+            labels: {{ hizmet_sinifi | map(attribute='tur') | list | tojson }},
+            values: {{ hizmet_sinifi | map(attribute='toplam') | list | tojson }},
+            colors: ['#2563eb', '#0ea5e9', '#f59e0b', '#10b981', '#8b5cf6', '#ef4444']
+        }
+    };
+
+    const isDarkMode = document.body.classList.contains('theme-dark');
+    const gradientStart = isDarkMode ? '#60a5fa' : '#3b82f6';
+    const gradientEnd = isDarkMode ? '#2563eb' : '#1d4ed8';
+
+    let currentCategory = 'calisma';
+
+    function renderActiveChart() {
+        const d = datasets[currentCategory];
+        if(!d || !d.values.length) return;
+
+        const isDark = document.body.classList.contains('theme-dark');
+        const translatedTitle = window.KDS_i18n ? window.KDS_i18n.get(d.title) : d.title;
+        document.getElementById('chartTitle').innerHTML = '📈 ' + translatedTitle;
+
+        let combined = d.labels.map((lbl, i) => ({l: lbl, v: d.values[i]}));
+        combined.sort((a,b) => b.v - a.v); 
+        const sortedLabels = combined.map(x => x.l);
+        const sortedValues = combined.map(x => x.v);
+
+        let colors = d.colors;
+        if (!colors || colors.length < sortedValues.length) {
+            colors = sortedValues.map((_, i) => {
+                const ratio = i / Math.max(sortedValues.length - 1, 1);
+                return interpolateColor(isDark ? '#93c5fd' : '#3b82f6', isDark ? '#1d4ed8' : '#1e40af', ratio);
+            });
+        }
+
+        const trace = {
+            x: sortedLabels,
+            y: sortedValues,
+            type: 'bar',
+            marker: {
+                color: colors,
+                line: { color: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.2)', width: 1 }
+            },
+            text: sortedValues.map(v => '<b>' + v + '</b>'),
+            textposition: 'outside',
+            textfont: { family: 'Inter', size: 11, color: isDark ? '#cbd5e1' : '#334155' },
+            hovertemplate: '<b>%{x}</b><br>Sayı: %{y}<extra></extra>'
+        };
+
+        const layout = {
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Inter', color: isDark ? '#94a3b8' : '#334155', size: 10 },
+            xaxis: { 
+                title: '', 
+                gridcolor: 'rgba(0,0,0,0)', 
+                tickangle: -45,
+                tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
+            },
+            yaxis: { 
+                title: '', 
+                gridcolor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)',
+                tickfont: { color: isDark ? '#94a3b8' : '#64748b' }
+            },
+            margin: { t: 30, b: 80, l: 40, r: 20 },
+            height: 400,
+            bargap: 0.25
+        };
+
+        Plotly.react('dynamicChart', [trace], layout, {responsive: true, displaylogo: false});
+    }
+
+    function interpolateColor(c1, c2, ratio) {
+        const hex = s => parseInt(s, 16);
+        const r = Math.round(hex(c1.slice(1,3)) + (hex(c2.slice(1,3)) - hex(c1.slice(1,3))) * ratio);
+        const g = Math.round(hex(c1.slice(3,5)) + (hex(c2.slice(3,5)) - hex(c1.slice(3,5))) * ratio);
+        const b = Math.round(hex(c1.slice(5,7)) + (hex(c2.slice(5,7)) - hex(c1.slice(5,7))) * ratio);
+        return `rgb(${r},${g},${b})`;
+    }
+
+    // LISTE FİLTRELEME
+    let filterCat = null;
+    let filterVal = null;
+
+    const summaryRows = document.querySelectorAll('.summary-row');
+    const detailRows = document.querySelectorAll('.detail-row');
+    const clearFilterBtn = document.getElementById('clearFilterBtn');
+    const detailBadge = document.getElementById('detailBadge');
+
+    function applyFilter() {
+        let visibleCount = 0;
+        let rowIndex = 1;
+        const searchInput = document.getElementById('psListSearch').value.toLocaleLowerCase('tr');
+
+        detailRows.forEach(row => {
+            let matchCategory = true;
+            if (filterCat && filterVal) {
+                const rowVal = row.getAttribute('data-' + filterCat);
+                if (rowVal !== filterVal) matchCategory = false;
+            }
+
+            let matchSearch = true;
+            if (searchInput !== '') {
+                const text = row.textContent.toLocaleLowerCase('tr');
+                if (!text.includes(searchInput)) matchSearch = false;
+            }
+
+            if (matchCategory && matchSearch) {
+                row.style.display = '';
+                row.querySelector('.row-num').textContent = rowIndex++;
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+
+        document.getElementById('noResultsDetail').style.display = visibleCount === 0 ? 'block' : 'none';
+        document.querySelector('#personelListTable thead').style.display = visibleCount === 0 ? 'none' : '';
+
+        if (filterCat && filterVal) {
+            clearFilterBtn.style.display = 'block';
+            const translatedVal = window.KDS_i18n ? window.KDS_i18n.get(filterVal) : filterVal;
+            detailBadge.textContent = '(' + translatedVal + ')';
+        } else {
+            clearFilterBtn.style.display = 'none';
+            const allTxt = window.KDS_i18n ? window.KDS_i18n.get('(Tüm Personel)') : '(Tüm Personel)';
+            detailBadge.textContent = allTxt;
+        }
+    }
+
+    document.querySelectorAll('.clickable-header').forEach(header => {
+        header.addEventListener('click', function() {
+            const cat = this.getAttribute('data-cat');
+            
+            // Set current category to the clicked header
+            if(currentCategory !== cat) {
+                currentCategory = cat;
+                renderActiveChart();
+            }
+
+            // Remove table selections to show all list items
+            summaryRows.forEach(r => r.classList.remove('selected'));
+            filterCat = null;
+            filterVal = null;
+            applyFilter();
+        });
+    });
+
+    summaryRows.forEach(row => {
+        row.addEventListener('click', function() {
+            // Update active chart category and recreate chart
+            const newCat = this.getAttribute('data-cat');
+            if(currentCategory !== newCat) {
+                currentCategory = newCat;
+                renderActiveChart();
+            }
+
+            // Handle selection style and filtering
+            if (this.classList.contains('selected')) {
+                summaryRows.forEach(r => r.classList.remove('selected'));
+                filterCat = null;
+                filterVal = null;
+            } else {
+                summaryRows.forEach(r => r.classList.remove('selected'));
+                this.classList.add('selected');
+                filterCat = newCat;
+                filterVal = this.getAttribute('data-val');
+            }
+            applyFilter();
+        });
+    });
+
+    clearFilterBtn.addEventListener('click', function() {
+        summaryRows.forEach(r => r.classList.remove('selected'));
+        filterCat = null;
+        filterVal = null;
+        document.getElementById('psListSearch').value = '';
+        applyFilter();
+    });
+
+    document.getElementById('psListSearch').addEventListener('keyup', applyFilter);
+
+    window.addEventListener('load', () => {
+        renderActiveChart();
+        window.addEventListener('resize', renderActiveChart);
+    });
+
+})();
+</script>
+{% endblock %}

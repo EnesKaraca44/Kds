@@ -10,52 +10,72 @@ def randevu_verisi_yukle(start_date_str, end_date_str):
 
     sql_query = """
         SELECT
-            TblRandevular.RanID AS RandevuID,
-            TblRandevular.BsvTrh, TblRandevular.Trh, TblRandevular.Saat,
-            TblRandevular.HstKod, TblRandevular.DktID, TblRandevular.PolID,
-            TblRandevular.M_RANDEVU_DURUM, TblRandevular.TC_KIMLIK_NO,
-            TblRandevular.RANDEVU_TURU_ID, TblRandevular.M_RANDEVU_EKLEYEN,
-            TblRandevular.IPTAL,
-            DATEDIFF(DAY, TblRandevular.BsvTrh, ISNULL(TblRandevular.Trh, GETDATE())) AS fark,
-            TBLRANDEVU_TURU.RANDEVU_TURU_ADI, TblServis.SrvAd,
-            ISNULL(TblDoktor.DktAd, 'BELİRTİLMEMİŞ') AS dktad,
-            TBLHASTA.HstCepTel, TBLHASTA.hsttel1 AS tlfno,
+            SKS.SEVK_ID AS RandevuID,
+            CAST(SKS.RANDEVU_OLUSTURMA_TRH AS DATE) AS BsvTrh,
+            CAST(SKS.SEVK_ILK_CAGRILMA_TRH AS DATE) AS Trh,
+            dbo.IntegerIntoTime(SKS.SEVK_RANDEVU_SAAT) AS Saat,
+            H.HASTA_KODU AS HstKod,
+            D.KIMLIK_ID AS DktID,
+            SKS.SEVK_EDILEN_KLINIK_BIRIM_ID AS PolID,
+            CASE WHEN ISNULL(SKS.SEVK_HST_GELIS_ID, 0) = 0 THEN 2 ELSE 1 END AS M_RANDEVU_DURUM,
+            K.KIMLIK_TC_NO AS TC_KIMLIK_NO,
+            TD.TAKVIM_OLAY_TUR_DETAY_ID AS RANDEVU_TURU_ID,
+            CAST(NULL AS INT) AS M_RANDEVU_EKLEYEN,
+            CASE WHEN ISNULL(SKS.PSF_ID, 0) = 0 THEN 0 ELSE 1 END AS IPTAL,
+            DATEDIFF(
+                DAY,
+                CAST(SKS.RANDEVU_OLUSTURMA_TRH AS DATE),
+                CAST(SKS.SEVK_ILK_CAGRILMA_TRH AS DATE)
+            ) AS fark,
+            TD.TAKVIM_OLAY_TUR_DETAY_ADI AS RANDEVU_TURU_ADI,
+            B.BIRIM_AD AS SrvAd,
+            D.DOKTOR_AD + ' ' + D.DOKTOR_SOYAD AS dktad,
+            CAST(NULL AS NVARCHAR(20)) AS HstCepTel,
+            CAST(NULL AS NVARCHAR(20)) AS tlfno,
             CASE
-                WHEN TblRandevular.M_RANDEVU_DURUM = 1 THEN 'Geldi'
-                WHEN TblRandevular.M_RANDEVU_DURUM = 2 AND sv.sevk_Saat1 IS NULL THEN 'Gelmedi'
-                WHEN TblRandevular.M_RANDEVU_DURUM = 2 AND sv.sevk_Saat1 IS NOT NULL THEN 'Geç Geldi'
-                WHEN sv.sevk_Saat1 IS NOT NULL THEN 'Geldi'
-                WHEN TblRandevular.M_RANDEVU_DURUM = 3 THEN 'Belirsiz'
-                ELSE 'Gelmedi'
+                WHEN ISNULL(SKS.SEVK_HST_GELIS_ID, 0) = 0 THEN 'Gelmedi'
+                ELSE 'Geldi'
             END AS Durum,
-            TBLRANDEVU_TURU.RANDEVU_TURU_GUN_LIMIT,
-            CASE
-                WHEN ISNULL(MHRS_RANDEVU_TUR.ad, 'BELİRTİLMEMİŞ') = 'BELİRTİLMEMİŞ' THEN 'RS'
-                ELSE ISNULL(MHRS_RANDEVU_TUR.ad, 'BELİRTİLMEMİŞ')
-            END AS Randevuverilme_Yeri
-        FROM
-            TblRandevular (NOLOCK)
-            LEFT JOIN TBLRANDEVU_TURU (NOLOCK) ON TblRandevular.RANDEVU_TURU_ID = TBLRANDEVU_TURU.RANDEVU_TURU_ID
-            LEFT JOIN TblServis (NOLOCK) ON TblRandevular.PolID = TblServis.SrvNo
-            LEFT JOIN TblDoktor (NOLOCK) ON TblRandevular.DktID = TblDoktor.DktNo
-            LEFT JOIN TBLHASTA (NOLOCK) ON (TBLHASTA.HstNufus = NULLIF(TblRandevular.TC_KIMLIK_NO, '0'))
-            LEFT JOIN MHRS_RANDEVU_TUR (NOLOCK) ON TblRandevular.M_RANDEVU_EKLEYEN = MHRS_RANDEVU_TUR.kod
-            LEFT JOIN (
-                SELECT
-                    MIN(sevk_Saat1) AS sevk_Saat1, sevk_Hasta_kodu,
-                    CAST(FLOOR(CAST(tblsevk.sevk_etme_trh AS FLOAT)) AS DATETIME) AS sevk_etme_trh
-                FROM tblsevk (NOLOCK)
-                GROUP BY sevk_Hasta_kodu, CAST(FLOOR(CAST(tblsevk.sevk_etme_trh AS FLOAT)) AS DATETIME)
-            ) AS sv ON TblRandevular.Trh = sv.sevk_etme_trh AND TblRandevular.HstKod = sv.sevk_Hasta_kodu
-        WHERE
-            TblRandevular.IPTAL = 0
-            AND (TblRandevular.Trh BETWEEN ? AND ?)
-            AND (TblRandevular.RANDEVU_TURU_ID IN (6,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44))
+            CAST(NULL AS INT) AS RANDEVU_TURU_GUN_LIMIT,
+            TD.TAKVIM_OLAY_TUR_DETAY_ADI AS Randevuverilme_Yeri
+        FROM SBS_KLINIK_SEVK AS SKS WITH (NOLOCK)
+        LEFT JOIN KIMLIK AS K WITH (NOLOCK)
+            ON SKS.HASTA_KIMLIK_ID = K.KIMLIK_ID
+            AND ISNULL(K.PSF_ID, 0) = 0
+        LEFT JOIN SBS_HASTA AS H WITH (NOLOCK)
+            ON K.KIMLIK_ID = H.HASTA_KIMLIK_ID
+            AND ISNULL(H.PSF_ID, 0) = 0
+        LEFT JOIN SBS_DOKTOR AS D WITH (NOLOCK)
+            ON SKS.SEVK_EDILEN_HEKIM_KIMLIK_ID = D.KIMLIK_ID
+            AND ISNULL(D.PSF_ID, 0) = 0
+        LEFT JOIN SBS_KLINIK AS SK WITH (NOLOCK)
+            ON SKS.SEVK_EDILEN_KLINIK_BIRIM_ID = SK.BIRIM_ID
+            AND ISNULL(SK.PSF_ID, 0) = 0
+        LEFT JOIN BIRIM AS B WITH (NOLOCK)
+            ON B.BIRIM_ID = SK.BIRIM_ID
+            AND ISNULL(B.PSF_ID, 0) = 0
+        LEFT JOIN PASIF AS P WITH (NOLOCK)
+            ON P.PASIF_ID = SKS.PSF_ID
+        LEFT JOIN TAKVIM_OLAY_TUR_DETAY AS TD WITH (NOLOCK)
+            ON SKS.TAKVIM_OLAY_TUR_DETAY_ID = TD.TAKVIM_OLAY_TUR_DETAY_ID
+            AND ISNULL(TD.PSF_ID, 0) = 0
+        LEFT JOIN TAKVIM_OLAY_TUR AS T WITH (NOLOCK)
+            ON TD.TAKVIM_OLAY_TUR_ID = T.TAKVIM_OLAY_TUR_ID
+            AND ISNULL(T.PSF_ID, 0) = 0
+        LEFT JOIN SBS_ODA_TANIM AS SKOT WITH (NOLOCK)
+            ON SKOT.ODA_ID = SKS.ODA_ID
+            AND ISNULL(SKOT.PSF_ID, 0) = 0
+        WHERE (SKS.SEVK_TURU & 4) = 4
+          AND ISNULL(SKS.PSF_ID, 0) = 0
+          AND SKS.SEVK_ILK_CAGRILMA_TRH >= ?
+          AND SKS.SEVK_ILK_CAGRILMA_TRH <  DATEADD(DAY, 1, ?)
     """
 
     try:
         start_dt = datetime.strptime(f'{start_date_str} 00:00:00', '%Y-%m-%d %H:%M:%S')
-        end_dt = datetime.strptime(f'{end_date_str} 23:59:59', '%Y-%m-%d %H:%M:%S')
+        # SQL sorgusu zaten "< DATEADD(DAY, 1, ?)" yapıyor.
+        # Bu yüzden Python tarafında end_dt 00:00:00 olmalı ki örneğin 18 Mart seçildiğinde 19 Mart 00:00:00'dan küçük olanları (tüm 18 Mart'ı) garantili alsın.
+        end_dt = datetime.strptime(f'{end_date_str} 00:00:00', '%Y-%m-%d %H:%M:%S')
 
         df = pd.read_sql(sql_query, conn, params=[start_dt, end_dt])
         df['BsvTrh'] = pd.to_datetime(df['BsvTrh'])
