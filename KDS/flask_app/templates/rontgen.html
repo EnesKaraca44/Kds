@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Röntgen Analizi{% endblock %}
-{% block page_title %}🩻 Röntgen Branş ve Verimlilik Analiz Paneli{% endblock %}
+{% block title %}<span data-t="Röntgen Analizi">Röntgen Analizi</span>{% endblock %}
+{% block page_title %}<span data-t="🩻 Röntgen Branş ve Verimlilik Analiz Paneli">🩻 Röntgen Branş ve Verimlilik Analiz Paneli</span>{% endblock %}
 {% block head %}
 <style>
     .metrics-grid.rontgen-metrics {
@@ -21,24 +21,49 @@
     }
 
     .info-banner {
-        margin-top: 14px;
-        border-radius: 10px;
-        padding: 8px 14px;
-        font-size: 0.8rem;
-        background: linear-gradient(90deg, rgba(185, 28, 28, 0.85), rgba(127, 29, 29, 0.6));
-        color: #fee2e2;
-        border: 1px solid rgba(248, 113, 113, 0.8);
+        margin-top: 18px;
+        border-radius: 14px;
+        padding: 18px 24px;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        background: linear-gradient(135deg, #166534, #14532D); /* Saturated Green */
+        color: #ffffff;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        line-height: 1.5;
+    }
+
+    .info-banner:hover {
+        transform: translateX(8px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
     }
 
     .info-banner.secondary {
-        background: linear-gradient(90deg, rgba(30, 64, 175, 0.7), rgba(15, 23, 42, 0.8));
-        color: #e0f2fe;
-        border-color: rgba(59, 130, 246, 0.7);
-        margin-top: 8px;
+        background: linear-gradient(135deg, #1e40af, #1e3a8a); /* Saturated Blue */
+        margin-top: 12px;
+    }
+
+    .info-banner-icon {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        flex-shrink: 0;
+        font-size: 1.5rem;
+        background: rgba(255, 255, 255, 0.2);
+        color: #fff;
+        backdrop-filter: blur(4px);
     }
 
     .info-banner strong {
-        font-weight: 600;
+        font-weight: 800;
+        color: #fff;
+        text-shadow: 0 1px 3px rgba(0,0,0,0.3);
     }
 
     .rontgen-tabs {
@@ -73,16 +98,29 @@
 
     .heatmap-cell {
         text-align: center;
-        font-weight: 700;
-        color: #0f172a;
-        border-radius: 8px;
-        min-width: 78px;
-        box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+        font-weight: 800;
+        color: #1e293b;
+        border-radius: 2px;
+        min-width: 85px;
+        padding: 10px 4px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+        transition: all 0.2s ease;
+        position: relative;
+    }
+
+    .heatmap-cell:hover {
+        transform: translateY(-2px);
+        z-index: 10;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        filter: brightness(1.05);
+        cursor: default;
     }
 
     .heatmap-total {
-        font-weight: 700;
+        font-weight: 800;
         text-align: right;
+        color: var(--text-color, #1e293b);
+        background: rgba(0, 0, 0, 0.02);
     }
 
     .ratio-bar-track {
@@ -151,44 +189,59 @@
 {% else %}
 
 <div class="metrics-grid rontgen-metrics">
-    <div class="metric-card">
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Kurum Yapılan Tetkik</div>
-            <div class="metric-value">{{ toplam_tetkik|turkish_number(0) }} Adet</div>
+            <div class="metric-label" data-t="Kurum Yapılan Tetkik">Kurum Yapılan Tetkik</div>
+            <div class="metric-value">{{ toplam_tetkik|turkish_number(0) }} <span data-t="Adet">Adet</span></div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 10V6a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M2 10h20"/><path d="M7 10v1a5 5 0 0 0 10 0v-1"/><path d="M12 15v3"/><path d="M7 18h10"/></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Panoramik Tetkik</div>
-            <div class="metric-value">{{ toplam_pan|turkish_number(0) }} Adet</div>
+            <div class="metric-label" data-t="Panoramik Tetkik">Panoramik Tetkik</div>
+            <div class="metric-value">{{ toplam_pan|turkish_number(0) }} <span data-t="Adet">Adet</span></div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-gold">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 12c.5 0 .5-1.5 .5-2.5C7.5 5 9 2 12 2s4.5 3 4.5 7.5c0 1 .5 2.5 .5 2.5 2 1.5 1 5-1 7-1 1-1.5 3-2 3h-4c-.5 0-1-2-2-3-2-2-3-5.5-1-7Z"/><path d="M9 12h6"/></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Periapikal Tetkik</div>
-            <div class="metric-value">{{ toplam_peri|turkish_number(0) }} Adet</div>
+            <div class="metric-label" data-t="Periapikal Tetkik">Periapikal Tetkik</div>
+            <div class="metric-value">{{ toplam_peri|turkish_number(0) }} <span data-t="Adet">Adet</span></div>
         </div>
     </div>
 </div>
 
 {% if hekim_en_fazla is not none %}
 <div class="info-banner">
-    En fazla tetkik işleyen hekim: <strong>{{ hekim_en_fazla.DktAd }}</strong>,
-    toplam <strong>{{ hekim_en_fazla.TOPLAM_FILM|turkish_number(0) }}</strong> film.
+    <div class="info-banner-icon">🏆</div>
+    <div>
+        <span data-t="En fazla tetkik işleyen hekim:">En fazla tetkik işleyen hekim:</span> <strong>{{ hekim_en_fazla.DktAd }}</strong>,
+        <span data-t="toplam">toplam</span> <strong>{{ hekim_en_fazla.TOPLAM_FILM|turkish_number(0) }}</strong> <span data-t="film.">film.</span>
+    </div>
 </div>
 {% if hekim_en_az is not none %}
 <div class="info-banner secondary">
-    En düşük hacimli aktif hekim: <strong>{{ hekim_en_az.DktAd }}</strong>,
-    toplam <strong>{{ hekim_en_az.TOPLAM_FILM|turkish_number(0) }}</strong> film.
+    <div class="info-banner-icon">📉</div>
+    <div>
+        <span data-t="En düşük hacimli aktif hekim:">En düşük hacimli aktif hekim:</span> <strong>{{ hekim_en_az.DktAd }}</strong>,
+        <span data-t="toplam">toplam</span> <strong>{{ hekim_en_az.TOPLAM_FILM|turkish_number(0) }}</strong> <span data-t="film.">film.</span>
+    </div>
 </div>
 {% endif %}
 {% endif %}
 
 <div class="tabs rontgen-tabs" data-target="#rontgenTabs">
-    <button class="tab-btn active">👨‍⚕️ Hekim Analizi</button>
-    <button class="tab-btn">🏥 Branş Analizi</button>
-    <button class="tab-btn">🔥 Yoğunluk Haritası</button>
-    <button class="tab-btn">📊 Verimlilik & Anomali</button>
+    <button class="tab-btn active" data-t="👨‍⚕️ Hekim Analizi">👨‍⚕️ Hekim Analizi</button>
+    <button class="tab-btn" data-t="🏥 Branş Analizi">🏥 Branş Analizi</button>
+    <button class="tab-btn" data-t="🔥 Yoğunluk Haritası">🔥 Yoğunluk Haritası</button>
+    <button class="tab-btn" data-t="📊 Verimlilik & Anomali">📊 Verimlilik & Anomali</button>
 </div>
 
 <div id="rontgenTabs">
@@ -196,17 +249,17 @@
     <div class="tab-content active">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">Hekim Bazlı Tetkik Dağılımı</div>
+                <div class="chart-title" data-t="Hekim Bazlı Tetkik Dağılımı">Hekim Bazlı Tetkik Dağılımı</div>
                 {{ charts.fig_hekim_bar | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">Hekim Bazlı Özet Tablo</div>
+                <div class="chart-title" data-t="Hekim Bazlı Özet Tablo">Hekim Bazlı Özet Tablo</div>
                 <div class="table-wrapper">
                     <table class="data-table table-compact">
                         <thead>
                             <tr>
-                                <th>Hekim</th>
-                                <th>Toplam Film</th>
+                                <th data-t="Hekim">Hekim</th>
+                                <th data-t="Toplam Film">Toplam Film</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -227,16 +280,16 @@
     <div class="tab-content">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">Branş Bazlı Dağılım</div>
+                <div class="chart-title" data-t="Branş Bazlı Dağılım">Branş Bazlı Dağılım</div>
                 {{ charts.branch_pie | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">Tetkik Türü Dağılımı</div>
+                <div class="chart-title" data-t="Tetkik Türü Dağılımı">Tetkik Türü Dağılımı</div>
                 {{ charts.type_pie | safe }}
             </div>
         </div>
         <div class="chart-container" style="margin-top:16px;">
-            <div class="chart-title">Branş Bazlı Toplam Tetkik Hacmi</div>
+            <div class="chart-title" data-t="Branş Bazlı Toplam Tetkik Hacmi">Branş Bazlı Toplam Tetkik Hacmi</div>
             {{ charts.branch_bar | safe }}
         </div>
     </div>
@@ -244,31 +297,36 @@
     <!-- Yoğunluk Haritası -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Hekim - Tetkik Türü Kullanım Yoğunluğu</div>
+            <div class="chart-title" data-t="Hekim - Tetkik Türü Kullanım Yoğunluğu">Hekim - Tetkik Türü Kullanım Yoğunluğu</div>
             {% if heatmap_rows %}
             <div class="table-wrapper">
                 <table class="data-table table-compact heatmap-table">
                     <thead>
                         <tr>
-                            <th>Hekim</th>
+                            <th data-t="Hekim">Hekim</th>
                             {% for col in heatmap_columns %}
-                            <th>{{ col }}</th>
+                            <th data-t="{{ col }}">{{ col }}</th>
                             {% endfor %}
-                            <th>Toplam</th>
+                            <th data-t="Toplam">Toplam</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in heatmap_rows %}
                         <tr>
-                            <td>{{ row.hekim }}</td>
+                            <td style="font-weight: 600;">{{ row.hekim }}</td>
                             {% for cell in row.cells %}
-                            <td class="heatmap-cell"
-                                style="background:
-                                linear-gradient(90deg,
-                                rgba(59, 130, 246, {{ 0.14 + (cell.intensity / 100) * 0.28 }}),
-                                rgba(37, 99, 235, {{ 0.18 + (cell.intensity / 100) * 0.58 }}));">
-                                {{ cell.value|turkish_number(0) }}
-                            </td>
+                            {% if cell.value > 0 %}
+                                {% set hue = 50 - (cell.intensity * 0.5) %}
+                                {% set lightness = 98 - (cell.intensity * 0.48) %}
+                                {% set text_color = '#000000' if lightness > 55 else '#ffffff' %}
+                                <td class="heatmap-cell"
+                                    style="background: hsl({{ hue }}, 100%, {{ lightness }}%); color: {{ text_color }};"
+                                    title="{{ cell.label }}: {{ cell.value }}">
+                                    {{ cell.value|turkish_number(0) }}
+                                </td>
+                            {% else %}
+                                <td class="heatmap-cell" style="background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.15); font-weight: 400;">0</td>
+                            {% endif %}
                             {% endfor %}
                             <td class="heatmap-total">{{ row.toplam|turkish_number(0) }}</td>
                         </tr>
@@ -285,11 +343,11 @@
     <!-- Verimlilik & Anomali -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Tetkik İsteme Kararlılığı ve Anomali Analizi</div>
+            <div class="chart-title" data-t="İleri Tetkik (Sefalometrik & Tomografi) Hekim Dağılımı">İleri Tetkik (Sefalometrik & Tomografi) Hekim Dağılımı</div>
             {{ charts.verim_box | safe }}
         </div>
         <div class="chart-container" style="margin-top:16px;">
-            <div class="chart-title">Panoramik / Periapikal Tercih Dengesi</div>
+            <div class="chart-title" data-t="Panoramik / Periapikal Tercih Dengesi">Panoramik / Periapikal Tercih Dengesi</div>
             {% if ratio_rows %}
             <div class="ratio-note">En yüksek hacimli 30 hekim için panoramik ve periapikal tercih dengesi listelenmiştir.</div>
             <div class="table-wrapper">
@@ -316,7 +374,7 @@
                             <td>
                                 <div class="ratio-bar-track">
                                     <div class="ratio-bar-fill {% if row.yorum == 'Dengeli' %}balance{% elif row.yorum == 'Panoramik agirlikli' %}panoramik{% else %}periapikal{% endif %}"
-                                        style="width: {{ row.bar_width }}%;"></div>
+                                        style="--bar-width: {{ row.bar_width }}%; width: var(--bar-width);"></div>
                                 </div>
                             </td>
                             <td>

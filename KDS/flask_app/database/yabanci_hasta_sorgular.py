@@ -9,38 +9,69 @@ def yabanci_hasta_verisi_yukle(start_date_str, end_date_str):
         return pd.DataFrame()
 
     sql_query = """
-        SELECT 
-            suriye.HstNufus, suriye.HastaAdi, SUM(suriye.HstFiyat) AS Fiyat,
-            suriye.hstgtrh, suriye.hstsra, suriye.HstUyruk, suriye.Ulke,
-            suriye.GSS_TAKIP_NO, suriye.hsttetno, suriye.Cinsiyet, suriye.HstDtrh
-        FROM (
-            SELECT
-                TblHasta.HstDtrh, TblHasta.HstUyruk, TblHasta.HstUlke,
-                ISNULL(TBLULKE.AD, TblUyruk.ADI) AS Ulke,
-                CASE TblHasta.Hstcins WHEN '0' THEN 'Erkek' WHEN '1' THEN 'Bayan' END AS Cinsiyet,
-                TblHasta.HstAd + ' ' + TblHasta.HstSoy AS HastaAdi,
-                TblHasta.HstKod, TblHastaRO.HstSra, TblHastaDetay.hsttetno,
-                TblHastaDetay.HstFiyat, TblHasta.HstNufus, TblHastaRO.hstgtrh,
-                TblHastaRO.GSS_TAKIP_NO
-            FROM TblHasta (NOLOCK)
-            LEFT JOIN TBLULKE (NOLOCK) ON ISNULL(TblHasta.HstUlke, 0) = TBLULKE.Id
-            LEFT JOIN TblUyruk (NOLOCK) ON TblUyruk.KODU = TblHasta.HstUyruk
-            INNER JOIN TblHastaRO (NOLOCK) ON TblHastaRO.HstKod = TblHasta.HstKod
-            INNER JOIN TblHastaDetay (NOLOCK) ON TblHastaDetay.hstKod = TblHastaRO.HstKod 
-                AND TblHastaDetay.Hstsra = TblHastaRO.HstSra 
-                AND TblHastaDetay.HstGtrh = TblHastaRO.HstGtrh
-            INNER JOIN tbltetkikdetay (NOLOCK) ON tbltetkikdetay.tkodu = TblHastaDetay.hsttetno 
-                AND TblHastaDetay.HstSablon = tbltetkikdetay.tsablon
-            WHERE TblHastaDetay.HstSilindi = 0
-            AND (TblHastaRO.hstgtrh BETWEEN ? AND ?)
-        ) AS suriye
-        WHERE suriye.HstFiyat > 0
-        AND ((suriye.HstUyruk <> 'TR' AND ISNULL(suriye.HstUyruk, '') <> '') OR suriye.Ulke NOT LIKE '%Türkiye%')
-        GROUP BY 
-            suriye.HstNufus, suriye.HastaAdi, suriye.hstgtrh, suriye.hstsra,
-            suriye.HstUyruk, suriye.Ulke, suriye.GSS_TAKIP_NO, suriye.hsttetno,
-            suriye.Cinsiyet, suriye.HstDtrh
-        ORDER BY suriye.HastaAdi;
+        SELECT
+            k.KIMLIK_TC_NO AS HstNufus,
+            (k.KIMLIK_AD + ' ' + k.KIMLIK_SOYAD) AS HastaAdi,
+            SUM(
+                CAST(
+                    ISNULL(shh.HST_BIRIM_FIYAT, 0) * ISNULL(shh.HST_MIKTAR, ISNULL(shh.HST_ADET, 1))
+                    AS FLOAT
+                )
+            ) AS Fiyat,
+            CAST(sevk.SEVK_ETME_TRH AS DATETIME) AS hstgtrh,
+            CAST(hru.HST_GELIS_ID AS INT) AS hstsra,
+            CAST(NULL AS NVARCHAR(10)) AS HstUyruk,
+            u.ULKE_AD AS Ulke,
+            CAST(NULL AS NVARCHAR(50)) AS GSS_TAKIP_NO,
+            CAST(skh.HIZMET_SUT_KODU AS NVARCHAR(50)) AS hsttetno,
+            CASE
+                WHEN k.CINSIYET_TUR_ID = 1 THEN 'Erkek'
+                WHEN k.CINSIYET_TUR_ID = 2 THEN 'Bayan'
+                ELSE 'Bilinmiyor'
+            END AS Cinsiyet,
+            CAST(k.KIMLIK_DOGUM_TRH AS DATETIME) AS HstDtrh
+        FROM SBS_HASTA_HAREKET AS shh WITH (NOLOCK)
+        INNER JOIN SBS_HASTA_RESMI_UCRETLI AS hru WITH (NOLOCK)
+            ON hru.HST_GELIS_ID = shh.HST_GELIS_ID
+            AND ISNULL(hru.PSF_ID, 0) = 0
+        LEFT JOIN SBS_KLINIK_SEVK AS sevk WITH (NOLOCK)
+            ON sevk.SEVK_HST_GELIS_ID = hru.HST_GELIS_ID
+            AND ISNULL(sevk.PSF_ID, 0) = 0
+        INNER JOIN STOK_KART_HIZMET AS skh WITH (NOLOCK)
+            ON skh.STOK_ID = shh.STOK_ID
+            AND ISNULL(skh.PSF_ID, 0) = 0
+        INNER JOIN KIMLIK AS k WITH (NOLOCK)
+            ON k.KIMLIK_ID = shh.HASTA_KIMLIK_ID
+        INNER JOIN SBS_HASTA AS sh WITH (NOLOCK)
+            ON sh.HASTA_KIMLIK_ID = k.KIMLIK_ID
+            AND ISNULL(sh.PSF_ID, 0) = 0
+        LEFT JOIN ULKE AS u WITH (NOLOCK)
+            ON u.ULKE_ID = sh.HASTA_ULKE
+            AND ISNULL(u.PSF_ID, 0) = 0
+        WHERE 1 = 1
+            AND ISNULL(shh.PSF_ID, 0) = 0
+            AND ISNULL(sevk.SEVK_DURUM, 0) IN (1, 2, 3, 4, 5, 44)
+            AND ISNULL(u.ULKE_AD, '') <> ''
+            AND ISNULL(u.ULKE_AD, '') NOT LIKE '%Türkiye%'
+            AND (sevk.SEVK_ETME_TRH >= ?)
+            AND (sevk.SEVK_ETME_TRH < DATEADD(day, 1, ?))
+        GROUP BY
+            k.KIMLIK_TC_NO,
+            (k.KIMLIK_AD + ' ' + k.KIMLIK_SOYAD),
+            CAST(sevk.SEVK_ETME_TRH AS DATETIME),
+            CAST(hru.HST_GELIS_ID AS INT),
+            u.ULKE_AD,
+            CAST(skh.HIZMET_SUT_KODU AS NVARCHAR(50)),
+            k.CINSIYET_TUR_ID,
+            CAST(k.KIMLIK_DOGUM_TRH AS DATETIME)
+        HAVING
+            SUM(
+                CAST(
+                    ISNULL(shh.HST_BIRIM_FIYAT, 0) * ISNULL(shh.HST_MIKTAR, ISNULL(shh.HST_ADET, 1))
+                    AS FLOAT
+                )
+            ) > 0
+        ORDER BY (k.KIMLIK_AD + ' ' + k.KIMLIK_SOYAD);
     """
 
     try:

@@ -92,31 +92,58 @@ def tedavi():
 
     summary = summary[summary['ISLEM_ADETI'] > 0].copy()
     summary['ISLEM_BASI_GELIR'] = summary['TOPLAM_CIRO'] / summary['ISLEM_ADETI']
-    scatter_df = summary.nlargest(top_n, 'ISLEM_BASI_GELIR')
-    fig_scatter = px.scatter(
-        scatter_df,
-        x='ISLEM_ADETI',
-        y='TOPLAM_CIRO',
-        size='ISLEM_BASI_GELIR',
-        color=group_col,
-        hover_name=group_col,
-    )
+    
+    # Verimlilik Analizi için outlierları engelleyerek en büyük ciro yapanları al
+    scatter_df = summary.nlargest(top_n, 'TOPLAM_CIRO')
+    
+    # Plotly'de her kategoride tek bir satır veri olunca 'size' (büyüklük) matematiksel olarak 0 piksele düşüyor ve grafik boş çıkıyordu.
+    # Y-Eksenine direkt Birim Başı Geliri (Verimlilik) koyarak analizi daha mantıklı hale getirdik.
+    # Verilerimizi temiz ve güvenli bir şekilde döngüyle primitives (liste) haline getiriyoruz.
+    # Pandas veya Numpy'deki olası NaN/bdata sorunları Plotly'de render hatası çıkarabiliyor.
+    x_vals, y_vals, text_vals, ciro_vals = [], [], [], []
+    
+    for _, row in scatter_df.iterrows():
+        adet = float(row['ISLEM_ADETI'])
+        verim = float(row['ISLEM_BASI_GELIR'])
+        ciro = float(row['TOPLAM_CIRO'])
+        if pd.isna(adet) or pd.isna(verim) or pd.isna(ciro) or adet <= 0:
+            continue
+            
+        x_vals.append(adet)
+        y_vals.append(verim)
+        ciro_vals.append(ciro)
+        text_vals.append(str(row[group_col]))
+        
+    import plotly.graph_objects as go
+    fig_scatter = go.Figure()
+
+    if x_vals:
+        fig_scatter.add_trace(go.Scatter(
+            x=x_vals,
+            y=y_vals,
+            mode='markers+text',
+            text=text_vals, # İsimler baloncukların üzerinde yazsın
+            textposition='top center',
+            marker=dict(
+                size=18, # SABİT BOYUT: Ölçeklendirici crashe girmesin diye tüm yuvarlaklar aynı boyutta.
+                color=y_vals, # Rengi verimliliğe göre yapıyoruz
+                colorscale='Plasma',
+                showscale=True,
+                colorbar=dict(title='Verimlilik', thickness=15),
+                line=dict(width=1.5, color='rgba(255,255,255,0.7)')
+            ),
+            customdata=ciro_vals,
+            hovertemplate="<b>%{text}</b><br>Hacim: %{x:,.0f}<br>Verimlilik: ₺%{y:,.2f}<br>Ciro: ₺%{customdata:,.2f}<extra></extra>"
+        ))
+    
     fig_scatter.update_layout(
         template='plotly_dark',
-        height=420,
-        margin=dict(l=10, r=10, t=10, b=10),
+        height=450,
+        margin=dict(l=30, r=20, t=30, b=30),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(tickformat='.3s', title=''),
-        yaxis=dict(tickformat='.3s', title=''),
-        legend=dict(
-            x=1.01,
-            y=1,
-            bgcolor='rgba(13,27,62,0.8)',
-            bordercolor='#2d4a8a',
-            borderwidth=1,
-            font=dict(size=10),
-        ),
+        xaxis=dict(tickformat='.3s', title='İşlem Adeti (Hacim)', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
+        yaxis=dict(tickformat='.3s', title='Birim Başı Gelir', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
     )
 
     insights = []

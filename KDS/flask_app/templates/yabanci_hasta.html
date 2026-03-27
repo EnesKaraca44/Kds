@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Yabancı Hasta{% endblock %}
-{% block page_title %}🌍 Yabancı Hasta Analizi{% endblock %}
+{% block title %}<span data-t="Yabancı Hasta">Yabancı Hasta</span>{% endblock %}
+{% block page_title %}<span data-t="🌍 Yabancı Hasta Analizi">🌍 Yabancı Hasta Analizi</span>{% endblock %}
 {% block head %}
 <style>
     .yh-note {
@@ -78,47 +78,119 @@
         background: #eff6ff;
         color: #1d4ed8;
     }
+
+    /* Modern Dashboard Cards Styles (Yabancı Hasta Adaptasyonu) */
+    .metric-card {
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        position: relative;
+        overflow: hidden;
+        padding: 24px 20px;
+        transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        background: var(--bg-card);
+    }
+    .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
+    }
+    .metric-icon {
+        position: absolute;
+        right: -10px;
+        bottom: -15px;
+        opacity: 0.15;
+        z-index: 1;
+        transform: rotate(-10deg);
+        color: #ffffff;
+    }
+    .metric-icon svg {
+        width: 100px;
+        height: 100px;
+        stroke-width: 1.5;
+    }
+    .metric-body {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .metric-label {
+        font-size: 0.85rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.9);
+        margin: 0;
+    }
+    .metric-value {
+        font-size: 2.2rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        font-variant-numeric: tabular-nums;
+        color: #ffffff;
+        line-height: 1.1;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+    }
+
+    /* Yüksek Kontrastlı & Renk Körlüğü Dostu Palet */
+    .card-blue { background: linear-gradient(135deg, #2563EB, #1E40AF); }
+    .card-orange { background: linear-gradient(135deg, #EA580C, #9A3412); }
+    .card-gold { background: linear-gradient(135deg, #F59E0B, #92400E); }
+    .card-warm-green { background: linear-gradient(135deg, #16A34A, #14532D); }
+    .card-cool-green { background: linear-gradient(135deg, #0D9488, #0F766E); }
 </style>
 {% endblock %}
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 <div class="metrics-grid cols-4">
-    <div class="metric-card">
-        <div class="metric-icon">🌍</div>
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ total_patients|turkish_number(0) }}</div>
-            <div class="metric-label">Toplam Yabancı Hasta</div>
+            <div class="metric-label" data-t="Toplam Yabancı Hasta">Toplam Yabancı Hasta</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">💰</div>
+    <div class="metric-card card-warm-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ total_revenue|turkish_number }}</div>
-            <div class="metric-label">Toplam Gelir</div>
+            <div class="metric-value">{{ total_revenue|turkish_number }}</div>
+            <div class="metric-label" data-t="Toplam Gelir">Toplam Gelir</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">📊</div>
+    <div class="metric-card card-cool-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ avg_rev|turkish_number }}</div>
-            <div class="metric-label">Hasta Başı Ort. Gelir</div>
+            <div class="metric-value">{{ avg_rev|turkish_number }}</div>
+            <div class="metric-label" data-t="Hasta Başı Ort. Gelir">Hasta Başı Ort. Gelir</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">🏳️</div>
+    <div class="metric-card card-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"></path><line x1="4" y1="22" x2="4" y2="15"></line></svg>
+        </div>
         <div class="metric-body">
             <div class="metric-value">{{ ulke_cesitlilik }}</div>
-            <div class="metric-label">Ülke Çeşitliliği</div>
+            <div class="metric-label" data-t="Ülke Çeşitliliği">Ülke Çeşitliliği</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#yhTabs">
-    <button class="tab-btn active">📍 Coğrafi Dağılım</button>
-    <button class="tab-btn">📈 Verimlilik Matrisi</button>
-    <button class="tab-btn">👥 Demografi</button>
+    <button class="tab-btn active" data-t="📍 Coğrafi Dağılım">📍 Coğrafi Dağılım</button>
+    <button class="tab-btn" data-t="Verimlilik Matrisi">📈 Verimlilik Matrisi</button>
+    <button class="tab-btn" data-t="Demografi">👥 Demografi</button>
 </div>
 
 <div id="yhTabs">
@@ -126,11 +198,11 @@
     <div class="tab-content active">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">Gelir Lideri Ülkeler</div>
+                <div class="chart-title" data-t="Gelir Lideri Ülkeler">Gelir Lideri Ülkeler</div>
                 {{ charts.fig_geo_bar | safe }}
             </div>
             <div class="chart-container">
-                <div class="chart-title">Hasta Sayısı Dağılımı</div>
+                <div class="chart-title" data-t="Hasta Sayısı Dağılımı">Hasta Sayısı Dağılımı</div>
                 {{ charts.fig_geo_pie | safe }}
             </div>
         </div>
@@ -139,19 +211,19 @@
     <!-- Verimlilik Matrisi -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title">Ülke Bazlı Verimlilik (Hacim vs. Değer)</div>
+            <div class="chart-title" data-t="Ülke Bazlı Verimlilik (Hacim vs. Değer)">Ülke Bazlı Verimlilik (Hacim vs. Değer)</div>
             {% if eff_table %}
-            <div class="yh-note">Ülkeler hasta başı gelir ve toplam gelir birlikte değerlendirilerek sıralanmıştır.</div>
+            <div class="yh-note" data-t="Ülkeler hasta başı gelir ve toplam gelir birlikte değerlendirilerek sıralanmıştır.">Ülkeler hasta başı gelir ve toplam gelir birlikte değerlendirilerek sıralanmıştır.</div>
             <div class="table-wrapper">
                 <table class="data-table yh-table">
                     <thead>
                         <tr>
-                            <th>Ülke</th>
-                            <th>Hasta Sayısı</th>
-                            <th>Toplam Gelir</th>
-                            <th>Hasta Başı Gelir</th>
-                            <th>Hacim / Değer</th>
-                            <th>Yorum</th>
+                            <th data-t="Ülke">Ülke</th>
+                            <th data-t="Hasta Sayısı">Hasta Sayısı</th>
+                            <th data-t="Toplam Gelir">Toplam Gelir</th>
+                            <th data-t="Hasta Başı Gelir">Hasta Başı Gelir</th>
+                            <th data-t="Hacim / Değer">Hacim / Değer</th>
+                            <th data-t="Yorum">Yorum</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -159,8 +231,8 @@
                         <tr>
                             <td>{{ row.ulke }}</td>
                             <td>{{ row.hasta_sayisi|turkish_number(0) }}</td>
-                            <td>₺{{ row.toplam_gelir|turkish_number }}</td>
-                            <td>₺{{ row.hasta_basi_gelir|turkish_number }}</td>
+                            <td>{{ row.toplam_gelir|turkish_number }}</td>
+                            <td>{{ row.hasta_basi_gelir|turkish_number }}</td>
                             <td>
                                 <div class="yh-bar-track">
                                     <div class="yh-bar-fill {{ row.seviye }}" style="width: {{ row.bar_width }}%;"></div>
@@ -175,7 +247,7 @@
                 </table>
             </div>
             {% else %}
-            <div class="alert alert-warning">Verimlilik tablosu için veri bulunamadı.</div>
+            <div class="alert alert-warning" data-t="Verimlilik tablosu için veri bulunamadı.">Verimlilik tablosu için veri bulunamadı.</div>
             {% endif %}
         </div>
     </div>
@@ -184,17 +256,17 @@
     <div class="tab-content">
         <div class="chart-row">
             <div class="chart-container">
-                <div class="chart-title">Yaş ve Cinsiyet Dağılımı</div>
+                <div class="chart-title" data-t="Yaş ve Cinsiyet Dağılımı">Yaş ve Cinsiyet Dağılımı</div>
                 {% if demo_table %}
-                <div class="yh-note">Yaş grupları benzersiz hasta sayısına göre ve cinsiyet kırılımı ile listelenmiştir.</div>
+                <div class="yh-note" data-t="Yaş grupları benzersiz hasta sayısına göre ve cinsiyet kırılımı ile listelenmiştir.">Yaş grupları benzersiz hasta sayısına göre ve cinsiyet kırılımı ile listelenmiştir.</div>
                 <div class="table-wrapper">
                     <table class="data-table yh-table">
                         <thead>
                             <tr>
-                                <th>Yaş Grubu</th>
-                                <th>Toplam Hasta</th>
-                                <th>Yoğunluk</th>
-                                <th>Cinsiyet Dağılımı</th>
+                                <th data-t="Yaş Grubu">Yaş Grubu</th>
+                                <th data-t="Toplam Hasta">Toplam Hasta</th>
+                                <th data-t="Yoğunluk">Yoğunluk</th>
+                                <th data-t="Cinsiyet Dağılımı">Cinsiyet Dağılımı</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -218,11 +290,11 @@
                     </table>
                 </div>
                 {% else %}
-                <div class="alert alert-warning">Demografi tablosu için veri bulunamadı.</div>
+                <div class="alert alert-warning" data-t="Demografi tablosu için veri bulunamadı.">Demografi tablosu için veri bulunamadı.</div>
                 {% endif %}
             </div>
             <div class="chart-container">
-                <div class="chart-title">Cinsiyet Payı</div>
+                <div class="chart-title" data-t="Cinsiyet Payı">Cinsiyet Payı</div>
                 {{ charts.fig_demo_pie | safe }}
             </div>
         </div>
@@ -230,17 +302,11 @@
 </div>
 
 <div class="insights" style="margin-top: 20px;">
-    <h2 class="section-title">🤖 Akıllı Analiz Notları</h2>
+    <h2 class="section-title" data-t="🤖 Akıllı Analiz Notları">🤖 Akıllı Analiz Notları</h2>
     {% for item in insights %}
-        {% if item.ulke is defined %}
+        {% if item.share_pct is defined %}
         <div class="insight-row">
-            🏆 <strong>{{ item.ulke }}</strong>:
-            {{ item.gelir|turkish_number(2) }} ₺ gelir,
-            {{ item.hasta|turkish_number(0) }} hasta
-        </div>
-        {% elif item.share_pct is defined %}
-        <div class="insight-row">
-            📊 İlk 3 ülke toplam gelirin <strong>%{{ item.share_pct|round(1) }}</strong>'ini oluşturuyor.
+            📊 <span data-t="İlk 3 ülke toplam gelirin">İlk 3 ülke toplam gelirin</span> <strong>%{{ item.share_pct|round(1) }}</strong>'ini <span data-t="oluşturuyor.">oluşturuyor.</span>
         </div>
         {% endif %}
     {% endfor %}

@@ -136,7 +136,7 @@ def yabanci_hasta():
             size='Hasta_Basi_Gelir',
             color='Ulke',
             hover_name='Ulke',
-            labels={'Hasta_Sayisi': 'Hasta Sayısı', 'Toplam_Gelir': 'Toplam Gelir (₺)'},
+            labels={'Hasta_Sayisi': 'Hasta Sayısı', 'Toplam_Gelir': 'Toplam Gelir'},
         )
     else:
         fig_eff = px.scatter(
@@ -145,7 +145,7 @@ def yabanci_hasta():
             y='Toplam_Gelir',
             color='Ulke',
             hover_name='Ulke',
-            labels={'Hasta_Sayisi': 'Hasta Sayısı', 'Toplam_Gelir': 'Toplam Gelir (₺)'},
+            labels={'Hasta_Sayisi': 'Hasta Sayısı', 'Toplam_Gelir': 'Toplam Gelir'},
         )
     fig_eff.update_layout(
         template='plotly_dark',
@@ -154,7 +154,7 @@ def yabanci_hasta():
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(tickformat='.3s', title='Hasta Sayısı'),
-        yaxis=dict(tickformat='.3s', title='Toplam Gelir (₺)'),
+        yaxis=dict(tickformat='.3s', title='Toplam Gelir'),
         legend=dict(
             x=1.01,
             y=1,

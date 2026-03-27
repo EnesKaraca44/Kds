@@ -6,7 +6,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.dinamik_gelir_sorgular import son_fatura_metrikleri_getir
+from database.dinamik_gelir_sorgular import dinamik_dashboard_metrikleri_getir
 from database.baglanti import baglanti_olustur
 
 dashboard_bp = Blueprint('dashboard', __name__)
@@ -65,7 +65,7 @@ def dashboard():
     
     start_perf = time.time()
     try:
-        df_latest = son_fatura_metrikleri_getir()
+        df_latest = dinamik_dashboard_metrikleri_getir(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
         query_time = round(time.time() - start_perf, 3)
         
         if not df_latest.empty:

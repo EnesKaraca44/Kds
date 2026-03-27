@@ -39,7 +39,7 @@ def malzeme():
 
     # Branş dağılımı
     branch_sum = df.groupby('bransAdi')['toplam'].sum().reset_index().sort_values('toplam', ascending=False).head(10)
-    fig_br = px.bar(branch_sum, x='toplam', y='bransAdi', orientation='h', title="En Çok Tüketen 10 Branş (₺)",
+    fig_br = px.bar(branch_sum, x='toplam', y='bransAdi', orientation='h', title="En Çok Tüketen 10 Branş",
                     color='toplam', color_continuous_scale='Reds')
     fig_br.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 

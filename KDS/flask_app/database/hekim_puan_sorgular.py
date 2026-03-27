@@ -8,58 +8,124 @@ def hekim_puan_verisi_yukle(start_date, end_date):
         return None
 
     query = """
-    SET NOCOUNT ON; 
-    DECLARE @BAS_DATE DATE = ?;
-    DECLARE @BIT_DATE DATE = ?;
-
-    WITH RawData AS (
-        SELECT  
-            VW_HASTANE.TETKIK_DOKTOR_ADI,
-            VW_HASTANE.HASTA_KODU,
-            VW_HASTANE.HASTA_ADI_SOYADI,
-            VW_HASTANE.HASTA_GELIS_NO,
-            VW_HASTANE.HASTA_GELIS_TARIHI,
-            VW_HASTANE.TETKIK_TARIHI,
-            VW_HASTANE.TETKIK_ADI,
-            VW_HASTANE.TETKIK_ADET,
-            VW_HASTANE.TETKIK_DOKTOR_ID,
-            LEFT(VW_HASTANE.TETKIK_SAATI, 5) AS TETKIK_SAATI,
-            VW_HASTANE.TETKIK_BUTCE_KODU,
-            TblDoktor.DktMuaynehane,
-            VW_HASTANE.TETKIK_DIS_NO,
-            VW_HASTANE.TETKIK_BIRIM_UCRET,
-            VW_HASTANE.MESAI_DISI,
-            TblDoktor.DkTkAd,
-            TblDoktor.DOKTOR_TCK_NO,
-            Kons.DktAd AS KonAd,
-            ISNULL(NULLIF(VW_HASTANE.RntTur, 0) * SIGN(ISNULL(VW_HASTANE.RADYODOKTOR, 0)) +
-                   NULLIF(VW_HASTANE.HstTeknisyen, -32768) - VW_HASTANE.HstTeknisyen, 1) AS Katsayi,
-            VW_HASTANE.TETKIK_BIRIM_PUAN
-        FROM VW_HASTANE WITH (NOLOCK)
-        INNER JOIN TblDoktor WITH (NOLOCK) ON VW_HASTANE.TETKIK_DOKTOR_ID = TblDoktor.DktNo
-        LEFT JOIN TblDoktor AS Kons WITH (NOLOCK) ON VW_HASTANE.T_DOKTOR2_ID = Kons.DktNo
-        WHERE VW_HASTANE.TETKIK_BIRIM_PUAN > 0 
-          AND VW_HASTANE.TETKIK_TARIHI BETWEEN @BAS_DATE AND @BIT_DATE
-    )
-    SELECT 
-        TETKIK_DOKTOR_ADI, HASTA_KODU, HASTA_ADI_SOYADI, HASTA_GELIS_NO,
-        HASTA_GELIS_TARIHI, TETKIK_TARIHI, TETKIK_ADI, TETKIK_DOKTOR_ID,
-        TETKIK_SAATI, TETKIK_BUTCE_KODU, DktMuaynehane, TETKIK_DIS_NO,
-        TETKIK_BIRIM_UCRET, MESAI_DISI, DkTkAd, DOKTOR_TCK_NO, KonAd,
-        SUM(TETKIK_ADET) AS TETKIK_ADET,
-        MIN(Katsayi * Katsayi * TETKIK_BIRIM_PUAN) AS PUAN,
-        SUM(TETKIK_ADET) * MIN(Katsayi * Katsayi * TETKIK_BIRIM_PUAN) AS TETKIK_TOPLAM_PUAN
-    FROM RawData
-    GROUP BY 
-        TETKIK_DOKTOR_ADI, HASTA_KODU, HASTA_ADI_SOYADI, HASTA_GELIS_NO,
-        HASTA_GELIS_TARIHI, TETKIK_TARIHI, TETKIK_ADI, TETKIK_DOKTOR_ID,
-        TETKIK_SAATI, TETKIK_BUTCE_KODU, DktMuaynehane, TETKIK_DIS_NO,
-        TETKIK_BIRIM_UCRET, MESAI_DISI, DkTkAd, DOKTOR_TCK_NO, KonAd
-    ORDER BY TETKIK_DOKTOR_ADI, TETKIK_ADI;
+    select 
+     HASTA_KODU
+     ,konsultanHekimKimlikAd as KonAd
+     ,hekimAdSoyad as TETKIK_DOKTOR_ADI
+     ,birimAd
+     ,stokAd as TETKIK_ADI
+     ,kimlikId as TETKIK_DOKTOR_ID
+     ,cast(hizmetKod as nvarchar)as TETKIK_BUTCE_KODU
+     ,cast (islemTrh as date) as TETKIK_TARIHI
+     ,isnull(mesaiIciPuan,0) as mesaiIciPuan
+     , isnull(mesaiDisiPuan,0) as mesaiDisiPuan
+     , isnull(Toplampuan,0) as Toplampuan
+     ,hastaKimlikId 
+     ,cast(birimPuan as decimal(27,13))as birimPuan
+     ,uygulamaYer as TETKIK_DIS_NO
+     ,hstAdet as TETKIK_ADET
+     , dbo.IntegerIntoTime(islemSaat ) as TETKIK_SAATI
+     ,gelisNo as HASTA_GELIS_NO 
+     ,gelisTrh as HASTA_GELIS_TARIHI
+     ,hizmetPuanAlmasin
+     ,hizmetPuanDegisiklikTrh
+     ,medulaGonderimDurumu 
+     ,hastaAdSoyad as HASTA_ADI_SOYADI
+     ,birimFiyat as TETKIK_BIRIM_UCRET
+     ,miktar
+     ,tutar
+     ,paraBirim 
+     ,dovizKuru 
+     ,tutarDvz
+     ,farkUcret
+     ,KatilimPayi 
+     ,KurumKatilim  
+    from (  
+    select skh.HIZMET_TANIMI as stokAd,
+    skh.HIZMET_SUT_KODU as hizmetKod,  
+    case when (isnull(skh.HIZMET_UCRET_TUR_ID,0) <> 2 
+              and td.TUR_DEGER_KOD='MESAIICI' 
+              and (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null)) 
+         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1) * sdo.D_ORAN) 
+    end as mesaiIciPuan,
+    case when (isnull(skh.HIZMET_UCRET_TUR_ID,0) <> 2 
+              and td.TUR_DEGER_KOD='MESAIDISI' 
+              and (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null)) 
+         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1) * sdo.D_ORAN) 
+    end as mesaiDisiPuan,
+    case when (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null) 
+         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1)) 
+    end as Toplampuan,
+    td.TUR_DEGER_KOD as mesaiDurum,sd.KIMLIK_ID as kimlikId ,
+    shh.HASTA_KIMLIK_ID as hastaKimlikId ,
+    (sd.DOKTOR_AD+' '+sd.DOKTOR_SOYAD) as hekimAdSoyad,
+    (sdk.DOKTOR_AD+' '+sdk.DOKTOR_SOYAD) as konsultanHekimKimlikAd,
+    b.BIRIM_AD as birimAd,
+    sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1)) as birimPuan 
+    ,shru.HST_GELIS_KOD as gelisNo,shh.ISLEM_TRH as islemTrh ,
+    SHRU.HST_GELIS_ID as hstGelisId,
+    shru.HST_GELIS_TRH as gelisTrh,
+    shh.ISLEM_SAAT as islemSaat,
+    shh.STOK_ID as stokId,
+    shh.SBS_HASTA_HAREKET_ID as sbsHastaHareketId,
+    shh.HIZMET_PUAN_ALMASIN as hizmetPuanAlmasin, 
+    case when skh.HIZMET_UYGULAMA_YERI = 1 then 'Dis' 
+         when skh.HIZMET_UYGULAMA_YERI = 2 then 'YarımCene' 
+         when skh.HIZMET_UYGULAMA_YERI = 3 then 'TamCene' 
+         when skh.HIZMET_UYGULAMA_YERI = 4 then 'Agiz' 
+         else 'Agiz' end as uygulamaYer,
+    isnull(shh.HST_MIKTAR,shh.HST_ADET) as hstAdet, 
+    shh.HIZMET_PUAN_DEGISIKLIK_TRH as hizmetPuanDegisiklikTrh,
+    cast(isnull(shh.MEDULA_GONDERIM_DURUMU,0) as integer) as medulaGonderimDurumu, 
+    sh.HASTA_KODU as HASTA_KODU,
+    hastakimlik.KIMLIK_AD+' '+hastakimlik.KIMLIK_SOYAD as hastaAdSoyad,
+    shh.HST_BIRIM_FIYAT as birimFiyat, 
+    shh.HST_MIKTAR as miktar,
+    (shh.HST_BIRIM_FIYAT * shh.HST_MIKTAR) * sdo.D_ORAN as tutar,
+    isnull(pr.PARA_BIRIM_AD,'TL') as paraBirim,
+    shh.DOVIZ_KURU as dovizKuru,
+    shh.TUTAR_DVZ as tutarDvz,
+    shh.FARK_UCRET as farkUcret,
+    shh.KATILIM_PAYI as katilimPayi,
+    case when isnull(skh.HIZMET_KURUM_KATILIM_DURUM,0) <> 0 then shh.KURUM_KATILIM else 0 end as kurumKatilim
+     from SBS_HASTA_HAREKET as shh with(nolock) 
+    left join SBS_DOKTOR as sd with (nolock) on shh.HEKIM_KIMLIK_ID = sd.KIMLIK_ID and (isnull(sd.PSF_ID,0) = 0) 
+    inner join SBS_HASTA_RESMI_UCRETLI as shru with (nolock) on shru.HST_GELIS_ID = shh.HST_GELIS_ID and (isnull(shru.PSF_ID,0) = 0) 
+    inner join STOK_KART_HIZMET as skh with (nolock) on skh.STOK_ID = shh.STOK_ID and (isnull(skh.PSF_ID,0) = 0)  
+    inner join SBS_HASTA as sh with (nolock) on sh.HASTA_KIMLIK_ID = shru.HASTA_KIMLIK_ID and (isnull(sh.PSF_ID,0) = 0) 
+    inner join KIMLIK as hastaKimlik with (nolock) on hastaKimlik.KIMLIK_ID = shh.HASTA_KIMLIK_ID and (isnull(hastaKimlik.PSF_ID,0) = 0) 
+    inner join SBS_KLINIK as sk with (nolock) on sk.BIRIM_ID = shh.KLINIK_BIRIM_ID and (isnull(sk.PSF_ID,0) = 0) 
+    left join TUR_DETAY as td with (nolock) on td.TUR_DETAY_ID = sk.MESAI_DURUMU and (isnull(td.PSF_ID,0) = 0) 
+    left join SBS_DOKTOR as sdk with (nolock) on sdk.KIMLIK_ID = shh.KONSULTAN_HEKIM_KIMLIK_ID and (isnull(sdk.PSF_ID,0) = 0) 
+    left join BIRIM as b with(nolock) on b.BIRIM_ID = shh.KLINIK_BIRIM_ID and (isnull(b.PSF_ID,0) = 0) 
+    left join PARA_BIRIM as PR with(nolock) on pr.PARA_BIRIM_ID = shh.DOVIZ_TUR_ID
+    INNER JOIN SBS_DOKTOR_ORAN AS sdo WITH (NOLOCK) 
+        ON K = SIGN(ISNULL(NULLIF(shh.KONSULTAN_HEKIM_KIMLIK_ID, shh.HEKIM_KIMLIK_ID), 0)) 
+        AND D = SIGN(ISNULL(shh.HEKIM_KIMLIK_ID, 0)) 
+        AND C = SIGN(ISNULL(shh.OGRENCI_HEKIM_KIMLIK_ID, 0)) 
+        AND sdo.TASLAK_ID = 1 
+        AND ISNULL(sdo.PSF_ID, 0) = 0
+    WHERE (isnull(shh.PSF_ID,0) = 0) 
+        AND isnull(EK_ODEME_YANSIMASIN,0) <= 0
+        AND (shh.ISLEM_TRH >= ?) AND (shh.ISLEM_TRH < DATEADD(day, 1, ?))
+    group by sh.HASTA_KODU, td.TUR_DEGER_KOD, sd.KIMLIK_ID, shru.HST_GELIS_KOD, b.BIRIM_AD,
+        (sd.DOKTOR_AD+' '+sd.DOKTOR_SOYAD), (sdk.DOKTOR_AD+' '+sdk.DOKTOR_SOYAD),
+        shru.HST_GELIS_TRH, shh.HASTA_KIMLIK_ID, SHRU.HST_GELIS_ID, skh.HIZMET_TANIMI,
+        skh.HIZMET_SUT_KODU, shh.ISLEM_TRH, shh.ISLEM_SAAT, shh.HIZMET_PUAN_ALMASIN,
+        shh.HIZMET_PUAN1, skh.HIZMET_UYGULAMA_YERI, shh.HST_MIKTAR, shh.HST_ADET,
+        shh.STOK_ID, shh.SBS_HASTA_HAREKET_ID, shh.MEDULA_GONDERIM_DURUMU,
+        shh.HIZMET_PUAN_DEGISIKLIK_TRH, hastakimlik.KIMLIK_AD+' '+hastakimlik.KIMLIK_SOYAD,
+        shh.HST_BIRIM_FIYAT, pr.PARA_BIRIM_AD, shh.DOVIZ_KURU, shh.TUTAR_DVZ,
+        shh.FARK_UCRET, shh.KATILIM_PAYI, shh.KURUM_KATILIM, skh.HIZMET_KURUM_KATILIM_DURUM,
+        sdo.D_ORAN, sdo.K_ORAN, sdo.C_ORAN, skh.HIZMET_UCRET_TUR_ID
+    ) as doktorT 
+    where 1=1
+    AND (islemTrh >= ?) AND (islemTrh < DATEADD(day, 1, ?))
+    order by stokAd
     """
 
     try:
-        df = pd.read_sql(query, conn, params=(start_date, end_date))
+        df = pd.read_sql(query, conn, params=(start_date, end_date, start_date, end_date))
         return df
     except Exception as e:
         print(f"Hekim Puan Verisi Yükleme Hatası: {e}")

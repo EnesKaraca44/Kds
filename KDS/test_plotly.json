@@ -1,0 +1,1 @@
+{"data": [{"hovertemplate": "hareketTurAd=%{x}<br>tahsilatToplam=%{y}<br>tahsilat_text=%{text}<extra></extra>", "legendgroup": "Kredi Kart", "marker": {"color": "#636efa", "pattern": {"shape": ""}}, "name": "Kredi Kart", "orientation": "v", "showlegend": true, "text": 

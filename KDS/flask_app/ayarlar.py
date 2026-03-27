@@ -5,10 +5,10 @@ SECRET_KEY = os.environ.get("FLASK_SECRET_KEY", "kds-super-secret-key-2026")
 
 # Veritabanı ayarları (eski secrets.toml'dan taşındı)
 DATABASE = {
-    "server": "192.168.12.17",
-    "database": "MAMAKADSM_HASTAM",
-    "username": "metasoft",
-    "password": "Meta26.soft",
+    "server": "193.255.140.195:50602",
+    "database": "DEAL",
+    "username": "sa",
+    "password": "REMOVED_FOR_SECURITY",
     "driver": "{ODBC Driver 17 for SQL Server}",
 }
 
@@ -17,3 +17,6 @@ CREDENTIALS = {
     "admin": "12345",
     "user": "",
 }
+
+
+

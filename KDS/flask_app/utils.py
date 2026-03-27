@@ -26,7 +26,7 @@ def generate_smart_insights(df, group_col, revenue_col, count_col, top_n=3):
         top = sorted_rev.head(top_n)
         for _, row in top.iterrows():
             insights.append(
-                f"🏆 {row[group_col]}: {format_turkish_number(row[revenue_col])} ₺ gelir, "
+                f"🏆 {row[group_col]}: {format_turkish_number(row[revenue_col])} gelir, "
                 f"{format_turkish_number(row[count_col], 0)} işlem"
             )
 

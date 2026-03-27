@@ -1,49 +1,100 @@
 {% extends "base.html" %}
 
-{% block title %}Ana Sayfa{% endblock %}
-{% block page_title %}🏥 Kurum Performans Yönetim Sistemi{% endblock %}
+{% block title %}<span data-t="Ana Sayfa">Ana Sayfa</span>{% endblock %}
+{% block page_title %}<span data-t="Kurum Performans Yönetim Sistemi">🏥 Kurum Performans Yönetim Sistemi</span>{% endblock %}
 
 {% block content %}
+<style>
+  /* Dashboard Typography & KPI Redesign */
+  .content-area {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+  
+  .greeting-bar {
+    background: linear-gradient(90deg, rgba(15,23,42,0.8), rgba(30,41,59,0.8));
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 18px 24px;
+    margin-bottom: 28px;
+    color: #f8fafc; /* Metin rengi düzeltmesi */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 500;
+  }
+  
+  .greeting-bar strong {
+    color: #38bdf8;
+    font-weight: 700;
+  }
+
+  .greeting-period {
+    font-size: 0.85rem;
+    color: #94a3b8;
+  }
+  
+  .section-title {
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: #F8FAFC;
+    border-bottom: 2px solid rgba(255,255,255,0.05);
+    padding-bottom: 10px;
+    margin-bottom: 24px;
+    font-size: 1.4rem;
+  }
+
+  /* Metric card styles moved to global style.css */
+</style>
+
 <div class="greeting-bar">
-    <span>👋 {{ greeting }}, <strong>{{ logged_in_user }}</strong></span>
-    <span class="greeting-period">Analiz periyodu: {{ start_date.strftime('%d.%m.%Y') }} - {{
+    <span>👋 <span data-t="{{ greeting }}">{{ greeting }}</span>, <strong>{{ logged_in_user }}</strong></span>
+    <span class="greeting-period"><span data-t="Analiz periyodu">Analiz periyodu</span>: {{ start_date.strftime('%d.%m.%Y') }} - {{
         end_date.strftime('%d.%m.%Y') }}</span>
 </div>
 
 <!-- Finansal Performans Özeti -->
-<h2 class="section-title">🚀 Finansal Performans Özeti</h2>
+<h2 class="section-title" data-t="🚀 Finansal Performans Özeti">🚀 Finansal Performans Özeti</h2>
 
 {% if metrics and 'error' not in metrics %}
 <div class="metrics-grid">
-    <div class="metric-card">
-        <div class="metric-icon">👥</div>
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">{{ metrics.toplam_hasta }} Kişi</div>
-            <div class="metric-label">Toplam Hasta</div>
-            <div class="metric-delta positive">Güncel Kayıt</div>
+            <div class="metric-value">{{ metrics.toplam_hasta }} <span data-t="Kişi">Kişi</span></div>
+            <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
+            <div class="metric-delta positive" data-t="Güncel Kayıt">Güncel Kayıt</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">💰</div>
+    <div class="metric-card card-warm-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ metrics.toplam_tutar|turkish_number }}</div>
-            <div class="metric-label">Toplam Gelir</div>
-            <div class="metric-delta positive">Tahakkuk Eden</div>
+            <div class="metric-value">{{ metrics.toplam_tutar|turkish_number }}</div>
+            <div class="metric-label" data-t="Tahmini Toplam Gelir"> Tahmini Toplam Gelir</div>
+            <div class="metric-delta positive" data-t="Tahakkuk Eden">Tahakkuk Eden</div>
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">📊</div>
+    <div class="metric-card card-purple">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-value">₺{{ metrics.avg_val|turkish_number }}</div>
-            <div class="metric-label">Hasta Başı Ort.</div>
-            <div class="metric-delta positive">Verimlilik</div>
+            <div class="metric-value">{{ metrics.avg_val|turkish_number }}</div>
+            <div class="metric-label" data-t="Hasta Başına Düşen Ortalama Gelir">Hasta Başına Düşen Ortalama Gelir</div>
+            <div class="metric-delta positive" data-t="Verimlilik">Verimlilik</div>
         </div>
     </div>
 </div>
 
 <div class="info-banner">
-    📄 <strong>Sistem Notu:</strong> En son <code>{{ metrics.fatura_no }}</code> nolu fatura grubu işlendi. Veriler bu
-    grup üzerinden konsolide edilmiştir.
+    📄 <strong data-t="Sistem Notu">Sistem Notu:</strong> <span data-t="Veriler, seçili tarih aralığındaki güncel (canlı) hareketlerden konsolide edilmiştir.">Veriler, seçili tarih aralığındaki güncel (canlı) hareketlerden konsolide
+    edilmiştir.</span>
 </div>
 {% elif metrics and 'error' in metrics %}
 <div class="alert alert-error">⚠️ Veri yükleme hatası: {{ metrics.error }}</div>
@@ -53,40 +104,45 @@
 
 <!-- Sistem Sağlık Durumu -->
 <div class="divider"></div>
-<h2 class="section-title">🛠️ Sistem Sağlık Durumu</h2>
+<h2 class="section-title" data-t="🛠️ Sistem Sağlık Durumu">🛠️ Sistem Sağlık Durumu</h2>
 
 <div class="metrics-grid cols-3">
-    <div class="metric-card">
-        <div class="metric-icon">📡</div>
+    <div class="metric-card card-slate">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg>
+        </div>
         <div class="metric-body">
-            <div class="metric-label">Sunucu Bağlantısı</div>
+            <div class="metric-label" data-t="Sunucu Bağlantısı">Sunucu Bağlantısı</div>
             {% if db_status == 'ok' %}
-            <div class="status-badge success">✅ Çalışıyor: Bağlantı Sağlıklı</div>
+            <div class="metric-delta" data-t="✅ Doğrulandı">✅ Doğrulandı</div>
             {% else %}
-            <div class="status-badge error">❌ Bağlantı Yok</div>
+            <div class="metric-delta error" data-t="❌ Bağlantı Yok" style="background: rgba(239,68,68,0.2);">❌ Bağlantı Yok</div>
             {% endif %}
         </div>
     </div>
-    <div class="metric-card">
-        <div class="metric-icon">⚡</div>
-        <div class="metric-body">
-            <div class="metric-label">Sorgu Performansı</div>
-            {% if query_time > 0 and query_time < 1.0 %} <div class="status-badge success">🚀 Çok Hızlı: {{ query_time
-                }} sn
+    <div class="metric-card card-amber">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
         </div>
-        {% elif query_time >= 1.0 %}
-        <div class="status-badge warning">⏱️ Normal: {{ query_time }} sn</div>
-        {% else %}
-        <div class="status-badge info">Ölçülmedi</div>
-        {% endif %}
+        <div class="metric-body">
+            <div class="metric-label" data-t="Sorgu Performansı">Sorgu Performansı</div>
+            {% if query_time > 0 and query_time < 1.0 %} 
+            <div class="metric-delta">🚀 {{ query_time }} <span data-t="sn">sn</span></div>
+            {% elif query_time >= 1.0 %}
+            <div class="metric-delta">⏱️ {{ query_time }} <span data-t="sn">sn</span></div>
+            {% else %}
+            <div class="metric-delta" data-t="Ölçülmedi">Ölçülmedi</div>
+            {% endif %}
+        </div>
     </div>
-</div>
-<div class="metric-card">
-    <div class="metric-icon">🕒</div>
-    <div class="metric-body">
-        <div class="metric-label">Son Güncelleme</div>
-        <div class="status-badge info">{{ current_time }}</div>
+    <div class="metric-card card-indigo">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-label" data-t="Son Güncelleme">Son Güncelleme</div>
+            <div class="metric-delta">{{ current_time }}</div>
+        </div>
     </div>
-</div>
 </div>
 {% endblock %}

@@ -9,7 +9,7 @@ import unicodedata
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required  # noqa: E402
-from database.rontgen_sorgular import rontgen_verisi_yukle  # noqa: E402
+from database.rontgen_sorgular import rontgen_verisi_hekim_brans  # noqa: E402
 from routes.dashboard import get_date_range  # noqa: E402
 
 rontgen_bp = Blueprint("rontgen", __name__)
@@ -83,132 +83,107 @@ def _safe_float(value):
 @login_required
 def rontgen():
     sd, ed = get_date_range()
-    df_raw = rontgen_verisi_yukle(sd, ed)
+    df_hekim, df_brans = rontgen_verisi_hekim_brans(sd, ed)
 
-    if df_raw is None or df_raw.empty:
+    if (df_hekim is None or df_hekim.empty) and (df_brans is None or df_brans.empty):
         return render_template("rontgen.html", start_date=sd, end_date=ed, no_data=True)
 
-    df = df_raw.copy()
+    film_cols = ["Periapikal", "Panoramik", "Sefalometrik", "DentalTomografi"]
+    
+    if not df_hekim.empty:
+        for col in film_cols:
+            if col in df_hekim.columns:
+                df_hekim[col] = pd.to_numeric(df_hekim[col], errors="coerce").fillna(0).astype(int)
+        df_hekim["TOPLAM_FILM"] = df_hekim[film_cols].sum(axis=1)
 
-    C_HEKIM = _find_column(["DKTAD", "HEKIM ADI", "DOKTOR", "HEKIM"], df.columns)
-    C_KLINIK = _find_column(["GSS_KLINIK_ADI", "BRANS_ADI"], df.columns)
-    C_PERI = _find_column(["PERIAPICAL RÖNTGEN SAYISI", "PERIAPIKAL RÖNTGEN SAYISI"], df.columns)
-    C_PAN = _find_column(["PANORAMIK RÖNTGEN SAYISI"], df.columns)
-    C_SEF = _find_column(["SEFALOMETRIK RÖNTGEN SAYISI"], df.columns)
-    C_TOMO = _find_column(["DENTAL TOMOGRAFI RÖNTGEN SAYISI"], df.columns)
+    if not df_brans.empty:
+        for col in film_cols:
+            if col in df_brans.columns:
+                df_brans[col] = pd.to_numeric(df_brans[col], errors="coerce").fillna(0).astype(int)
+        df_brans["TOPLAM_FILM"] = df_brans[film_cols].sum(axis=1)
 
-    if not C_HEKIM or not C_PAN:
-        return render_template("rontgen.html", start_date=sd, end_date=ed, no_data=True)
+    toplam_tetkik = int(df_hekim["TOPLAM_FILM"].sum()) if not df_hekim.empty else 0
+    toplam_pan = int(df_hekim["Panoramik"].sum()) if not df_hekim.empty and "Panoramik" in df_hekim.columns else 0
+    toplam_peri = int(df_hekim["Periapikal"].sum()) if not df_hekim.empty and "Periapikal" in df_hekim.columns else 0
 
-    film_cols = [c for c in [C_PERI, C_PAN, C_SEF, C_TOMO] if c is not None]
-    for col in film_cols:
-        df[col] = pd.to_numeric(df[col], errors="coerce").fillna(0).astype(int)
-
-    # Genel metrikler
-    df["TOPLAM_FILM"] = df[film_cols].sum(axis=1)
-    toplam_tetkik = int(df["TOPLAM_FILM"].sum())
-    toplam_pan = int(df[C_PAN].sum()) if C_PAN else 0
-    toplam_peri = int(df[C_PERI].sum()) if C_PERI else 0
+    C_HEKIM = "DktAd"
+    C_KLINIK = "BirimAd"
+    C_PAN = "Panoramik"
+    C_PERI = "Periapikal"
 
     # ---- Sekme 1: Hekim Analizi ----
-    hekim_sum = (
-        df.groupby(C_HEKIM)[film_cols]
-        .sum()
-        .reset_index()
-    )
-    hekim_sum["TOPLAM_FILM"] = hekim_sum[film_cols].sum(axis=1)
-    hekim_sum = hekim_sum.sort_values("TOPLAM_FILM", ascending=False)
+    hekim_sum = df_hekim.sort_values("TOPLAM_FILM", ascending=False).copy() if not df_hekim.empty else pd.DataFrame()
+    top_n = 25
+    hekim_top = hekim_sum.head(top_n) if not hekim_sum.empty else pd.DataFrame()
+    
+    # DEBUG LOG
+    try:
+        with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\df_debug.txt", "w", encoding="utf-8") as f:
+            if not hekim_top.empty:
+                f.write("hekim_top:\n")
+                f.write(hekim_top.to_string())
+                hekim_melt = hekim_top.melt(id_vars=C_HEKIM, value_vars=film_cols, var_name="Tür", value_name="Adet")
+                f.write("\n\nhekim_melt:\n")
+                f.write(hekim_melt.to_string())
+            else:
+                f.write("hekim_top is empty!\n")
+    except Exception:
+        pass
+        
+    fig_hekim_bar_html = _empty_chart_html("NO_DATA_HEKIM", height=420)
+    if not hekim_top.empty:
+        hekim_melt = hekim_top.melt(id_vars=C_HEKIM, value_vars=film_cols, var_name="Tür", value_name="Adet")
+        hekim_melt["Adet"] = pd.to_numeric(hekim_melt["Adet"], errors='coerce').fillna(0).astype(int)
+        
+        fig_hekim_bar = go.Figure()
+        for tur in film_cols:
+            df_tur = hekim_melt[hekim_melt["Tür"] == tur]
+            fig_hekim_bar.add_trace(go.Bar(
+                x=df_tur[C_HEKIM].tolist(),
+                y=df_tur["Adet"].tolist(),
+                name=tur,
+                text=df_tur["Adet"].tolist(),
+                textposition="outside"
+            ))
+            
+        fig_hekim_bar.update_layout(
+            barmode="group",
+            template="plotly_dark", height=420, margin=dict(l=10, r=10, t=10, b=60),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+            xaxis=dict(tickangle=-45, title=""),
+            yaxis=dict(title=""),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+        )
+        fig_hekim_bar_html = fig_hekim_bar.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True})
 
-    top_n = 15
-    hekim_top = hekim_sum.head(top_n)
-    hekim_melt = hekim_top.melt(
-        id_vars=C_HEKIM, value_vars=film_cols, var_name="Tür", value_name="Adet"
-    )
-    fig_hekim_bar = px.bar(
-        hekim_melt,
-        x=C_HEKIM,
-        y="Adet",
-        color="Tür",
-        barmode="group",
-        labels={C_HEKIM: "Hekim", "Adet": "Film Sayısı"},
-    )
-    fig_hekim_bar.update_traces(texttemplate="%{y:.3s}", textposition="outside", cliponaxis=False)
-    fig_hekim_bar.update_layout(
-        template="plotly_dark",
-        height=420,
-        margin=dict(l=10, r=10, t=10, b=60),
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        xaxis=dict(tickangle=-45),
-        legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
-    )
-
-    hekim_table = hekim_sum.head(30).to_dict(orient="records")
-
-    # Bilgi şeritleri
+    hekim_table = hekim_sum.head(30).to_dict(orient="records") if not hekim_sum.empty else []
     hekim_en_fazla = hekim_sum.iloc[0] if not hekim_sum.empty else None
-    hekim_en_az = (
-        hekim_sum[hekim_sum["TOPLAM_FILM"] > 0].iloc[-1]
-        if (hekim_sum["TOPLAM_FILM"] > 0).any()
-        else None
-    )
+    hekim_en_az = (hekim_sum[hekim_sum["TOPLAM_FILM"] > 0].iloc[-1] if not hekim_sum.empty and (hekim_sum["TOPLAM_FILM"] > 0).any() else None)
 
     # ---- Sekme 2: Branş Analizi ----
     branch_pie_html = ""
     branch_type_pie_html = ""
     fig_branch_bar_html = ""
-    if C_KLINIK:
-        branch_sum = (
-            df.groupby(C_KLINIK)[film_cols]
-            .sum()
-            .reset_index()
-        )
-        branch_sum["TOPLAM_FILM"] = branch_sum[film_cols].sum(axis=1)
-        branch_sum = branch_sum.sort_values("TOPLAM_FILM", ascending=False)
+    
+    if not df_brans.empty:
+        branch_sum = df_brans.sort_values("TOPLAM_FILM", ascending=False).copy()
+        fig_branch_pie = px.pie(branch_sum, names=C_KLINIK, values="TOPLAM_FILM", hole=0.55)
+        fig_branch_pie.update_layout(template="plotly_dark", margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
 
-        fig_branch_pie = px.pie(
-            branch_sum,
-            names=C_KLINIK,
-            values="TOPLAM_FILM",
-            hole=0.55,
-        )
-        fig_branch_pie.update_layout(
-            template="plotly_dark",
-            margin=dict(l=10, r=10, t=10, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-        )
-
-        total_by_type = df[film_cols].sum().reset_index()
+        total_by_type = branch_sum[film_cols].sum().reset_index()
         total_by_type.columns = ["TUR", "ADET"]
-        fig_type_pie = px.pie(
-            total_by_type,
-            names="TUR",
-            values="ADET",
-            hole=0.55,
-        )
-        fig_type_pie.update_layout(
-            template="plotly_dark",
-            margin=dict(l=10, r=10, t=10, b=10),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-        )
+        fig_type_pie = px.pie(total_by_type, names="TUR", values="ADET", hole=0.55)
+        fig_type_pie.update_layout(template="plotly_dark", margin=dict(l=10, r=10, t=10, b=10), paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)")
 
         fig_branch_bar = px.bar(
-            branch_sum.head(10).sort_values("TOPLAM_FILM"),
-            x="TOPLAM_FILM",
-            y=C_KLINIK,
-            orientation="h",
-            labels={"TOPLAM_FILM": "Toplam Film Sayısı", C_KLINIK: ""},
+            branch_sum.head(10).sort_values("TOPLAM_FILM"), x="TOPLAM_FILM", y=C_KLINIK, orientation="h",
+            labels={"TOPLAM_FILM": "", C_KLINIK: ""},
         )
-        fig_branch_bar.update_traces(texttemplate="%{x:.3s}", textposition="outside", cliponaxis=False)
+        fig_branch_bar.update_traces(texttemplate="%{x}", textposition="outside", cliponaxis=False)
+        fig_branch_bar.update_xaxes(type="linear")
         fig_branch_bar.update_layout(
-            template="plotly_dark",
-            height=360,
-            margin=dict(l=10, r=50, t=10, b=40),
-            paper_bgcolor="rgba(0,0,0,0)",
-            plot_bgcolor="rgba(0,0,0,0)",
-            showlegend=False,
+            template="plotly_dark", height=360, margin=dict(l=10, r=50, t=10, b=40),
+            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)", showlegend=False,
         )
 
         cfg = {"responsive": True}
@@ -216,8 +191,8 @@ def rontgen():
         branch_type_pie_html = fig_type_pie.to_html(full_html=False, include_plotlyjs=False, config=cfg)
         fig_branch_bar_html = fig_branch_bar.to_html(full_html=False, include_plotlyjs=False, config=cfg)
 
-    # ---- Sekme 3: Yoğunluk (Hekim x Tetkik Türü heatmap) ----
-    heat_html = _empty_chart_html("Secilen aralikta yogunluk verisi bulunamadi.", height=420)
+    # ---- Sekme 3: Yoğunluk ----
+    heat_html = _empty_chart_html("NO_DATA_HEAT", height=420)
     heatmap_columns = []
     heatmap_rows = []
     if not hekim_top.empty:
@@ -226,66 +201,86 @@ def rontgen():
         heat_df = heat_df.loc[:, heat_df.sum(axis=0) > 0]
 
         if not heat_df.empty:
-            heat_df.columns = [_short_type_name(col) for col in heat_df.columns]
             heatmap_columns = list(heat_df.columns)
-            col_max = {
-                col: max(_safe_float(heat_df[col].max()), 1.0)
-                for col in heat_df.columns
-            }
+            col_max = {col: max(_safe_float(heat_df[col].max()), 1.0) for col in heat_df.columns}
             for doctor_name, row in heat_df.iterrows():
                 cells = []
                 for col in heat_df.columns:
                     value = int(_safe_float(row[col]))
                     intensity = int(round((value / col_max[col]) * 100)) if col_max[col] else 0
-                    cells.append({
-                        "label": col,
-                        "value": value,
-                        "intensity": intensity,
-                    })
-                heatmap_rows.append({
-                    "hekim": doctor_name,
-                    "cells": cells,
-                    "toplam": int(sum(cell["value"] for cell in cells)),
-                })
+                    cells.append({"label": col, "value": value, "intensity": intensity})
+                heatmap_rows.append({"hekim": doctor_name, "cells": cells, "toplam": int(sum(c["value"] for c in cells))})
 
             fig_heat = go.Figure(
                 data=go.Heatmap(
-                    z=heat_df.values,
-                    x=list(heat_df.columns),
-                    y=list(heat_df.index),
-                    colorscale="YlOrRd",
-                    colorbar=dict(title="Film Sayısı"),
-                    text=heat_df.values,
-                    texttemplate="%{text}",
-                    hovertemplate="<b>%{y}</b><br>%{x}: %{z}<extra></extra>",
+                    z=heat_df.values, x=list(heat_df.columns), y=list(heat_df.index),
+                    colorscale="YlOrRd", colorbar=dict(title="Film Sayısı"),
+                    text=heat_df.values, texttemplate="%{text}", hovertemplate="<b>%{y}</b><br>%{x}: %{z}<extra></extra>",
                 )
             )
             fig_heat.update_layout(
-                template="plotly_dark",
-                height=420,
-                margin=dict(l=80, r=40, t=10, b=40),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                xaxis=dict(title="Tetkik Türü"),
-                yaxis=dict(title="Hekim"),
+                template="plotly_dark", height=420, margin=dict(l=80, r=40, t=10, b=40),
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                xaxis=dict(title=""), yaxis=dict(title=""),
             )
-            cfg = {"responsive": True}
-            heat_html = fig_heat.to_html(full_html=False, include_plotlyjs=False, config=cfg)
+            heat_html = fig_heat.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True})
 
-    # ---- Sekme 4: Verimlilik & Anomali (Panoramik / Periapikal tercih oranı) ----
+    # ---- Sekme 4: Verimlilik & Anomali ----
     verim_html = _empty_chart_html("Panoramik / Periapikal denge verisi bulunamadi.", height=380)
     verim_scatter_points = []
     verim_scatter_x_max = 100.0
     verim_scatter_y_max = 2.0
     ratio_rows = []
-    box_html = _empty_chart_html("Anomali kutu grafigi icin brans verisi bulunamadi.", height=380)
-    if C_PAN and C_PERI:
+    box_html = _empty_chart_html("İleri tetkik (Sefalometrik & Tomografi) verisi bulunamadı.", height=380)
+    
+    if not hekim_sum.empty and ("Sefalometrik" in hekim_sum.columns or "DentalTomografi" in hekim_sum.columns):
+        ileri_cols = [c for c in ["Sefalometrik", "DentalTomografi"] if c in hekim_sum.columns]
+        if ileri_cols:
+            ileri_df = hekim_sum[hekim_sum[ileri_cols].sum(axis=1) > 0].copy()
+            ileri_df["ILERI_TOPLAM"] = ileri_df[ileri_cols].sum(axis=1)
+            ileri_df = ileri_df.sort_values("ILERI_TOPLAM", ascending=False).head(15)
+            
+            if not ileri_df.empty:
+                ileri_melt = ileri_df.melt(id_vars=C_HEKIM, value_vars=ileri_cols, var_name="Tür", value_name="Adet")
+                ileri_melt["Adet"] = pd.to_numeric(ileri_melt["Adet"], errors='coerce').fillna(0).astype(int)
+                
+                fig_ileri = go.Figure()
+                colors = ["#f59e0b", "#ec4899"]
+                for i, tur in enumerate(ileri_cols):
+                    df_tur = ileri_melt[ileri_melt["Tür"] == tur]
+                    fig_ileri.add_trace(go.Bar(
+                        x=df_tur[C_HEKIM].tolist(),
+                        y=df_tur["Adet"].tolist(),
+                        name=tur,
+                        text=df_tur["Adet"].tolist(),
+                        textposition="outside",
+                        marker_color=colors[i % len(colors)]
+                    ))
+
+                fig_ileri.update_layout(
+                    barmode="group",
+                    template="plotly_dark", height=380, margin=dict(l=10, r=10, t=10, b=60),
+                    paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                    xaxis=dict(tickangle=-45, title=""),
+                    yaxis=dict(title=""),
+                    legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+                )
+                box_html = fig_ileri.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True})
+    
+    if not hekim_sum.empty:
         ratio_df = hekim_sum.copy()
         ratio_df = ratio_df[ratio_df["TOPLAM_FILM"] > 0].copy()
         ratio_df = ratio_df[(ratio_df[C_PAN] > 0) | (ratio_df[C_PERI] > 0)].copy()
-        # Panoramik / Periapikal oranı (Periapikal 0 ise oran 0 kabul)
-        denom = ratio_df[C_PERI].replace(0, pd.NA)
-        ratio_df["TERCIH_ORAN"] = (ratio_df[C_PAN] / denom).fillna(0.0)
+        
+        def _calc_ratio(row):
+            pan = _safe_float(row[C_PAN])
+            peri = _safe_float(row[C_PERI])
+            if peri == 0:
+                return 99.0 if pan > 0 else 1.0
+            return pan / peri
+        
+        ratio_df["TERCIH_ORAN"] = ratio_df.apply(_calc_ratio, axis=1)
+        
         if not ratio_df.empty:
             ratio_x_max = float(ratio_df["TOPLAM_FILM"].quantile(0.98))
             ratio_y_max = float(ratio_df["TERCIH_ORAN"].quantile(0.95))
@@ -293,25 +288,10 @@ def rontgen():
             ratio_y_max = max(ratio_y_max * 1.15, 2.0)
             verim_scatter_x_max = ratio_x_max
             verim_scatter_y_max = ratio_y_max
-            verim_scatter_points = (
-                ratio_df[[C_HEKIM, "TOPLAM_FILM", "TERCIH_ORAN", C_PAN, C_PERI]]
-                .rename(
-                    columns={
-                        C_HEKIM: "hekim",
-                        "TOPLAM_FILM": "toplam_film",
-                        "TERCIH_ORAN": "tercih_oran",
-                        C_PAN: "panoramik",
-                        C_PERI: "periapikal",
-                    }
-                )
-                .to_dict(orient="records")
-            )
-            for row in (
-                ratio_df[[C_HEKIM, "TOPLAM_FILM", "TERCIH_ORAN", C_PAN, C_PERI]]
-                .sort_values("TOPLAM_FILM", ascending=False)
-                .head(30)
-                .to_dict(orient="records")
-            ):
+            
+            for row in (ratio_df[[C_HEKIM, "TOPLAM_FILM", "TERCIH_ORAN", C_PAN, C_PERI]]
+                        .sort_values("TOPLAM_FILM", ascending=False).head(30)
+                        .to_dict(orient="records")):
                 oran = _safe_float(row["TERCIH_ORAN"])
                 if oran >= 1.2:
                     yorum = "Panoramik agirlikli"
@@ -319,106 +299,36 @@ def rontgen():
                     yorum = "Periapikal agirlikli"
                 else:
                     yorum = "Dengeli"
+                    
                 ratio_rows.append({
-                    "hekim": row[C_HEKIM],
-                    "toplam_film": int(_safe_float(row["TOPLAM_FILM"])),
-                    "panoramik": int(_safe_float(row[C_PAN])),
-                    "periapikal": int(_safe_float(row[C_PERI])),
-                    "oran": round(oran, 2),
-                    "bar_width": max(6, min(int((oran / max(ratio_y_max, 0.1)) * 100), 100)),
+                    "hekim": row[C_HEKIM], "toplam_film": int(_safe_float(row["TOPLAM_FILM"])),
+                    "panoramik": int(_safe_float(row[C_PAN])), "periapikal": int(_safe_float(row[C_PERI])),
+                    "oran": round(oran, 2), "bar_width": max(6, min(int((oran / max(ratio_y_max, 0.1)) * 100), 100)),
                     "yorum": yorum,
                 })
 
             fig_scatter = go.Figure(
                 data=[
                     go.Scatter(
-                        x=ratio_df["TOPLAM_FILM"],
-                        y=ratio_df["TERCIH_ORAN"],
-                        mode="markers",
-                        text=ratio_df[C_HEKIM],
+                        x=ratio_df["TOPLAM_FILM"], y=ratio_df["TERCIH_ORAN"],
+                        mode="markers", text=ratio_df[C_HEKIM],
                         customdata=ratio_df[[C_PAN, C_PERI]].to_numpy(),
-                        hovertemplate=(
-                            "<b>%{text}</b><br>"
-                            "Toplam Film: %{x}<br>"
-                            "Panoramik / Periapikal Oran: %{y:.2f}<br>"
-                            "Panoramik: %{customdata[0]}<br>"
-                            "Periapikal: %{customdata[1]}<extra></extra>"
-                        ),
-                        marker=dict(
-                            size=14,
-                            color="#2563eb",
-                            opacity=0.82,
-                            line=dict(color="#ffffff", width=1.2),
-                        ),
+                        hovertemplate=("<b>%{text}</b><br>Toplam Film: %{x}<br>Panoramik / Periapikal Oran: %{y:.2f}<br>"
+                                       "Panoramik: %{customdata[0]}<br>Periapikal: %{customdata[1]}<extra></extra>"),
+                        marker=dict(size=14, color="#2563eb", opacity=0.82, line=dict(color="#ffffff", width=1.2)),
                     )
                 ]
             )
             fig_scatter.update_layout(
-                template="plotly_dark",
-                height=380,
-                margin=dict(l=10, r=20, t=10, b=40),
-                paper_bgcolor="rgba(0,0,0,0)",
-                plot_bgcolor="rgba(0,0,0,0)",
-                coloraxis_colorbar=dict(title="Oran"),
-                xaxis=dict(title="Toplam Film", range=[0, ratio_x_max]),
-                yaxis=dict(title="Panoramik / Periapikal Oran", range=[0, ratio_y_max]),
-                uirevision="rontgen-verim-scatter",
+                template="plotly_dark", height=380, margin=dict(l=10, r=20, t=10, b=40),
+                paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+                coloraxis_colorbar=dict(title=""), xaxis=dict(title="", range=[0, ratio_x_max]),
+                yaxis=dict(title="", range=[0, ratio_y_max]), uirevision="rontgen-verim-scatter",
             )
+            verim_html = fig_scatter.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True})
 
-            if C_KLINIK:
-                ratio_df_branch = ratio_df.copy()
-                klinik_map = (
-                    df[[C_HEKIM, C_KLINIK]]
-                    .dropna(subset=[C_HEKIM, C_KLINIK])
-                    .drop_duplicates(subset=[C_HEKIM])
-                    .set_index(C_HEKIM)[C_KLINIK]
-                    .to_dict()
-                )
-                ratio_df_branch[C_KLINIK] = ratio_df_branch[C_HEKIM].map(klinik_map)
-                ratio_df_branch = ratio_df_branch.dropna(subset=[C_KLINIK])
-
-                if not ratio_df_branch.empty:
-                    fig_box = px.box(
-                        ratio_df_branch,
-                        x=C_KLINIK,
-                        y="TERCIH_ORAN",
-                        points="all",
-                        labels={
-                            C_KLINIK: "Branş",
-                            "TERCIH_ORAN": "Panoramik / Periapikal Oran",
-                        },
-                    )
-                    fig_box.update_traces(
-                        jitter=0.35,
-                        pointpos=0,
-                        marker=dict(size=7, opacity=0.7, color="#2563eb"),
-                        line=dict(color="#1d4ed8", width=2),
-                        fillcolor="rgba(37, 99, 235, 0.18)",
-                    )
-                    fig_box.update_layout(
-                        template="plotly_dark",
-                        height=380,
-                        margin=dict(l=10, r=20, t=10, b=80),
-                        paper_bgcolor="rgba(0,0,0,0)",
-                        plot_bgcolor="rgba(0,0,0,0)",
-                        xaxis=dict(tickangle=-45),
-                        yaxis=dict(range=[0, ratio_y_max]),
-                        uirevision="rontgen-verim-box",
-                    )
-                    box_html = fig_box.to_html(
-                        full_html=False, include_plotlyjs=False, config={"responsive": True}
-                    )
-
-            cfg = {"responsive": True}
-            verim_html = fig_scatter.to_html(
-                full_html=False, include_plotlyjs=False, config=cfg
-            )
-
-    cfg_main = {"responsive": True}
     charts = {
-        "fig_hekim_bar": fig_hekim_bar.to_html(
-            full_html=False, include_plotlyjs=False, config=cfg_main
-        ),
+        "fig_hekim_bar": fig_hekim_bar_html,
         "fig_heat": heat_html,
         "branch_pie": branch_pie_html,
         "type_pie": branch_type_pie_html,
