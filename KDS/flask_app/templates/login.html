@@ -29,22 +29,28 @@
 
             <form method="POST" class="login-form">
                 <div class="form-group">
-                    <label for="username">👤 Kullanıcı Adı</label>
-                    <input type="text" id="username" name="username" required placeholder="Kullanıcı adınızı girin"
-                        autocomplete="username">
+                    <label for="username">Kullanıcı Adı veya TC Kimlik No</label>
+                    <div class="input-wrapper">
+                        <span class="field-icon">👤</span>
+                        <input type="text" id="username" name="username" required placeholder="TC Kimlik No / Kullanıcı Adı"
+                            autocomplete="username">
+                    </div>
                 </div>
                 <div class="form-group">
-                    <label for="password">🔒 Şifre</label>
-                    <input type="password" id="password" name="password" required placeholder="Şifrenizi girin"
-                        autocomplete="current-password">
+                    <label for="password">Şifre</label>
+                    <div class="input-wrapper">
+                        <span class="field-icon">🔒</span>
+                        <input type="password" id="password" name="password" required placeholder="Şifrenizi girin"
+                            autocomplete="current-password">
+                    </div>
                 </div>
                 <button type="submit" class="login-btn">
-                    🔐 Giriş Yap
+                    Sisteme Giriş Yap
                 </button>
             </form>
 
             <div class="login-footer">
-                <p>© 2026 Seyrani Demirel</p>
+                <p>Kurum Karar Destek Sistemi v2.0 | © 2026 | MetaSoft</p>
             </div>
         </div>
     </div>

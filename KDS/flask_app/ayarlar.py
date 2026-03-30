@@ -8,7 +8,7 @@ DATABASE = {
     "server": "193.255.140.195:50602",
     "database": "DEAL",
     "username": "sa",
-    "password": "REMOVED_FOR_SECURITY",
+    "password": "enc:Z/4EPURZYeiloayNccO7ECHsixCKeQynNBknaFGrvYM=",
     "driver": "{ODBC Driver 17 for SQL Server}",
 }
 
