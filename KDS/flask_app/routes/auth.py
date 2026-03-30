@@ -3,6 +3,7 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from ayarlar import CREDENTIALS
+from database.auth_dao import authenticate
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -16,12 +17,16 @@ def login():
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '').strip()
 
-        if username in CREDENTIALS and str(CREDENTIALS[username]) == password:
+        kullanici = authenticate(username, password)
+
+        if kullanici:
+            # Login başarılı
             session['logged_in'] = True
-            session['logged_in_user'] = username
+            session['logged_in_user'] = kullanici.get('kullaniciAdSoyad', username)
+            session['user_id'] = kullanici.get('kullaniciId')
             return redirect(url_for('dashboard.dashboard'))
         else:
-            flash('😕 Kullanıcı adı veya şifre hatalı', 'error')
+            flash('😕 Kullanıcı adı/TC veya şifre hatalı', 'error')
 
     return render_template('login.html')
 
