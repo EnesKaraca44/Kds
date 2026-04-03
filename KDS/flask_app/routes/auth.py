@@ -24,6 +24,7 @@ def login():
             session['logged_in'] = True
             session['logged_in_user'] = kullanici.get('kullaniciAdSoyad', username)
             session['user_id'] = kullanici.get('kullaniciId')
+            session['kimlik_id'] = kullanici.get('kimlikId')
             return redirect(url_for('dashboard.dashboard'))
         else:
             flash('😕 Kullanıcı adı/TC veya şifre hatalı', 'error')

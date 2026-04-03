@@ -4,7 +4,7 @@ import os
 import re
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from ayarlar import DATABASE
+from ayarlar import DATABASE, DATABASE_MENU
 from crypto_system_functions import decrypt_string_v2, encrypt_string_v2
 
 
@@ -66,4 +66,29 @@ def baglanti_olustur():
     except Exception as e:
         # Windows konsol encoding'lerinde emoji bazen hata çıkarabiliyor.
         print(f"Veritabani baglanti hatasi: {e}")
+        return None
+
+
+def baglanti_olustur_menu_db():
+    """Menü kişiselleştirme veritabanına bağlantı oluşturur."""
+    try:
+        password = _maybe_decrypt_password(DATABASE_MENU.get("password", ""))
+
+        server = DATABASE_MENU.get("server", "")
+        if isinstance(server, str) and ":" in server and "," not in server:
+            host, port = server.rsplit(":", 1)
+            if port.isdigit():
+                server = f"{host},{port}"
+
+        conn_str = (
+            f"DRIVER={DATABASE_MENU['driver']};"
+            f"SERVER={server};"
+            f"DATABASE={DATABASE_MENU['database']};"
+            f"UID={DATABASE_MENU['username']};"
+            f"PWD={password};"
+        )
+        conn = pyodbc.connect(conn_str)
+        return conn
+    except Exception as e:
+        print(f"Menu DB baglanti hatasi: {e}")
         return None

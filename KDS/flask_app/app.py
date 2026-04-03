@@ -6,6 +6,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from ayarlar import SECRET_KEY
+from database.auth_dao import get_user_menu_labels
 
 
 def login_required(f):
@@ -22,6 +23,27 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = SECRET_KEY
     app.config['SESSION_TYPE'] = 'filesystem'
+
+    default_nav_items = {
+        'ANA MODÜLLER': [
+            {'url': '/dashboard', 'icon': '🏠', 'label': 'Ana Sayfa'},
+            {'url': '/personel-sorgulama', 'icon': '👤', 'label': 'Personel Sorgulama'},
+            {'url': '/hekim-puan', 'icon': '🏵️', 'label': 'Hekim Hizmet Puan Analiz'},
+            {'url': '/poliklinik', 'icon': '👥', 'label': 'Hekim Poliklinik Hasta'},
+            {'url': '/tedavi', 'icon': '🩺', 'label': 'Tedavi Grupları Analizi'},
+            {'url': '/malzeme', 'icon': '📦', 'label': 'Kurum Malzeme Tüketim'},
+            {'url': '/yabanci-hasta', 'icon': '🌐', 'label': 'Yabancı Hasta Analizi'},
+            {'url': '/randevu', 'icon': '📅', 'label': 'Hekim Randevu Analizi'},
+            {'url': '/gelir', 'icon': '💰', 'label': 'Kurum Gelir Analiz'},
+            {'url': '/sterilizasyon', 'icon': '💉', 'label': 'Sterilizasyon Maliyet'},
+            {'url': '/sevk', 'icon': '📤', 'label': 'Hekim Sevk Sayıları'},
+        ],
+        'DİĞER': [
+            {'url': '/tibbi-atik', 'icon': '⚗️', 'label': 'Tıbbi Atık Analizi'},
+            {'url': '/protez', 'icon': '🦷', 'label': 'Protez Analizi'},
+            {'url': '/rontgen', 'icon': '🩻', 'label': 'Röntgen Analizi'},
+        ]
+    }
 
     # Jinja2 Template'lerine yardımcı fonksiyonlar ekle
     @app.template_filter('turkish_number')
@@ -41,28 +63,24 @@ def create_app():
     # Tüm template'lere login bilgisini otomatik gönder
     @app.context_processor
     def inject_user():
+        nav_items = default_nav_items
+        kullanici_id = session.get('user_id')
+
+        if kullanici_id:
+            menu_labels = get_user_menu_labels(kullanici_id)
+            if menu_labels:
+                filtered_nav = {}
+                for group_name, items in default_nav_items.items():
+                    matched_items = [item for item in items if item.get('label') in menu_labels]
+                    if matched_items:
+                        filtered_nav[group_name] = matched_items
+
+                if filtered_nav:
+                    nav_items = filtered_nav
+
         return dict(
             logged_in_user=session.get('logged_in_user', ''),
-            nav_items={
-                'ANA MODÜLLER': [
-                    {'url': '/dashboard', 'icon': '🏠', 'label': 'Ana Sayfa'},
-                    {'url': '/personel-sorgulama', 'icon': '👤', 'label': 'Personel Sorgulama'},
-                    {'url': '/hekim-puan', 'icon': '🏵️', 'label': 'Hekim Hizmet Puan Analiz'},
-                    {'url': '/poliklinik', 'icon': '👥', 'label': 'Hekim Poliklinik Hasta'},
-                    {'url': '/tedavi', 'icon': '🩺', 'label': 'Tedavi Grupları Analizi'},
-                    {'url': '/malzeme', 'icon': '📦', 'label': 'Kurum Malzeme Tüketim'},
-                    {'url': '/yabanci-hasta', 'icon': '🌐', 'label': 'Yabancı Hasta Analizi'},
-                    {'url': '/randevu', 'icon': '📅', 'label': 'Hekim Randevu Analizi'},
-                    {'url': '/gelir', 'icon': '💰', 'label': 'Kurum Gelir Analiz'},
-                    {'url': '/sterilizasyon', 'icon': '💉', 'label': 'Sterilizasyon Maliyet'},
-                    {'url': '/sevk', 'icon': '📤', 'label': 'Hekim Sevk Sayıları'},
-                ],
-                'DİĞER': [
-                    {'url': '/tibbi-atik', 'icon': '⚗️', 'label': 'Tıbbi Atık Analizi'},
-                    {'url': '/protez', 'icon': '🦷', 'label': 'Protez Analizi'},
-                    {'url': '/rontgen', 'icon': '🩻', 'label': 'Röntgen Analizi'},
-                ]
-            }
+            nav_items=nav_items
         )
 
     # Blueprint'leri kaydet
