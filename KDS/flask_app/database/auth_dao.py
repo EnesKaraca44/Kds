@@ -3,7 +3,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database.baglanti import baglanti_olustur
+from database.baglanti import baglanti_olustur, baglanti_olustur_menu_db
 from crypto_system_functions import encrypt_string_v2, string_to_sha256
 
 def find_username_from_tc(tc: str) -> str:
@@ -90,12 +90,12 @@ def find_user_with_username_and_password(username: str, password_hash: str) -> d
         """
         
         username_clean = username.strip()
-        
         # SQL Parametreleri (?, ?, ?, ?, ?)
         cursor.execute(sql, (password_hash, username_clean, username_clean, username_clean, username_clean))
         row = cursor.fetchone()
         
         if row:
+            print(f"DEBUG: Kimlik bulundu! Ad: {row.kullaniciAdSoyad}")
             kullanici = {
                 'kimlikId': row.kimlikId,
                 'kullaniciId': row.kullaniciId,
@@ -106,6 +106,8 @@ def find_user_with_username_and_password(username: str, password_hash: str) -> d
                 'merkeziVeriId': row.merkeziVeriId,
                 'kullaniciEngelDurum': row.kullaniciEngelDurum,
             }
+        else:
+            print(f"DEBUG: Veritabanında eşleşen kullanıcı BULUNAMADI! username: '{username_clean}', denenen hash: '{password_hash}'")
             
     except Exception as e:
         print(f"HATA: find_user_with_username_and_password hatası: {e}")
@@ -119,11 +121,14 @@ def find_user_with_username_and_password(username: str, password_hash: str) -> d
 def authenticate(username: str, password_raw: str) -> dict | None:
     """Sisteme giriş işlemini yönetir (Java'daki logic ile birebir)."""
     try:
+        print(f"DEBUG: authenticate() tetiklendi. username='{username}'")
         if not username or not password_raw:
+            print("DEBUG: Kullanıcı adı veya şifre boş.")
             return None
             
         # password = SystemFunctions.StringToSha256(SystemFunctions.encryptString_V2(password))
         encrypted_v2 = encrypt_string_v2(password_raw)
+        print(f"DEBUG: V2 Şifreleme çıktısı: '{encrypted_v2}'")
         if encrypted_v2 is None:
             return None
             
@@ -148,3 +153,73 @@ def authenticate(username: str, password_raw: str) -> dict | None:
     except Exception as e:
         print(f"HATA: authenticate metodunda beklenmedik hata: {e}")
         return None
+
+
+def get_user_menu_links(kullanici_id: int, kimlik_id: int) -> set[int]:
+    """Menu DB'den kullanıcıya ait KDS_LINK_ID listesini getirir."""
+    if not kullanici_id or not kimlik_id:
+        return set()
+
+    conn = None
+    try:
+        conn = baglanti_olustur_menu_db()
+        if not conn:
+            return set()
+
+        cursor = conn.cursor()
+        sql = """
+        SELECT kds.KDS_LINK_ID
+        FROM KULLANICI_KDS as kds WITH(NOLOCK)
+        WHERE kds.KULLANICI_ID = ?
+          AND kds.KIMLIK_ID = ?
+        """
+        cursor.execute(sql, (kullanici_id, kimlik_id))
+        rows = cursor.fetchall()
+
+        menu_link_ids = set()
+        for row in rows:
+            try:
+                menu_link_ids.add(int(row.KDS_LINK_ID))
+            except Exception:
+                continue
+        return menu_link_ids
+    except Exception as e:
+        print(f"HATA: get_user_menu_links hatasi: {e}")
+        return set()
+    finally:
+        if conn:
+            conn.close()
+
+
+def get_user_menu_labels(kullanici_id: int) -> set[str]:
+    """Menu DB'den kullanıcıya ait KDS_LINK_TANIM listesini getirir."""
+    if not kullanici_id:
+        return set()
+
+    conn = None
+    try:
+        conn = baglanti_olustur_menu_db()
+        if not conn:
+            return set()
+
+        cursor = conn.cursor()
+        sql = """
+        SELECT kds.KDS_LINK_TANIM
+        FROM KULLANICI_KDS as kds WITH(NOLOCK)
+        WHERE kds.KULLANICI_ID = ?
+        """
+        cursor.execute(sql, (kullanici_id,))
+        rows = cursor.fetchall()
+
+        menu_labels = set()
+        for row in rows:
+            value = str(row.KDS_LINK_TANIM).strip() if row.KDS_LINK_TANIM is not None else ""
+            if value:
+                menu_labels.add(value)
+        return menu_labels
+    except Exception as e:
+        print(f"HATA: get_user_menu_labels hatasi: {e}")
+        return set()
+    finally:
+        if conn:
+            conn.close()

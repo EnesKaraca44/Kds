@@ -814,6 +814,12 @@ function applyTranslations(lang) {
 
 // 4. Initialization
 document.addEventListener('DOMContentLoaded', function () {
+    // Guard against accidental HTML inside <title> blocks.
+    // If a template sends "<span ...>Title</span>", browser tab should still show plain text.
+    if (document.title && document.title.includes('<')) {
+        document.title = document.title.replace(/<[^>]*>/g, '').replace(/\s+/g, ' ').trim();
+    }
+
     const THEME_STORAGE_KEY = 'kds-theme';
     const themeToggle = document.getElementById('themeToggle');
     const themeIcon = document.getElementById('themeIcon');
