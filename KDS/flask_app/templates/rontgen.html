@@ -9,7 +9,7 @@
 
     .chart-row {
         display: grid;
-        grid-template-columns: 1.8fr 1.2fr;
+        grid-template-columns: 1.5fr 1fr;
         gap: 16px;
     }
 
@@ -250,7 +250,9 @@
         <div class="chart-row">
             <div class="chart-container">
                 <div class="chart-title" data-t="Hekim Bazlı Tetkik Dağılımı">Hekim Bazlı Tetkik Dağılımı</div>
-                {{ charts.fig_hekim_bar | safe }}
+                <div class="chart-scroll-wrapper">
+                    {{ charts.fig_hekim_bar | safe }}
+                </div>
             </div>
             <div class="chart-container">
                 <div class="chart-title" data-t="Hekim Bazlı Özet Tablo">Hekim Bazlı Özet Tablo</div>
@@ -344,7 +346,9 @@
     <div class="tab-content">
         <div class="chart-container">
             <div class="chart-title" data-t="İleri Tetkik (Sefalometrik & Tomografi) Hekim Dağılımı">İleri Tetkik (Sefalometrik & Tomografi) Hekim Dağılımı</div>
-            {{ charts.verim_box | safe }}
+            <div class="chart-scroll-wrapper">
+                {{ charts.verim_box | safe }}
+            </div>
         </div>
         <div class="chart-container" style="margin-top:16px;">
             <div class="chart-title" data-t="Panoramik / Periapikal Tercih Dengesi">Panoramik / Periapikal Tercih Dengesi</div>

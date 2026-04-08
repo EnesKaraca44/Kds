@@ -293,7 +293,7 @@
                 {% endfor %}
                 <label style="font-size:0.85rem; color:#9ca3af;" data-t="Sevk analizi için hekim seçiniz:">Sevk analizi için hekim seçiniz:</label>
                 <select name="dr" onchange="this.form.submit()"
-                        style="padding:8px 12px; border-radius:8px; border:1px solid rgba(148,163,184,0.5); background:#020617; color:#e5e7eb; min-width:260px;">
+                        style="padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); min-width:200px; width:100%;">
                     {% for dr in hekim_list %}
                     <option value="{{ dr }}" {% if dr == selected_dr %}selected{% endif %}>{{ dr }}</option>
                     {% endfor %}

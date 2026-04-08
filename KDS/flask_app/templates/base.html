@@ -147,7 +147,47 @@
     </main>
 
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    
+
+    <!-- Make all existing Plotly charts responsive after page load -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        if (typeof Plotly === 'undefined') return;
+        var isMobile = window.innerWidth <= 768;
+
+        function resizeAllPlots() {
+          document.querySelectorAll('.js-plotly-plot, .plotly-graph-div').forEach(function(plot) {
+            try {
+              Plotly.relayout(plot, { autosize: true });
+              Plotly.Plots.resize(plot);
+
+              if (isMobile && plot.data) {
+                plot.data.forEach(function(trace, i) {
+                  if (trace.type === 'pie') {
+                    Plotly.restyle(plot, {
+                      textposition: 'inside',
+                      textinfo: 'percent',
+                      insidetextorientation: 'horizontal',
+                      automargin: true
+                    }, [i]);
+                    Plotly.relayout(plot, {
+                      'legend.font.size': 9,
+                      'legend.orientation': 'h',
+                      'legend.y': -0.3,
+                      'legend.x': 0.5,
+                      'legend.xanchor': 'center',
+                      margin: { t: 30, b: 80, l: 10, r: 10 }
+                    });
+                  }
+                });
+              }
+            } catch(e) {}
+          });
+        }
+
+        [300, 800, 1500].forEach(function(d) { setTimeout(resizeAllPlots, d); });
+      });
+    </script>
+
     <!-- Flatpickr JS & Turkish Locale -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/tr.js"></script>

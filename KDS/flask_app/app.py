@@ -67,11 +67,23 @@ def create_app():
         kullanici_id = session.get('user_id')
 
         if kullanici_id:
-            menu_labels = get_user_menu_labels(kullanici_id)
-            if menu_labels:
+            menu_dict = get_user_menu_labels(kullanici_id)
+            if menu_dict:
                 filtered_nav = {}
                 for group_name, items in default_nav_items.items():
-                    matched_items = [item for item in items if item.get('label') in menu_labels]
+                    matched_items = []
+                    for item in items:
+                        label = item.get('label')
+                        if label in menu_dict:
+                            db_path = menu_dict[label]
+                            if db_path:
+                                item = dict(item)
+                                if db_path.startswith('http'):
+                                    item['url'] = db_path
+                                else:
+                                    path = db_path if db_path.startswith('/') else '/' + db_path
+                                    item['url'] = path
+                            matched_items.append(item)
                     if matched_items:
                         filtered_nav[group_name] = matched_items
 

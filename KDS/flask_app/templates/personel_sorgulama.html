@@ -11,7 +11,7 @@
     
     .chart-row {
         display: grid;
-        grid-template-columns: 450px 1fr !important; /* Tablo solda sabit genişlik, grafik sağda esnek */
+        grid-template-columns: 450px 1fr; /* Tablo solda sabit genişlik, grafik sağda esnek */
         gap: 24px;
         align-items: flex-start;
     }
@@ -272,7 +272,7 @@
 
     .bottom-section {
         display: grid;
-        grid-template-columns: 500px 1fr;
+        grid-template-columns: minmax(0, 500px) 1fr;
         gap: 24px;
         margin-top: 24px;
     }
@@ -326,6 +326,7 @@
         border-radius: 10px;
         font-size: 0.95rem;
         width: 300px;
+        max-width: 100%;
         transition: all 0.2s;
         background: var(--bg-main);
         color: var(--text-main);
@@ -336,6 +337,7 @@
     .search-input:focus {
         box-shadow: none;
         width: 340px;
+        max-width: 100%;
     }
     
     .btn-clear {

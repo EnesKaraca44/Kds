@@ -191,35 +191,46 @@ def get_user_menu_links(kullanici_id: int, kimlik_id: int) -> set[int]:
             conn.close()
 
 
-def get_user_menu_labels(kullanici_id: int) -> set[str]:
-    """Menu DB'den kullanıcıya ait KDS_LINK_TANIM listesini getirir."""
+def get_user_menu_labels(kullanici_id: int) -> dict[str, str | None]:
+    """
+    KULLANICI_KDS + KULLANICI_KDS_LINK join ile
+    kullanıcıya ait menü adı ve URL kodunu getirir.
+    Dönüş: {"Ana Sayfa": "1.1", "Hekim Hizmet Puan Analiz": None, ...}
+    """
     if not kullanici_id:
-        return set()
+        return {}
 
     conn = None
     try:
         conn = baglanti_olustur_menu_db()
         if not conn:
-            return set()
+            return {}
 
         cursor = conn.cursor()
         sql = """
-        SELECT kds.KDS_LINK_TANIM
+        SELECT
+            link.KDS_LINK_TANIM,
+            COALESCE(NULLIF(kds.KDS_LINK_URL, ''), link.KDS_LINK_TANIM_URL) as EFFECTIVE_URL_CODE
         FROM KULLANICI_KDS as kds WITH(NOLOCK)
+        INNER JOIN KULLANICI_KDS_LINK as link WITH(NOLOCK)
+            ON link.KDS_LINK_ID = kds.KDS_LINK_ID
         WHERE kds.KULLANICI_ID = ?
         """
         cursor.execute(sql, (kullanici_id,))
         rows = cursor.fetchall()
 
-        menu_labels = set()
+        menu_dict = {}
         for row in rows:
-            value = str(row.KDS_LINK_TANIM).strip() if row.KDS_LINK_TANIM is not None else ""
-            if value:
-                menu_labels.add(value)
-        return menu_labels
+            label = str(row.KDS_LINK_TANIM).strip() if row.KDS_LINK_TANIM is not None else ""
+            url_code = str(row.EFFECTIVE_URL_CODE).strip() if row.EFFECTIVE_URL_CODE is not None else None
+            if url_code == "":
+                url_code = None
+            if label:
+                menu_dict[label] = url_code
+        return menu_dict
     except Exception as e:
         print(f"HATA: get_user_menu_labels hatasi: {e}")
-        return set()
+        return {}
     finally:
         if conn:
             conn.close()
