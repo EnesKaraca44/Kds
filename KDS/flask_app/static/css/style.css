@@ -1112,6 +1112,8 @@ body.sidebar-collapsed .main-content {
     margin-bottom: 24px;
     box-shadow: var(--shadow-sm);
     transition: var(--transition);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .chart-container:hover {
@@ -1351,18 +1353,519 @@ body.sidebar-collapsed .main-content {
     }
 }
 
-/* Responsive */
-@media (max-width: 480px) {
+/* ============================================
+   GLOBAL RESPONSIVE DESIGN (Desktop/Tablet/Mobile)
+   Mobilde web görünümünü koruyarak yatay kaydırma
+   ile tabloları ve düzeni sağlam tutar.
+   ============================================ */
+
+/* --- Plotly charts: always fill container width --- */
+.js-plotly-plot,
+.plotly-graph-div,
+.plot-container {
+    width: 100% !important;
+}
+
+/* --- Scrollable chart wrapper for bar charts with many categories --- */
+.chart-scroll-wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    width: 100%;
+}
+
+/* --- Tabs: horizontal scroll on overflow --- */
+.tabs {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+    display: none;
+}
+
+/* --- Tables: always scrollable, never break layout --- */
+.table-wrapper,
+.table-responsive,
+.vezne-table-wrapper,
+.detail-table-wrapper,
+.dataTables_wrapper {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* DataTables mobile fixes */
+.dataTables_wrapper .dataTables_filter input,
+.dataTables_wrapper .dataTables_length select {
+    max-width: 100%;
+}
+
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_paginate {
+    flex-wrap: wrap;
+    font-size: 0.82rem;
+}
+
+.data-table,
+.detail-table,
+.heatmap-table,
+.ratio-table,
+.sevkoran-table,
+.yh-table,
+.protez-kritik-table,
+.vezne-table {
+    min-width: 600px;
+}
+
+/* Large Tablets (max-width: 1200px) */
+@media (max-width: 1200px) {
+    .bottom-section {
+        grid-template-columns: 1fr !important;
+    }
+
+    .panels-grid-4 {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+}
+
+/* Medium Devices (max-width: 1024px) */
+@media (max-width: 1024px) {
+    .metrics-grid.cols-3,
+    .metrics-grid.cols-4,
+    .metrics-grid.cols-6,
+    .metrics-grid.rontgen-metrics,
+    .metrics-grid.protez-metrics,
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+    }
+
+    .chart-row {
+        grid-template-columns: 1fr !important;
+    }
+
+    .topbar {
+        padding: 0 20px;
+    }
+
+    .content-area {
+        padding: 20px;
+    }
+
+    .insights-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .insights-grid .insight-card:first-child {
+        grid-column: auto !important;
+    }
+}
+
+/* Mobile Devices (max-width: 768px) */
+@media (max-width: 768px) {
+    /* --- Main Layout --- */
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        box-shadow: 10px 0 25px rgba(0, 0, 0, 0.5);
+        width: 85vw;
+        max-width: 380px;
+    }
+
+    .sidebar.open {
+        transform: translateX(0) !important;
+        z-index: 1100;
+    }
+
+    /* Dark overlay behind open sidebar */
+    .sidebar.open::after {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: -1;
+    }
+
+    .sidebar-close {
+        display: block;
+        padding: 5px 15px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    /* --- Topbar --- */
+    .topbar {
+        height: auto;
+        min-height: 60px;
+        flex-wrap: wrap;
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .topbar-left {
+        gap: 10px;
+    }
+
+    .page-title {
+        font-size: 1rem;
+    }
+
+    .topbar-right {
+        width: 100%;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .date-filter {
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .filter-select, .date-input {
+        flex: 1 1 auto;
+        min-width: 0;
+        width: 100%;
+        font-size: 0.85rem;
+        padding: 8px 10px;
+    }
+
+    .filter-btn {
+        width: 100%;
+        margin-top: 2px;
+    }
+
+    .lang-switcher {
+        margin-right: 0;
+    }
+
+    .theme-toggle {
+        padding: 8px 10px;
+        font-size: 0.82rem;
+    }
+
+    /* --- Content Area --- */
+    .content-area {
+        padding: 12px;
+    }
+
+    /* --- Period Banner --- */
+    .period-banner {
+        margin: 10px 12px 0;
+        border-radius: var(--radius-sm);
+        font-size: 0.82rem;
+        padding: 8px 12px;
+    }
+
+    /* --- Metric Cards (2 columns on mobile) --- */
+    .metrics-grid.cols-3,
+    .metrics-grid.cols-4,
+    .metrics-grid.cols-6,
+    .metrics-grid.rontgen-metrics,
+    .metrics-grid.protez-metrics,
+    .metrics-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 10px !important;
+    }
+
+    .metric-card {
+        padding: 14px 12px !important;
+    }
+
+    .metric-card .metric-value {
+        font-size: 1.4rem !important;
+    }
+
+    .metric-card .metric-label {
+        font-size: 0.72rem !important;
+    }
+
+    .metric-card .metric-icon svg {
+        width: 60px !important;
+        height: 60px !important;
+    }
+
+    .metric-card .metric-icon {
+        font-size: 3rem !important;
+    }
+
+    /* --- Chart & Grid Layouts --- */
+    .chart-row,
+    .vezne-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .chart-container {
+        padding: 12px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .chart-title {
+        font-size: 0.88rem !important;
+    }
+
+    .chart-scroll-wrapper .js-plotly-plot,
+    .chart-scroll-wrapper .plotly-graph-div,
+    .chart-scroll-wrapper .plot-container {
+        min-width: 600px;
+    }
+
+    /* --- Panels Grid (Personel Sorgulama etc.) --- */
+    .panels-grid-4 {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .bottom-section {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    /* --- Tables --- */
+    .table-wrapper {
+        border-radius: var(--radius-sm);
+    }
+
+    .data-table th, .data-table td {
+        padding: 8px 10px;
+        font-size: 0.8rem;
+        white-space: nowrap;
+    }
+
+    .detail-table th, .detail-table td {
+        padding: 8px 10px !important;
+        font-size: 0.8rem;
+    }
+
+    /* --- Section Titles --- */
+    .section-title {
+        font-size: 1rem;
+    }
+
+    /* --- Tab Buttons --- */
+    .tabs {
+        gap: 2px;
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 2px;
+    }
+
+    .tab-btn {
+        padding: 8px 12px;
+        font-size: 0.78rem;
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    /* --- Forms & Controls inside templates --- */
+    .chart-controls,
+    .protez-settings {
+        padding: 12px !important;
+    }
+
+    .chart-controls form,
+    .protez-settings {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .radio-pill span {
+        padding: 8px 10px;
+        font-size: 0.78rem;
+    }
+
+    /* Force inline form elements to stack on mobile */
+    .protez-detail-toolbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    .protez-detail-toolbar form {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .protez-detail-toolbar select {
+        width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    /* --- Greeting Bar --- */
+    .greeting-bar {
+        flex-direction: column !important;
+        gap: 8px !important;
+        padding: 12px 16px !important;
+        font-size: 0.88rem !important;
+    }
+
+    /* --- Info Banners --- */
+    .info-banner {
+        padding: 10px 14px;
+        font-size: 0.88rem;
+    }
+
+    /* --- Insight cards --- */
+    .insights-grid {
+        grid-template-columns: 1fr !important;
+    }
+
+    .insights-grid .insight-card:first-child {
+        grid-column: auto !important;
+    }
+
+    .insight-row {
+        padding: 12px 14px;
+        font-size: 0.88rem;
+    }
+
+    /* --- Personel Sorgulama specific --- */
+    .search-container {
+        flex-direction: column;
+        padding: 8px 8px 8px 36px !important;
+        width: 100%;
+    }
+
+    .search-input {
+        width: 100% !important;
+    }
+
+    .search-input:focus {
+        width: 100% !important;
+    }
+
+    .detail-header {
+        flex-direction: column !important;
+        gap: 10px;
+        padding: 12px !important;
+    }
+
+    /* --- Hekim Puan slider section --- */
+    .modern-slider {
+        width: 100% !important;
+    }
+
+    /* --- Select elements with inline min-width --- */
+    select {
+        max-width: 100% !important;
+    }
+
+    /* --- Sevk page inline form --- */
+    .topn-select {
+        flex-wrap: wrap;
+    }
+
+    .topn-slider {
+        width: 140px !important;
+    }
+
+    /* --- Tedavi topbar --- */
+    .tedavi-topbar {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* --- Login Page --- */
     .login-card {
-        padding: 40px 24px;
+        padding: 30px 20px;
         border-radius: 20px;
     }
-    
+
     .login-header h1 {
-        font-size: 1.5rem;
+        font-size: 1.4rem;
     }
-    
+
     .login-logo {
-        font-size: 3rem;
+        font-size: 2.5rem;
     }
-}
+
+    /* --- Heatmap cells --- */
+    .heatmap-cell {
+        min-width: 65px;
+        padding: 6px 2px;
+        font-size: 0.75rem;
+    }
+
+    /* --- Ratio / bar elements --- */
+    .ratio-bar-track,
+    .yh-bar-track,
+    .sevkoran-bar-track {
+        width: 80px;
+    }
+
+    /* --- Footer --- */
+    .footer {
+        font-size: 0.75rem;
+        padding: 12px;
+    }
+}
+
+/* Very Small Mobile (max-width: 480px) */
+@media (max-width: 480px) {
+    .metrics-grid.cols-3,
+    .metrics-grid.cols-4,
+    .metrics-grid.cols-6,
+    .metrics-grid.rontgen-metrics,
+    .metrics-grid.protez-metrics,
+    .metrics-grid {
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+    }
+
+    .metric-card .metric-value {
+        font-size: 1.5rem !important;
+    }
+
+    .page-title {
+        font-size: 0.95rem;
+    }
+
+    .nav-item {
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
+
+    .nav-icon {
+        font-size: 1.2rem;
+    }
+
+    .topbar-right {
+        gap: 6px;
+    }
+
+    .lang-btn {
+        padding: 6px 10px;
+        font-size: 0.78rem;
+    }
+
+    .theme-toggle {
+        padding: 6px 8px;
+        font-size: 0.78rem;
+    }
+
+    .tab-btn {
+        padding: 6px 10px;
+        font-size: 0.72rem;
+    }
+
+    .content-area {
+        padding: 8px;
+    }
+
+    .chart-container {
+        padding: 8px;
+        margin-bottom: 10px;
+    }
+
+    /* Force smaller table font on very small screens */
+    .data-table th, .data-table td {
+        padding: 6px 8px;
+        font-size: 0.75rem;
+    }
+}

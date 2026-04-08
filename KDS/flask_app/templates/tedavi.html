@@ -250,7 +250,7 @@
         <input type="hidden" name="tab" value="1">
         <label for="grup" style="font-size:0.85rem; font-weight:600; color:#cdd9f5;" data-t="Detaylı incelemek için bir grup seçin:">Detaylı incelemek için bir grup seçin:</label>
         <select id="grup" name="grup" onchange="this.form.submit()"
-                style="padding:8px 12px; border-radius:8px; border:1px solid rgba(45,74,138,0.7); background:#020617; color:#e8f0fe; min-width:260px;">
+                style="padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); min-width:200px; width:100%; max-width:400px;">
           {% for g in group_list %}
             <option value="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
           {% endfor %}

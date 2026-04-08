@@ -21,6 +21,9 @@ DATABASE_MENU = {
     "driver": os.environ.get("MENU_DB_DRIVER", DATABASE["driver"]),
 }
 
+# Menü linkleri için temel URL (domain kısmı)
+MENU_BASE_URL = os.environ.get("MENU_BASE_URL", "http://127.0.0.1:5000")
+
 # Kullanıcı bilgileri
 CREDENTIALS = {
     "admin": "12345",

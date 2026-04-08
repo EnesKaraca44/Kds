@@ -872,10 +872,54 @@ document.addEventListener('DOMContentLoaded', function () {
     function refreshPlotsInScope(scope = document) {
         if (typeof Plotly === 'undefined') return;
         const activeTheme = document.body.classList.contains('theme-dark') ? 'dark' : 'light';
-        [80, 220, 500].forEach(delay => {
+        const isMobile = window.innerWidth <= 768;
+
+        [80, 250, 600, 1200].forEach(delay => {
             setTimeout(() => {
                 scope.querySelectorAll('.js-plotly-plot, .plotly-graph-div').forEach(plot => {
-                    try { Plotly.Plots.resize(plot); Plotly.redraw(plot); } catch (_) {}
+                    try {
+                        var inScrollWrapper = plot.closest('.chart-scroll-wrapper');
+
+                        if (isMobile && inScrollWrapper && plot.data) {
+                            var hasBarWithManyCategories = plot.data.some(function(t) {
+                                return t.type === 'bar' && t.x && t.x.length > 8;
+                            });
+                            if (hasBarWithManyCategories) {
+                                var catCount = Math.max.apply(null, plot.data.map(function(t) {
+                                    return (t.x && t.x.length) || 0;
+                                }));
+                                var neededWidth = Math.max(600, catCount * 45);
+                                plot.style.minWidth = neededWidth + 'px';
+                                Plotly.relayout(plot, { width: neededWidth, autosize: false });
+                                Plotly.Plots.resize(plot);
+                                return;
+                            }
+                        }
+
+                        Plotly.relayout(plot, { autosize: true });
+                        Plotly.Plots.resize(plot);
+
+                        if (isMobile && plot.data) {
+                            plot.data.forEach((trace, i) => {
+                                if (trace.type === 'pie') {
+                                    Plotly.restyle(plot, {
+                                        textposition: 'inside',
+                                        textinfo: 'percent',
+                                        insidetextorientation: 'horizontal',
+                                        automargin: true
+                                    }, [i]);
+                                    Plotly.relayout(plot, {
+                                        'legend.font.size': 9,
+                                        'legend.orientation': 'h',
+                                        'legend.y': -0.3,
+                                        'legend.x': 0.5,
+                                        'legend.xanchor': 'center',
+                                        margin: { t: 30, b: 80, l: 10, r: 10 }
+                                    });
+                                }
+                            });
+                        }
+                    } catch (_) {}
                 });
                 applyPlotlyThemeToScope(activeTheme, scope);
             }, delay);
@@ -914,14 +958,21 @@ document.addEventListener('DOMContentLoaded', function () {
         document.body.classList.toggle('sidebar-collapsed', isCollapsed);
         setTimeout(() => refreshPlotsInScope(document), 300);
     }
-    applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true');
+    if (window.innerWidth <= 768) {
+        applySidebarState(true);
+    } else {
+        applySidebarState(localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true');
+    }
 
     if (hamburger) {
         hamburger.addEventListener('click', () => {
-            const isCollapsing = !document.body.classList.contains('sidebar-collapsed');
-            applySidebarState(isCollapsing);
-            localStorage.setItem(SIDEBAR_STORAGE_KEY, isCollapsing);
-            if (window.innerWidth <= 768 && sidebar) sidebar.classList.toggle('open');
+            if (window.innerWidth <= 768 && sidebar) {
+                sidebar.classList.toggle('open');
+            } else {
+                const isCollapsing = !document.body.classList.contains('sidebar-collapsed');
+                applySidebarState(isCollapsing);
+                localStorage.setItem(SIDEBAR_STORAGE_KEY, isCollapsing);
+            }
         });
     }
     if (sidebarClose && sidebar) {
@@ -930,6 +981,15 @@ document.addEventListener('DOMContentLoaded', function () {
             if (window.innerWidth > 768) { applySidebarState(false); localStorage.setItem(SIDEBAR_STORAGE_KEY, 'false'); }
         });
     }
+
+    // Close sidebar on mobile when clicking outside
+    document.addEventListener('click', function(e) {
+        if (window.innerWidth <= 768 && sidebar && sidebar.classList.contains('open')) {
+            if (!sidebar.contains(e.target) && e.target !== hamburger && !hamburger.contains(e.target)) {
+                sidebar.classList.remove('open');
+            }
+        }
+    });
 
     // Tabs
     document.querySelectorAll('.tabs').forEach(tabContainer => {

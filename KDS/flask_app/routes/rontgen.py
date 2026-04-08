@@ -113,7 +113,7 @@ def rontgen():
 
     # ---- Sekme 1: Hekim Analizi ----
     hekim_sum = df_hekim.sort_values("TOPLAM_FILM", ascending=False).copy() if not df_hekim.empty else pd.DataFrame()
-    top_n = 25
+    top_n = 15
     hekim_top = hekim_sum.head(top_n) if not hekim_sum.empty else pd.DataFrame()
     
     # DEBUG LOG
@@ -148,11 +148,12 @@ def rontgen():
             
         fig_hekim_bar.update_layout(
             barmode="group",
-            template="plotly_dark", height=420, margin=dict(l=10, r=10, t=10, b=60),
+            template="plotly_dark", height=420, margin=dict(l=10, r=10, t=30, b=100),
             paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            xaxis=dict(tickangle=-45, title=""),
-            yaxis=dict(title=""),
-            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="right", x=1),
+            xaxis=dict(tickangle=-45, title="", automargin=True),
+            yaxis=dict(title="", automargin=True),
+            legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="center", x=0.5),
+            autosize=True,
         )
         fig_hekim_bar_html = fig_hekim_bar.to_html(full_html=False, include_plotlyjs=False, config={"responsive": True})
 
