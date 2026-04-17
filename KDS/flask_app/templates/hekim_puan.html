@@ -439,7 +439,7 @@
                     <tr>
                         <td>{{ row.TETKIK_DOKTOR_ADI }}</td>
                         <td>{{ row.HASTA_ADI_SOYADI }}</td>
-                        <td>{{ row.TETKIK_ADI }}</td>
+                        <td data-t="{{ row.TETKIK_ADI }}">{{ row.TETKIK_ADI }}</td>
                         <td>{{ row.TETKIK_ADET }}</td>
                         <td>{{ row.TETKIK_TOPLAM_PUAN|turkish_number(0) }}</td>
                         <td>{{ row.TOPLAM_GELIR|turkish_number }}</td>
@@ -617,11 +617,12 @@ document.getElementById('hekimSelect')?.addEventListener('change', function() {
         let rowsHtml = '';
         if (hData && hData.length > 0) {
             hData.forEach(r => {
-                let name = r.TETKIK_ADI || '-';
-                let cnt = r.TETKIK_ADET || 0;
-                let pnt = new Intl.NumberFormat('tr-TR').format(r.TETKIK_TOPLAM_PUAN || 0);
-                let gel = '₺ ' + new Intl.NumberFormat('tr-TR', {minimumFractionDigits:2, maximumFractionDigits:2}).format(r.TOPLAM_GELIR || 0);
-                rowsHtml += `<tr><td>${name}</td><td>${cnt}</td><td>${pnt}</td><td>${gel}</td></tr>`;
+                const tetkikAdi = r.TETKIK_ADI || '-';
+                const adet = Number(r.TETKIK_ADET || 0);
+                const puan = Number(r.TETKIK_TOPLAM_PUAN || 0);
+                const gelir = Number(r.TOPLAM_GELIR || 0);
+                const translatedName = window.KDS_i18n ? window.KDS_i18n.get(tetkikAdi) : tetkikAdi;
+                rowsHtml += `<tr><td data-t="${tetkikAdi}">${translatedName}</td><td>${new Intl.NumberFormat('tr-TR').format(adet)}</td><td>${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(puan)}</td><td>${new Intl.NumberFormat('tr-TR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(gelir)}</td></tr>`;
             });
         } else {
             const noDataMsg = window.KDS_i18n ? window.KDS_i18n.get('Tabloda kayıt bulunamadı / Veri yok') : 'Tabloda kayıt bulunamadı / Veri yok';

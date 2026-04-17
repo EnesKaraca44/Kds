@@ -98,6 +98,9 @@ def personel_sorgulama():
 
     # KPI Değerleri
     toplam_personel = sum(d['toplam'] for d in calisma_durumu)
+    toplam_unvan = len(kadro_unvan)
+    toplam_tur = len(personel_tur)
+    toplam_sinif = len(hizmet_sinifi)
     calisan = next((d['toplam'] for d in calisma_durumu if d['tur'] == 'ÇALIŞIYOR'), 0)
     izinli = next((d['toplam'] for d in calisma_durumu if d['tur'] == 'İZİNLİ'), 0)
     raporlu = next((d['toplam'] for d in calisma_durumu if d['tur'] == 'RAPORLU'), 0)
@@ -112,6 +115,9 @@ def personel_sorgulama():
         start_date=sd,
         end_date=ed,
         toplam_personel=toplam_personel,
+        toplam_unvan=toplam_unvan,
+        toplam_tur=toplam_tur,
+        toplam_sinif=toplam_sinif,
         calisan=calisan,
         izinli=izinli,
         raporlu=raporlu,

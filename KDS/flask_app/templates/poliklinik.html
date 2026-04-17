@@ -47,7 +47,7 @@
 
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 <div class="metrics-grid cols-4 pol-kpis">
     <div class="metric-card card-blue">
@@ -159,8 +159,14 @@
         </div>
         {% else %}
         <div class="chart-row">
-            <div class="chart-container" style="padding: 10px;">{{ charts.fig_top | safe }}</div>
-            <div class="chart-container" style="padding: 10px;">{{ charts.fig_bot | safe }}</div>
+            <div class="chart-container" style="padding: 10px;">
+                <div class="chart-title" data-t="En Çok Hasta Bakan Hekimler">En Çok Hasta Bakan Hekimler</div>
+                {{ charts.fig_top | safe }}
+            </div>
+            <div class="chart-container" style="padding: 10px;">
+                <div class="chart-title" data-t="En Düşük Hasta Bakan Hekimler">En Düşük Hasta Bakan Hekimler</div>
+                {{ charts.fig_bot | safe }}
+            </div>
         </div>
         {% endif %}
 
@@ -169,25 +175,37 @@
                 style="font-weight: 700; font-size: 1.05rem; margin-bottom: 8px; display: flex; align-items: center; gap: 8px;" data-t="🤖 Akıllı Yorumlar">
                 <span style="font-size:1.3rem">🤖</span> Akıllı Yorumlar
             </div>
-            <p style="margin:0; font-size: 0.95em; color: var(--text-secondary);">{{ insight_text }}</p>
+            <p id="insightText" style="margin:0; font-size: 0.95em; color: var(--text-secondary);" data-t="{{ insight_text }}">{{ insight_text }}</p>
         </div>
 
     </div>
 
     <div class="tab-content">
         <div class="chart-row">
-            <div class="chart-container">{{ charts.fig_days | safe }}</div>
-            <div class="chart-container">{{ charts.fig_kurum | safe }}</div>
+            <div class="chart-container">
+                <div class="chart-title" data-t="Haftalık Gün Dağılımı">Haftalık Gün Dağılımı</div>
+                {{ charts.fig_days | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title" data-t="Kurum / Sigorta Dağılımı">Kurum / Sigorta Dağılımı</div>
+                {{ charts.fig_kurum | safe }}
+            </div>
         </div>
         <div class="chart-row" style="margin-top: 24px; grid-template-columns: 1fr;">
-            <div class="chart-container" style="min-height: 400px;">{{ charts.fig_trend | safe }}</div>
+            <div class="chart-container" style="min-height: 400px;">
+                <div class="chart-title" data-t="Gunluk Basvuru Trendi">Gunluk Basvuru Trendi</div>
+                {{ charts.fig_trend | safe }}
+            </div>
         </div>
     </div>
 
     <!-- Yeni Eklendi: Yoğunluk Analizi -->
     <div class="tab-content">
         <div class="chart-row" style="grid-template-columns: 1fr;">
-            <div class="chart-container" style="min-height: 400px;">{{ charts.fig_hourly | safe }}</div>
+            <div class="chart-container" style="min-height: 400px;">
+                <div class="chart-title" data-t="Gun Ici Saatlik Hasta Trafigi">Gun Ici Saatlik Hasta Trafigi</div>
+                {{ charts.fig_hourly | safe }}
+            </div>
         </div>
     </div>
 
@@ -238,6 +256,7 @@
             </div>
             <div style="flex: 1; min-width: 300px;">
                 <div class="chart-container" style="min-height: 400px; padding: 0;">
+                    <div class="chart-title" data-t="Branş Dağılımı">Branş Dağılımı</div>
                     {{ charts.fig_hekim_pie | safe }}
                 </div>
             </div>

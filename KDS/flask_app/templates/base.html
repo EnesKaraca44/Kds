@@ -118,9 +118,11 @@
                             Geçen Yıl</option>
                         <option value="ozel" {% if request.args.get('quick')=='ozel' %}selected{% endif %} data-t="Özel">Özel</option>
                     </select>
-                    <div class="custom-dates" id="customDates" style="display:none;">
-                        <input type="date" name="start" class="date-input" value="{{ request.args.get('start', '') }}">
-                        <input type="date" name="end" class="date-input" value="{{ request.args.get('end', '') }}">
+                    <div class="custom-dates" id="customDates" style="display:none; gap: 5px; align-items: center;">
+                        <span style="font-size: 1.1rem; margin-right: 2px;">📅</span>
+                        <input type="date" name="start" class="date-input" placeholder="Başlangıç Tarihi" data-t="Başlangıç Tarihi" value="{{ request.args.get('start', '') }}">
+                        <span style="color: var(--text-muted); font-weight: bold;">-</span>
+                        <input type="date" name="end" class="date-input" placeholder="Bitiş Tarihi" data-t="Bitiş Tarihi" value="{{ request.args.get('end', '') }}">
                     </div>
                     <button type="submit" class="filter-btn" data-t="Filtrele">🔄 Filtrele</button>
                 </form>
@@ -201,6 +203,26 @@
           allowInput: false,         // Elle yazmayı kapat, sadece takvimden seçsin (daha güvenli)
           disableMobile: true        // Mobilde de bu şık takvim UI'ı kullanılsın
         });
+
+        // Toggle custom dates visibility
+        const quickSelect = document.getElementById('quickSelect');
+        const customDates = document.getElementById('customDates');
+
+        function toggleCustomDates() {
+          if (quickSelect && customDates) {
+            if (quickSelect.value === 'ozel') {
+              customDates.style.display = 'flex';
+            } else {
+              customDates.style.display = 'none';
+            }
+          }
+        }
+
+        if (quickSelect) {
+          quickSelect.addEventListener('change', toggleCustomDates);
+          // Initial check on page load
+          toggleCustomDates();
+        }
       });
     </script>
     {% block scripts %}{% endblock %}

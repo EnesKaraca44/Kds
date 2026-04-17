@@ -74,7 +74,7 @@ def poliklinik():
             color=sort_by,
             color_continuous_scale='Blues',
             text_auto='.0f',
-            title="En Çok Hasta Bakan Hekimler",
+            # title="En Çok Hasta Bakan Hekimler", # Handled by HTML
         )
         fig_top.update_layout(
             template='plotly_white',
@@ -95,7 +95,7 @@ def poliklinik():
             color=sort_by,
             color_continuous_scale='Reds',
             text_auto='.0f',
-            title="En Düşük Hasta Bakan Hekimler",
+            # title="En Düşük Hasta Bakan Hekimler", # Handled by HTML
         )
         fig_bot.update_layout(
             template='plotly_white',
@@ -134,7 +134,7 @@ def poliklinik():
     
     daily_avg = df.groupby('Gun_Adı').size().reindex(gun_sirasi).reset_index(name='Hasta Sayısı').fillna(0)
     fig_days = px.bar(daily_avg, x='Gun_Adı', y='Hasta Sayısı', color='Hasta Sayısı', 
-                      color_continuous_scale='Turbo', title="Haftalık Gün Dağılımı")
+                      color_continuous_scale='Turbo') # title Handled by HTML
     fig_days.update_layout(
         template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(showgrid=False, zeroline=False, title=""),
@@ -147,8 +147,7 @@ def poliklinik():
     kurum_data = df.groupby('KrmAdi').size().reset_index(name='Sayi').nlargest(10, 'Sayi')
     if not kurum_data.empty:
         fig_kurum = px.pie(kurum_data, values='Sayi', names='KrmAdi', hole=0.5,
-                           color_discrete_sequence=px.colors.qualitative.Bold,
-                           title="Kurum / Sigorta Dağılımı")
+                           color_discrete_sequence=px.colors.qualitative.Bold) # title Handled by HTML
         fig_kurum.update_traces(textinfo='percent+label', textposition='outside')
         fig_kurum.update_layout(
             template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
@@ -209,7 +208,7 @@ def poliklinik():
     )
     fig_trend.update_layout(
         template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        title='Gunluk Basvuru Trendi',
+        # title='Gunluk Basvuru Trendi', # Handled by HTML
         hovermode='x unified',
         xaxis=dict(
             showgrid=True, gridcolor='rgba(15,23,42,0.05)', zeroline=False, title="",
@@ -294,7 +293,7 @@ def poliklinik():
     )
     fig_hourly.update_layout(
         template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        title='Gun Ici Saatlik Hasta Trafigi',
+        # title='Gun Ici Saatlik Hasta Trafigi', # Handled by HTML
         hovermode='x unified',
         xaxis=dict(
             showgrid=False,
@@ -361,8 +360,7 @@ def poliklinik():
         hekim_brans_sayisi = df_hekim['SrvAd'].nunique()
         
         brans_dagilimi = df_hekim.groupby('SrvAd').size().reset_index(name='Sayi')
-        fig_hekim_pie = px.pie(brans_dagilimi, values='Sayi', names='SrvAd', hole=0.0,
-                               title=f"{selected_hekim} Branş Dağılımı")
+        fig_hekim_pie = px.pie(brans_dagilimi, values='Sayi', names='SrvAd', hole=0.0) # title Handled by HTML
         fig_hekim_pie.update_traces(textinfo='percent', textposition='inside')
         fig_hekim_pie.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
@@ -382,13 +380,13 @@ def poliklinik():
             top_data_sorted = doc_perf.sort_values(['Benzersiz_Hasta_Sayisi', 'DOKTOR_ADI'], ascending=[False, True])
             top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
             top_doc_val = int(top_data_sorted.iloc[0]['Benzersiz_Hasta_Sayisi'])
-            insight_text = f"Seçili dönemde benzersiz hasta sayısına göre en yüksek değer {top_doc_val} ile {top_doc_name} olmuştur."
+            insight_text = f"INSIGHT_MAX_VAL|{top_doc_val}|{top_doc_name}"
         else:
             top_data_sorted = doc_perf.sort_values(sort_by, ascending=False)
             top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
             top_doc_val = int(top_data_sorted.iloc[0][sort_by])
             metric_label = "Kayıt Sayısı" if sort_by == 'Kayit_Sayisi' else "Benzersiz Hasta Sayısı"
-            insight_text = f"Seçili dönemde en yüksek performansı gösteren hekim {top_doc_val} {metric_label} ile {top_doc_name} olmuştur."
+            insight_text = f"INSIGHT_TOP_PERF|{top_doc_val}|{metric_label}|{top_doc_name}"
 
     return render_template('poliklinik.html',
         start_date=sd, end_date=ed, no_data=False,

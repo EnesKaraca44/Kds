@@ -206,11 +206,11 @@
 
     <div class="chart-row">
       <div class="chart-container">
-        <div class="chart-title">💰 <span data-t="Gelire Göre Top">Gelire Göre Top</span> {{ top_n }}</div>
+        <div class="chart-title" data-t="Gelire Göre Top">Gelire Göre Top</div>
         {{ charts.fig_gelir | safe }}
       </div>
       <div class="chart-container">
-        <div class="chart-title">⚕️ <span data-t="İşleme Göre Top">İşleme Göre Top</span> {{ top_n }}</div>
+        <div class="chart-title" data-t="İşleme Göre Top">İşleme Göre Top</div>
         {{ charts.fig_islem | safe }}
       </div>
     </div>
@@ -223,24 +223,14 @@
     <div class="insights">
       <h2 class="section-title" data-t="🎯 Sistem Analizi">🎯 Sistem Analizi</h2>
       {% for item in insights %}
-        {% if item.title is defined %}
-          <div class="insight-row">
-            🏆 <strong>{{ item.title }}</strong>:
-            {{ item.ciro|turkish_number(2) }} gelir,
-            {{ item.islem|turkish_number(0) }} işlem
-          </div>
-        {% elif item.share_pct is defined %}
-          <div class="insight-row">
-            📊 İlk 3 grup, toplam gelirin <strong>%{{ item.share_pct|round(1) }}</strong>'ini oluşturuyor.
-          </div>
-        {% endif %}
+        <div class="insight-row" data-t="{{ item }}">{{ item }}</div>
       {% endfor %}
     </div>
   </div>
 
   <div class="tab-content">
     <div class="chart-container">
-      <div class="chart-title">🔍 Grup Detayları</div>
+      <div class="chart-title" data-t="🔍 Grup Detayları">🔍 Grup Detayları</div>
       <form method="GET" style="margin-bottom: 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
         {% for key, value in request.args.items() %}
           {% if key not in ['grup', 'tab'] %}
@@ -252,7 +242,7 @@
         <select id="grup" name="grup" onchange="this.form.submit()"
                 style="padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); min-width:200px; width:100%; max-width:400px;">
           {% for g in group_list %}
-            <option value="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
+            <option value="{{ g }}" data-t="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
           {% endfor %}
         </select>
       </form>
@@ -270,7 +260,7 @@
           <tbody>
             {% for r in detay_rows %}
             <tr>
-              <td>{{ r.tetkik_adi }}</td>
+              <td data-t="{{ r.tetkik_adi }}">{{ r.tetkik_adi }}</td>
               <td>{{ r.adet|turkish_number(0) }}</td>
               <td>{{ r.ciro|turkish_number(2) }}</td>
             </tr>

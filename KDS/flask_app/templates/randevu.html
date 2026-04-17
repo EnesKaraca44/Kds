@@ -96,9 +96,24 @@
     .insights-grid .insight-card:first-child {
         grid-column: 1 / -1;
     }
-    
-    /* Metric card styles moved to global style.css */
 
+    /* Dark Mode Overrides for Insight Cards */
+    .theme-dark .insight-card {
+        color: #f1f5f9;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    .theme-dark .insight-card.success {
+        background: rgba(34, 197, 94, 0.12);
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+    .theme-dark .insight-card.info {
+        background: rgba(59, 130, 246, 0.12);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    .theme-dark .insight-card.warning {
+        background: rgba(249, 115, 22, 0.12);
+        border-color: rgba(249, 115, 22, 0.4);
+    }
 </style>
 {% endblock %}
 
@@ -201,7 +216,7 @@
             {% for item in insights %}
             <div class="insight-card {{ item.type }}">
                 <span class="insight-icon">{{ item.icon }}</span>
-                <span>{{ item.text | safe }}</span>
+                <span data-t="{{ item.text }}">{{ item.text | safe }}</span>
             </div>
             {% endfor %}
         </div>

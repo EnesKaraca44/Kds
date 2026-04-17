@@ -1,130 +1,80 @@
 hekim_top:
-                      DktAd  Periapikal  Panoramik  Sefalometrik  DentalTomografi  TOPLAM_FILM
-44               HÜLYA ASAN           2        168             0                0          170
-12       BURHAN CAN ÇANAKÇI         120          0             0                0          120
-62     RAMAZAN BERKAY PEKER           0          9             3               34           46
-57             NAZLI DURMUŞ          18          1             0                0           19
-7             BERKAY YILMAZ          18          0             0                0           18
-37   FATMA GÜLFEŞAN ÇANAKÇİ           3         13             0                0           16
-33            ENGİN KARİPER          16          0             0                0           16
-15               BÜŞRA SARI          15          0             0                0           15
-71             YAĞMUR CARUZ          15          0             0                0           15
-56              Müge  BULUT          11          3             0                0           14
-24                ECEM EREN          14          0             0                0           14
-3               ALEYNA ANIL          13          0             0                0           13
-64     SEVDE NUR HENDEMOĞLU          12          0             0                0           12
-39        GAYE NUR KARAGENÇ          10          2             0                0           12
-52       MELTEM TEKBAŞ ATAY          11          0             0                0           11
-74              ZEYNEP USTA           0          6             5                0           11
-32               EMRE ARDUÇ          10          0             0                0           10
-25                  EDA EFE           7          3             0                0           10
-53             MERVE COŞKUN           5          3             2                0           10
-65       SEYİT AHMET SAVDIÇ          10          0             0                0           10
-5            AYLİN ÇİLİNGİR           9          0             0                0            9
-49  MEDİHA BÜYÜKGÖZE DİNDAR           9          0             0                0            9
-66        SEZİN TATLICIOĞLU           1          5             3                0            9
-18              CEREN TURAN           8          0             0                0            8
-17           Cangür  TOPTOP           8          0             0                0            8
+                     DktAd  Periapikal  Panoramik  Sefalometrik  DentalTomografi  TOPLAM_FILM
+57              HÜLYA ASAN          84       5866             0                0         5950
+17      BURHAN CAN ÇANAKÇI        3623          8             0                0         3631
+85    RAMAZAN BERKAY PEKER         434       1554           102             1442         3532
+60          İREM ÇETİNKAYA        2051         12             0                0         2063
+61          KÜBRA MEYDANAL         808          0             0                0          808
+72  MERYEM BETÜL GÖNÜLALAN         718          0             0                0          718
+97            YAĞMUR CARUZ         618         17             0                0          635
+40           ENGİN KARİPER         552          0             0                0          552
+92          ŞULE NUR YEGÜL         455         33             0                0          488
+87    SEVDE NUR HENDEMOĞLU         484          1             0                0          485
+76            NAZLI DURMUŞ         408         32             0                0          440
+7               AYŞE GÖREN         417         22             0                0          439
+38       ELİF SİNEM SANCAR         406         24             1                0          431
+75             Müge  BULUT         355         62             0                0          417
+11             BERAT ÇAYLI         411          0             0                1          412
 
 hekim_melt:
-                      DktAd              Tür  Adet
-0                HÜLYA ASAN       Periapikal     2
-1        BURHAN CAN ÇANAKÇI       Periapikal   120
-2      RAMAZAN BERKAY PEKER       Periapikal     0
-3              NAZLI DURMUŞ       Periapikal    18
-4             BERKAY YILMAZ       Periapikal    18
-5    FATMA GÜLFEŞAN ÇANAKÇİ       Periapikal     3
-6             ENGİN KARİPER       Periapikal    16
-7                BÜŞRA SARI       Periapikal    15
-8              YAĞMUR CARUZ       Periapikal    15
-9               Müge  BULUT       Periapikal    11
-10                ECEM EREN       Periapikal    14
-11              ALEYNA ANIL       Periapikal    13
-12     SEVDE NUR HENDEMOĞLU       Periapikal    12
-13        GAYE NUR KARAGENÇ       Periapikal    10
-14       MELTEM TEKBAŞ ATAY       Periapikal    11
-15              ZEYNEP USTA       Periapikal     0
-16               EMRE ARDUÇ       Periapikal    10
-17                  EDA EFE       Periapikal     7
-18             MERVE COŞKUN       Periapikal     5
-19       SEYİT AHMET SAVDIÇ       Periapikal    10
-20           AYLİN ÇİLİNGİR       Periapikal     9
-21  MEDİHA BÜYÜKGÖZE DİNDAR       Periapikal     9
-22        SEZİN TATLICIOĞLU       Periapikal     1
-23              CEREN TURAN       Periapikal     8
-24           Cangür  TOPTOP       Periapikal     8
-25               HÜLYA ASAN        Panoramik   168
-26       BURHAN CAN ÇANAKÇI        Panoramik     0
-27     RAMAZAN BERKAY PEKER        Panoramik     9
-28             NAZLI DURMUŞ        Panoramik     1
-29            BERKAY YILMAZ        Panoramik     0
-30   FATMA GÜLFEŞAN ÇANAKÇİ        Panoramik    13
-31            ENGİN KARİPER        Panoramik     0
-32               BÜŞRA SARI        Panoramik     0
-33             YAĞMUR CARUZ        Panoramik     0
-34              Müge  BULUT        Panoramik     3
-35                ECEM EREN        Panoramik     0
-36              ALEYNA ANIL        Panoramik     0
-37     SEVDE NUR HENDEMOĞLU        Panoramik     0
-38        GAYE NUR KARAGENÇ        Panoramik     2
-39       MELTEM TEKBAŞ ATAY        Panoramik     0
-40              ZEYNEP USTA        Panoramik     6
-41               EMRE ARDUÇ        Panoramik     0
-42                  EDA EFE        Panoramik     3
-43             MERVE COŞKUN        Panoramik     3
-44       SEYİT AHMET SAVDIÇ        Panoramik     0
-45           AYLİN ÇİLİNGİR        Panoramik     0
-46  MEDİHA BÜYÜKGÖZE DİNDAR        Panoramik     0
-47        SEZİN TATLICIOĞLU        Panoramik     5
-48              CEREN TURAN        Panoramik     0
-49           Cangür  TOPTOP        Panoramik     0
-50               HÜLYA ASAN     Sefalometrik     0
-51       BURHAN CAN ÇANAKÇI     Sefalometrik     0
-52     RAMAZAN BERKAY PEKER     Sefalometrik     3
-53             NAZLI DURMUŞ     Sefalometrik     0
-54            BERKAY YILMAZ     Sefalometrik     0
-55   FATMA GÜLFEŞAN ÇANAKÇİ     Sefalometrik     0
-56            ENGİN KARİPER     Sefalometrik     0
-57               BÜŞRA SARI     Sefalometrik     0
-58             YAĞMUR CARUZ     Sefalometrik     0
-59              Müge  BULUT     Sefalometrik     0
-60                ECEM EREN     Sefalometrik     0
-61              ALEYNA ANIL     Sefalometrik     0
-62     SEVDE NUR HENDEMOĞLU     Sefalometrik     0
-63        GAYE NUR KARAGENÇ     Sefalometrik     0
-64       MELTEM TEKBAŞ ATAY     Sefalometrik     0
-65              ZEYNEP USTA     Sefalometrik     5
-66               EMRE ARDUÇ     Sefalometrik     0
-67                  EDA EFE     Sefalometrik     0
-68             MERVE COŞKUN     Sefalometrik     2
-69       SEYİT AHMET SAVDIÇ     Sefalometrik     0
-70           AYLİN ÇİLİNGİR     Sefalometrik     0
-71  MEDİHA BÜYÜKGÖZE DİNDAR     Sefalometrik     0
-72        SEZİN TATLICIOĞLU     Sefalometrik     3
-73              CEREN TURAN     Sefalometrik     0
-74           Cangür  TOPTOP     Sefalometrik     0
-75               HÜLYA ASAN  DentalTomografi     0
-76       BURHAN CAN ÇANAKÇI  DentalTomografi     0
-77     RAMAZAN BERKAY PEKER  DentalTomografi    34
-78             NAZLI DURMUŞ  DentalTomografi     0
-79            BERKAY YILMAZ  DentalTomografi     0
-80   FATMA GÜLFEŞAN ÇANAKÇİ  DentalTomografi     0
-81            ENGİN KARİPER  DentalTomografi     0
-82               BÜŞRA SARI  DentalTomografi     0
-83             YAĞMUR CARUZ  DentalTomografi     0
-84              Müge  BULUT  DentalTomografi     0
-85                ECEM EREN  DentalTomografi     0
-86              ALEYNA ANIL  DentalTomografi     0
-87     SEVDE NUR HENDEMOĞLU  DentalTomografi     0
-88        GAYE NUR KARAGENÇ  DentalTomografi     0
-89       MELTEM TEKBAŞ ATAY  DentalTomografi     0
-90              ZEYNEP USTA  DentalTomografi     0
-91               EMRE ARDUÇ  DentalTomografi     0
-92                  EDA EFE  DentalTomografi     0
-93             MERVE COŞKUN  DentalTomografi     0
-94       SEYİT AHMET SAVDIÇ  DentalTomografi     0
-95           AYLİN ÇİLİNGİR  DentalTomografi     0
-96  MEDİHA BÜYÜKGÖZE DİNDAR  DentalTomografi     0
-97        SEZİN TATLICIOĞLU  DentalTomografi     0
-98              CEREN TURAN  DentalTomografi     0
-99           Cangür  TOPTOP  DentalTomografi     0
+                     DktAd              Tür  Adet
+0               HÜLYA ASAN       Periapikal    84
+1       BURHAN CAN ÇANAKÇI       Periapikal  3623
+2     RAMAZAN BERKAY PEKER       Periapikal   434
+3           İREM ÇETİNKAYA       Periapikal  2051
+4           KÜBRA MEYDANAL       Periapikal   808
+5   MERYEM BETÜL GÖNÜLALAN       Periapikal   718
+6             YAĞMUR CARUZ       Periapikal   618
+7            ENGİN KARİPER       Periapikal   552
+8           ŞULE NUR YEGÜL       Periapikal   455
+9     SEVDE NUR HENDEMOĞLU       Periapikal   484
+10            NAZLI DURMUŞ       Periapikal   408
+11              AYŞE GÖREN       Periapikal   417
+12       ELİF SİNEM SANCAR       Periapikal   406
+13             Müge  BULUT       Periapikal   355
+14             BERAT ÇAYLI       Periapikal   411
+15              HÜLYA ASAN        Panoramik  5866
+16      BURHAN CAN ÇANAKÇI        Panoramik     8
+17    RAMAZAN BERKAY PEKER        Panoramik  1554
+18          İREM ÇETİNKAYA        Panoramik    12
+19          KÜBRA MEYDANAL        Panoramik     0
+20  MERYEM BETÜL GÖNÜLALAN        Panoramik     0
+21            YAĞMUR CARUZ        Panoramik    17
+22           ENGİN KARİPER        Panoramik     0
+23          ŞULE NUR YEGÜL        Panoramik    33
+24    SEVDE NUR HENDEMOĞLU        Panoramik     1
+25            NAZLI DURMUŞ        Panoramik    32
+26              AYŞE GÖREN        Panoramik    22
+27       ELİF SİNEM SANCAR        Panoramik    24
+28             Müge  BULUT        Panoramik    62
+29             BERAT ÇAYLI        Panoramik     0
+30              HÜLYA ASAN     Sefalometrik     0
+31      BURHAN CAN ÇANAKÇI     Sefalometrik     0
+32    RAMAZAN BERKAY PEKER     Sefalometrik   102
+33          İREM ÇETİNKAYA     Sefalometrik     0
+34          KÜBRA MEYDANAL     Sefalometrik     0
+35  MERYEM BETÜL GÖNÜLALAN     Sefalometrik     0
+36            YAĞMUR CARUZ     Sefalometrik     0
+37           ENGİN KARİPER     Sefalometrik     0
+38          ŞULE NUR YEGÜL     Sefalometrik     0
+39    SEVDE NUR HENDEMOĞLU     Sefalometrik     0
+40            NAZLI DURMUŞ     Sefalometrik     0
+41              AYŞE GÖREN     Sefalometrik     0
+42       ELİF SİNEM SANCAR     Sefalometrik     1
+43             Müge  BULUT     Sefalometrik     0
+44             BERAT ÇAYLI     Sefalometrik     0
+45              HÜLYA ASAN  DentalTomografi     0
+46      BURHAN CAN ÇANAKÇI  DentalTomografi     0
+47    RAMAZAN BERKAY PEKER  DentalTomografi  1442
+48          İREM ÇETİNKAYA  DentalTomografi     0
+49          KÜBRA MEYDANAL  DentalTomografi     0
+50  MERYEM BETÜL GÖNÜLALAN  DentalTomografi     0
+51            YAĞMUR CARUZ  DentalTomografi     0
+52           ENGİN KARİPER  DentalTomografi     0
+53          ŞULE NUR YEGÜL  DentalTomografi     0
+54    SEVDE NUR HENDEMOĞLU  DentalTomografi     0
+55            NAZLI DURMUŞ  DentalTomografi     0
+56              AYŞE GÖREN  DentalTomografi     0
+57       ELİF SİNEM SANCAR  DentalTomografi     0
+58             Müge  BULUT  DentalTomografi     0
+59             BERAT ÇAYLI  DentalTomografi     1
