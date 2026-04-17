@@ -1,34 +1,40 @@
-{% extends "base.html" %}
-{% block title %}Malzeme Tüketim{% endblock %}
-{% block page_title %}<span data-t="📦 Kurum Malzeme Tüketim Analizi">📦 Kurum Malzeme Tüketim Analizi</span>{% endblock %}
+{% extends "base.html" %} <!-- Ana şablon dosyasını (base.html) miras alarak başlık, menü ve alt bilgi (footer) alanlarını hazır getirir -->
+{% block title %}Malzeme Tüketim{% endblock %} <!-- Tarayıcı sekmesindeki başlık bilgisini ayarlar -->
+{% block page_title %}<span data-t="📦 Kurum Malzeme Tüketim Analizi">📦 Kurum Malzeme Tüketim Analizi</span>{% endblock %} <!-- Sayfanın ana başlık alanını doldurur -->
 
 {% block content %}
+<!-- Ana içerik bloğu başlangıcı -->
 {% if no_data %}
+<!-- Veritabanından hiçbir veri gelmediyse (hem tüketim hem depo verisi boşsa) bu uyarı kutusu gösterilir -->
 <div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
-<div class="metrics-grid cols-4">
-    <div class="metric-card">
+<!-- Veri varsa dashboard paneli render edilmeye başlanır -->
+<div class="malzeme-dashboard">
+<!-- Üst Panel: Temel Performans Göstergeleri (KPI) -->
+<div class="metrics-grid cols-4 malzeme-kpi-grid">
+    <!-- Toplam Tüketim Kartı -->
+    <div class="metric-card card-blue">
         <div class="metric-icon">📦</div>
         <div class="metric-body">
             <div class="metric-value">{{ toplam_tuketim|turkish_number(0) }}</div>
             <div class="metric-label" data-t="Toplam Tüketim (Adet)">Toplam Tüketim (Adet)</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-orange">
         <div class="metric-icon">👥</div>
         <div class="metric-body">
             <div class="metric-value">{{ tekil_hasta|turkish_number(0) }}</div>
             <div class="metric-label" data-t="Tekil Hasta">Tekil Hasta</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-green">
         <div class="metric-icon">🧪</div>
         <div class="metric-body">
             <div class="metric-value">{{ farkli_malzeme }}</div>
             <div class="metric-label" data-t="Farklı Malzeme">Farklı Malzeme</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-purple">
         <div class="metric-icon">💰</div>
         <div class="metric-body">
             <div class="metric-value">{{ toplam_tutar|turkish_number }}</div>
@@ -37,10 +43,509 @@
     </div>
 </div>
 
-<div class="chart-container">{{ charts.fig_trend | safe }}</div>
-<div class="chart-row">
-    <div class="chart-container">{{ charts.fig_branch | safe }}</div>
-    <div class="chart-container">{{ charts.fig_scatter | safe }}</div>
+<!-- Kategori Navigasyonu (Sekmeler) -->
+<div class="tabs">
+    <a class="tab-btn {% if active_kategori == '7' %}active{% endif %}" data-t="🧪 Miad Seviye Denetim" href="{{ url_for('malzeme.malzeme', kategori='7', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🧪 Miad Seviye Denetim</a>
+    <a class="tab-btn {% if active_kategori == '6' %}active{% endif %}" data-t="🧭 Malzeme Mevcut Durum" href="{{ url_for('malzeme.malzeme', kategori='6', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🧭 Malzeme Mevcut Durum</a>
+    <a class="tab-btn {% if active_kategori == '1' %}active{% endif %}" data-t="📊 Günlük Tüketim ve Hız Analizi" href="{{ url_for('malzeme.malzeme', kategori='1', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">📊 Günlük Tüketim ve Hız Analizi</a>
+    <a class="tab-btn {% if active_kategori == '2' %}active{% endif %}" data-t="🔗 Tetkik (İşlem) Bazlı Malzeme Detayı" href="{{ url_for('malzeme.malzeme', kategori='2', tetkik=selected_tetkik, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🔗 Tetkik (İşlem) Bazlı Malzeme Detayı</a>
+    <a class="tab-btn {% if active_kategori == '3' %}active{% endif %}" data-t="🩺 Branş ve Branş İçi Hekim Analizi" href="{{ url_for('malzeme.malzeme', kategori='3', brans=selected_brans, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🩺 Branş ve Branş İçi Hekim Analizi</a>
+    <a class="tab-btn {% if active_kategori == '4' %}active{% endif %}" data-t="🎈 Maliyet & Hasta İlişkisi" href="{{ url_for('malzeme.malzeme', kategori='4', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🎈 Maliyet & Hasta İlişkisi</a>
+    <!-- Kategori 5: Genel stok sıralaması sekmesi -->
+    <a class="tab-btn {% if active_kategori == '5' %}active{% endif %}" data-t="📋 Genel Stok Tüketim Sıralaması" href="{{ url_for('malzeme.malzeme', kategori='5', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">📋 Genel Stok Tüketim Sıralaması</a>
+</div>
+<!-- Sekme alanı sonu -->
+
+<!-- Kategori 7: Miad Seviye Denetim Bölümü -->
+{% if active_kategori == '7' %}
+<!-- Depo bazlı filtreleme formu: Kullanıcı depo seçince sayfa yenilenir ve seçili depoyu hatırlar -->
+<form method="get" class="mb-3 malzeme-inline-filter depo-inline-filter">
+    <!-- Sayfa değişse bile tarih/kategori filtresinin korunması için gizli (hidden) alanlar kullanılır -->
+    <input type="hidden" name="kategori" value="7">
+    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+    <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+    <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+    <div class="tetkik-filter-card depo-filter-card">
+        <div class="tetkik-filter-topline">
+            <span class="tetkik-filter-title" data-t="Depo Seçimi">Depo Seçimi</span>
+        </div>
+        <div class="tetkik-select-shell">
+            <!-- onchange="this.form.submit()" kullanılarak depo seçildiği anda sayfanın yenilenmesi ve filtrenin uygulanması sağlanır -->
+            <select id="depoSelectKat7" name="depo" class="tetkik-select depo-select" onchange="this.form.submit()">
+                <option value="" data-t="TÜM DEPOLAR" {% if not selected_depo %}selected{% endif %}>TÜM DEPOLAR</option>
+                {% for depo in depo_options %}
+                <option value="{{ depo.id }}" {% if depo.id == selected_depo %}selected{% endif %}>{{ depo.ad }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</form>
+{% if no_data_6_7 %}
+<div class="alert alert-warning">{{ no_data_6_7_message }}</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🧪 Miad Seviye Denetim">🧪 Miad Seviye Denetim</h4>
+    <div class="table-search-limit-row">
+        <div class="table-search-wrapper">
+            <input type="text" id="searchMiad" class="table-search-input" placeholder="🔍 Malzeme veya Lot No ara..." autocomplete="off">
+            <span class="search-icon"></span>
+            <span id="searchMiadCount" class="table-search-count"></span>
+        </div>
+        <div class="table-limit-wrapper">
+            <span class="table-limit-label" data-t="Göster">Göster:</span>
+            <div id="limitMiadSeg" class="table-limit-seg" role="group" aria-label="Göster">
+                <button type="button" class="table-limit-btn" data-limit="25">25</button>
+                <button type="button" class="table-limit-btn" data-limit="50">50</button>
+                <button type="button" class="table-limit-btn" data-limit="100">100</button>
+                <button type="button" class="table-limit-btn active" data-limit="all">Tümü</button>
+            </div>
+        </div>
+    </div>
+    <div class="table-wrapper malzeme-detail-table">
+        <div class="malzeme-table-head">
+            <div class="malzeme-table-title" data-t="Miad Takip Tablosu">Miad Takip Tablosu</div>
+            <div class="malzeme-table-meta">{{ miad_rows|length }} kayıt | Benzersiz Seri/Parti No: {{ miad_unique_seri_parti }}</div>
+        </div>
+        <table class="data-table malzeme-table-compact">
+            <colgroup>
+                <col style="width:35%">
+                <col style="width:15%">
+                <col style="width:15%">
+                <col style="width:15%">
+                <col style="width:20%">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th class="miad-stok-col" data-t="Stok Adı">Stok Adı</th>
+                    <th class="miad-lot-col" data-t="Lot / Seri No">Lot / Seri No</th>
+                    <th class="miad-miktar-col" data-t="Miktar">Miktar</th>
+                    <th class="miad-skt-col" data-t="Son Kullanma Tarihi">Son Kullanma Tarihi</th>
+                    <th class="durum-col" data-t="Durum">Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in miad_rows %}
+                <tr>
+                    <td class="miad-stok-cell">{{ row.stokAd }}</td>
+                    <td class="miad-lot-cell">{{ row.lotNo }}</td>
+                    <td class="miad-miktar-cell"><span class="qty-chip">{{ row.miktar|turkish_number(0) }}</span></td>
+                    <td class="miad-skt-cell">{{ row.skt }}</td>
+                    <td class="durum-cell">
+                        <!-- Python (malzeme.py) tarafında hesaplanan duruma göre renkli rozetler (badge) basılır -->
+                        {% if row.durum == 'Gecmis' %}
+                        <span class="malzeme-badge badge-danger" data-t="Miadı Geçmiş">Miadı Geçmiş</span>
+                        {% elif row.durum == 'Yaklasan' %}
+                        <span class="malzeme-badge badge-warning" data-t="Yaklaşan">Yaklaşan</span>
+                        {% else %}
+                        <span class="malzeme-badge badge-success" data-t="Güvenli">Güvenli</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if miad_rows|length == 0 %}
+                <tr>
+                    <td colspan="5" class="malzeme-empty-cell">{{ no_data_6_7_message }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 {% endif %}
+{% endif %}
+
+<!-- Kategori 6: Malzeme Mevcut Durum Bölümü -->
+{% if active_kategori == '6' %}
+<!-- Depo bazlı filtreleme formu: GET metodu parametreleri URL üzerinden taşır -->
+<form method="get" class="mb-3 malzeme-inline-filter depo-inline-filter">
+    <input type="hidden" name="kategori" value="6">
+    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+    <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+    <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+    <div class="tetkik-filter-card depo-filter-card">
+        <div class="tetkik-filter-topline">
+            <span class="tetkik-filter-title" data-t="Depo Seçimi">Depo Seçimi</span>
+        </div>
+        <div class="tetkik-select-shell">
+            <select id="depoSelectKat6" name="depo" class="tetkik-select depo-select" onchange="this.form.submit()">
+                <option value="" data-t="TÜM DEPOLAR" {% if not selected_depo %}selected{% endif %}>TÜM DEPOLAR</option>
+                {% for depo in depo_options %}
+                <option value="{{ depo.id }}" {% if depo.id == selected_depo %}selected{% endif %}>{{ depo.ad }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+</form>
+{% if no_data_6_7 %}
+<div class="alert alert-warning">{{ no_data_6_7_message }}</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🧭 Malzeme Mevcut Durum">🧭 Malzeme Mevcut Durum</h4>
+    <div class="table-search-limit-row">
+        <div class="table-search-wrapper">
+            <input type="text" id="searchMevcut" class="table-search-input" placeholder="🔍 Malzeme adı ara..." autocomplete="off">
+            <span class="search-icon"></span>
+            <span id="searchMevcutCount" class="table-search-count"></span>
+        </div>
+        <div class="table-limit-wrapper">
+            <span class="table-limit-label" data-t="Göster">Göster:</span>
+            <div id="limitMevcutSeg" class="table-limit-seg" role="group" aria-label="Göster">
+                <button type="button" class="table-limit-btn" data-limit="25">25</button>
+                <button type="button" class="table-limit-btn" data-limit="50">50</button>
+                <button type="button" class="table-limit-btn" data-limit="100">100</button>
+                <button type="button" class="table-limit-btn active" data-limit="all">Tümü</button>
+            </div>
+        </div>
+    </div>
+    <div class="table-wrapper malzeme-detail-table">
+        <div class="malzeme-table-head">
+            <div class="malzeme-table-title" data-t="Stok Mevcut Durum Tablosu">Stok Mevcut Durum Tablosu</div>
+            <div class="malzeme-table-meta" data-t="{0} kalem|{{ mevcut_durum_rows|length }}">{{ mevcut_durum_rows|length }} kalem</div>
+        </div>
+        <table class="data-table malzeme-table-compact">
+            <colgroup>
+                <col style="width:56%">
+                <col style="width:20%">
+                <col style="width:24%">
+            </colgroup>
+            <thead>
+                <tr>
+                    <th data-t="Stok Adı">Stok Adı</th>
+                    <th class="mevcut-miktar-col" data-t="Mevcut Miktar">Mevcut Miktar</th>
+                    <th class="durum-col" data-t="Durum">Durum</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in mevcut_durum_rows %}
+                <tr>
+                    <td>{{ row.stokAd }}</td>
+                    <td class="mevcut-miktar-cell"><span class="qty-chip">{{ row.mevcutMiktar|turkish_number(0) }}</span></td>
+                    <td class="durum-cell">
+                        <!-- Stok miktarına göre (Kritik/Tedarik/Yeterli) otomatik durum belirleme -->
+                        {% if row.durum == 'Kritik' %}
+                        <span class="malzeme-badge badge-danger" data-t="Kritik">Kritik</span>
+                        {% elif row.durum == 'Tedarik Edilmeli' %}
+                        <span class="malzeme-badge badge-warning" data-t="Tedarik Edilmeli">Tedarik Edilmeli</span>
+                        {% elif row.durum == 'Stoksuz' %}
+                        <span class="malzeme-badge badge-dark" data-t="Stoksuz">Stoksuz</span>
+                        {% else %}
+                        <span class="malzeme-badge badge-success" data-t="Yeterli">Yeterli</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+                {% if mevcut_durum_rows|length == 0 %}
+                <tr>
+                    <td colspan="3" class="malzeme-empty-cell">{{ no_data_6_7_message }}</td>
+                </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Kategori 1: Günlük Tüketim ve Hız Analizi (Grafik) -->
+{% if active_kategori == '1' %}
+{% if no_data_1_5 %}
+<div class="alert alert-warning" data-t="Seçilen tarih aralığında veri bulunamadı.">Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="📊 Günlük Tüketim ve Hız Analizi">📊 Günlük Tüketim ve Hız Analizi</h4>
+    <!-- Plotly grafiği |safe filtresiyle XSS koruması altında render edilir -->
+    <div class="chart-container">{{ charts.fig_trend | safe }}</div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Kategori 2: Tetkik (İşlem) Bazlı Malzeme Detayı -->
+{% if active_kategori == '2' %}
+<!-- Veri kontrolü: Eğer backend tarafından 'no_data_1_5' (Kategori 1-5 arası veri) True gelmişse uyarı ver -->
+{% if no_data_1_5 %}
+<div class="alert alert-warning" data-t="Seçilen tarih aralığında veri bulunamadı.">Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🔗 Tetkik (İşlem) Bazlı Malzeme Detayı">🔗 Tetkik (İşlem) Bazlı Malzeme Detayı</h4>
+    <!-- İşlem (Tetkik) seçimi için filtre formu -->
+    <form method="get" class="mb-3 malzeme-inline-filter">
+        <input type="hidden" name="kategori" value="2">
+        <input type="hidden" name="depo" value="{{ request.args.get('depo', '') }}">
+        <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+        <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+        <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+        <div class="tetkik-filter-card">
+            <div class="tetkik-filter-topline">
+                <span class="tetkik-filter-title" data-t="Analiz Edilecek İşlem">Analiz Edilecek İşlem</span>
+            </div>
+            <div class="tetkik-select-shell">
+                <!-- İşlem değişince form otomatik submit edilir (onchange) -->
+                <select id="tetkikSelect" name="tetkik" class="tetkik-select" onchange="this.form.submit()">
+                    <option value="{{ tum_islemler_key }}" data-t="TÜM İŞLEMLER" {% if selected_tetkik == tum_islemler_key %}selected{% endif %}>TÜM İŞLEMLER</option>
+                    {% for t in tetkik_options %}
+                    <option value="{{ t }}" {% if t == selected_tetkik %}selected{% endif %}>{{ t }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <div class="chart-row malzeme-detail-grid">
+        <!-- Sol taraf: Seçili işleme ait mini özet kartları -->
+        <div class="chart-container malzeme-summary-card">
+            <div class="mini-kpi">
+                <div class="mini-kpi-label" data-t="İşlem Maliyeti">İşlem Maliyeti</div>
+                <div class="mini-kpi-value">{{ secili_islem_maliyeti|turkish_number }}</div>
+            </div>
+            <div class="mini-kpi-divider"></div>
+            <div class="mini-kpi">
+                <div class="mini-kpi-label" data-t="Malzeme Çeşidi">Malzeme Çeşidi</div>
+                <div class="mini-kpi-value">{{ secili_malzeme_cesidi|turkish_number(0) }}</div>
+            </div>
+        </div>
+        <div class="table-wrapper malzeme-detail-table">
+            <div class="malzeme-table-head">
+                <div class="malzeme-table-title" data-t="Malzeme Dağılım Tablosu">Malzeme Dağılım Tablosu</div>
+                <div class="malzeme-table-meta" data-t="{0} kalem|{{ tetkik_detay_rows|length }}">{{ tetkik_detay_rows|length }} kalem</div>
+            </div>
+            <table class="data-table malzeme-table-compact">
+                <colgroup>
+                    <col style="width:64%">
+                    <col style="width:18%">
+                    <col style="width:18%">
+                </colgroup>
+                <thead>
+                    <tr>
+                        <th data-t="Stok Adı">Stok Adı</th>
+                        <th class="tetkik-miktar-col" data-t="Tüketim Miktarı">Tüketim Miktarı</th>
+                        <th data-t="Toplam Tutar">Toplam Tutar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in tetkik_detay_rows %}
+                    <tr>
+                        <td>{{ row.stokAd }}</td>
+                        <td class="tetkik-miktar-cell"><span class="qty-chip">{{ row.dusumMiktar|turkish_number(0) }}</span></td>
+                        <td class="amount-cell">{{ row.toplam|turkish_number }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if tetkik_detay_rows|length == 0 %}
+                    <tr>
+                        <td colspan="3" class="malzeme-empty-cell" data-t="Seçilen işlem için satır bulunamadı.">Seçilen işlem için satır bulunamadı.</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Kategori 3: Branş ve Branş İçi Hekim Analizi -->
+{% if active_kategori == '3' %}
+{% if no_data_1_5 %}
+<div class="alert alert-warning" data-t="Seçilen tarih aralığında veri bulunamadı.">Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🩺 Branş ve Branş İçi Hekim Analizi">🩺 Branş ve Branş İçi Hekim Analizi</h4>
+    <div class="chart-row">
+        <div class="chart-container">{{ charts.fig_branch_rank | safe }}</div>
+        <div class="chart-container">
+            <form method="get" class="mb-3">
+                <input type="hidden" name="kategori" value="3">
+                <input type="hidden" name="depo" value="{{ request.args.get('depo', '') }}">
+                <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+                <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
+                <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
+                <label for="bransSelect" class="metric-label" data-t="Branş içi hekim dağılımı için seçin:">Branş içi hekim dağılımı için seçin:</label>
+                <select id="bransSelect" name="brans" class="form-control" onchange="this.form.submit()">
+                    {% for b in brans_options %}
+                    <option value="{{ b }}" {% if b == selected_brans %}selected{% endif %}>{{ b }}</option>
+                    {% endfor %}
+                </select>
+            </form>
+            {{ charts.fig_branch_doc_pie | safe }}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Kategori 4: Maliyet & Hasta İlişkisi -->
+{% if active_kategori == '4' %}
+{% if no_data_1_5 %}
+<div class="alert alert-warning" data-t="Seçilen tarih aralığında veri bulunamadı.">Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🎈 Maliyet & Hasta İlişkisi (Balon: Hasta Başı Maliyet)">🎈 Maliyet & Hasta İlişkisi (Balon: Hasta Başı Maliyet)</h4>
+    <div class="chart-container">{{ charts.fig_cost_patient | safe }}</div>
+</div>
+{% endif %}
+{% endif %}
+
+<!-- Kategori 5: Genel Stok Tüketim Sıralaması (Tablo) -->
+{% if active_kategori == '5' %}
+{% if no_data_1_5 %}
+<div class="alert alert-warning" data-t="Seçilen tarih aralığında veri bulunamadı.">Seçilen tarih aralığında veri bulunamadı.</div>
+{% else %}
+<div class="chart-section malzeme-panel">
+    <h4 data-t="📋 Genel Stok Tüketim Sıralaması">📋 Genel Stok Tüketim Sıralaması</h4>
+    <div class="table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th data-t="stokAd">stokAd</th>
+                    <th data-t="toplam">toplam</th>
+                    <th data-t="dusumMiktar">dusumMiktar</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in stok_rank_rows %}
+                <!-- Veritabanından gelen her bir stok satırı için HTML tablosu doldurulur -->
+                <tr>
+                    <td>{{ row.stokAd }}</td>
+                    <!-- Türk parası formatında (₺) maliyet gösterimi -->
+                    <td>₺{{ row.toplam|turkish_number }}</td>
+                    <!-- Tüketim miktarı (adet/birim) gösterimi -->
+                    <td>{{ row.dusumMiktar|turkish_number }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+<!-- Alt Kısım: Stratejik Denetim Notları -->
+<div class="chart-section malzeme-panel">
+    <h4 data-t="🎯 Stratejik Denetim Notları">🎯 Stratejik Denetim Notları</h4>
+    <div class="insight-list malzeme-insight-list">
+        {% for not_satiri in stratejik_notlar %}
+        <div class="malzeme-insight-card" data-t="{{ not_satiri.i18n_key }}{% for arg in not_satiri.args %}|{{ arg }}{% endfor %}">{{ not_satiri.text }}</div>
+        {% endfor %}
+    </div>
+</div>
+
+</div>
+{% endif %}
+
+<!-- İstemci Tarafı (Client-side) Filtreleme Mantığı -->
+<script>
+(function() {
+    /**
+     * Türkçe karakterlere duyarlı (case-insensitive) çevirici
+     */
+    function turkishLower(str) {
+        return str
+            .replace(/İ/g, 'i')
+            .replace(/I/g, 'ı')
+            .replace(/Ğ/g, 'ğ')
+            .replace(/Ü/g, 'ü')
+            .replace(/Ş/g, 'ş')
+            .replace(/Ö/g, 'ö')
+            .replace(/Ç/g, 'ç')
+            .toLowerCase();
+    }
+
+    function setupTableSearch(inputId, countId, tableSelector, limitControlId) {
+        var input = document.getElementById(inputId);
+        var countEl = document.getElementById(countId);
+        var limitControl = limitControlId ? document.getElementById(limitControlId) : null;
+        if (!input) return;
+
+        var table = input.closest('.malzeme-panel');
+        if (!table) return;
+        var tbody = table.querySelector(tableSelector + ' tbody');
+        if (!tbody) return;
+
+        var allRows = Array.from(tbody.querySelectorAll('tr'));
+        // Empty cell satırı sadece tablo tamamen boşken gelir; aramaya/limit'e dahil etmiyoruz.
+        var filterableRows = allRows.filter(function(r) { return !r.querySelector('.malzeme-empty-cell'); });
+
+        function getLimit() {
+            if (!limitControl) return Infinity;
+
+            // Dropdown (select) legacy destek
+            if (limitControl.tagName && limitControl.tagName.toLowerCase() === 'select') {
+                if (!limitControl.value || limitControl.value === 'all') return Infinity;
+                var nSel = parseInt(limitControl.value, 10);
+                return isNaN(nSel) ? Infinity : nSel;
+            }
+
+            // Segment buton grubu
+            var activeBtn = limitControl.querySelector('.table-limit-btn.active');
+            var val = activeBtn ? activeBtn.getAttribute('data-limit') : 'all';
+            if (!val || val === 'all') return Infinity;
+            var n = parseInt(val, 10);
+            return isNaN(n) ? Infinity : n;
+        }
+
+        function updateCount(visible, totalMatching, showCount) {
+            if (!showCount) {
+                countEl.textContent = '';
+                countEl.classList.remove('visible');
+                return;
+            }
+            countEl.textContent = visible + ' / ' + totalMatching;
+            countEl.classList.add('visible');
+        }
+
+        /**
+         * Arama kutusuna her karakter girildiğinde tetiklenen ana fonksiyon
+         */
+        function applySearchAndLimit() {
+            var query = turkishLower(input.value.trim()); // Aramayı boşluklardan arındırıp küçük harfe çevirir
+            var limit = getLimit();
+
+            var matchingRows = [];
+            // Önce tüm arama yapılabilir satırları gizle, sonra uygun olanları geri getir.
+            filterableRows.forEach(function(row) {
+                row.style.display = 'none';
+            });
+            filterableRows.forEach(function(row) {
+                var text = turkishLower(row.textContent);
+                var isMatch = (!query || text.indexOf(query) !== -1);
+                if (isMatch) matchingRows.push(row);
+            });
+
+            // Matching satırlar arasından limit kadar gösteriyoruz.
+            matchingRows.forEach(function(row, idx) {
+                row.style.display = idx < limit ? '' : 'none';
+            });
+
+            var totalMatching = matchingRows.length;
+            var visible = (limit === Infinity) ? totalMatching : Math.min(limit, totalMatching);
+
+            // Sayaç balonu: arama varsa veya limit Tümü değilse göster.
+            var shouldShowCount = (!!query) || (limit !== Infinity);
+            updateCount(visible, totalMatching, shouldShowCount);
+        }
+
+        input.addEventListener('input', applySearchAndLimit);
+        if (limitControl) {
+            if (limitControl.tagName && limitControl.tagName.toLowerCase() === 'select') {
+                limitControl.addEventListener('input', applySearchAndLimit);
+                limitControl.addEventListener('change', applySearchAndLimit);
+            } else {
+                // Buton grubu
+                var btns = Array.from(limitControl.querySelectorAll('.table-limit-btn'));
+                btns.forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        btns.forEach(function(b) { b.classList.remove('active'); });
+                        btn.classList.add('active');
+                        applySearchAndLimit();
+                    });
+                });
+            }
+        }
+
+        // İlk yüklemede limit varsa zaten uygula.
+        applySearchAndLimit();
+    }
+
+    setupTableSearch('searchMiad', 'searchMiadCount', '.data-table', 'limitMiadSeg');
+    setupTableSearch('searchMevcut', 'searchMevcutCount', '.data-table', 'limitMevcutSeg');
+})();
+</script>
 {% endblock %}

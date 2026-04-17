@@ -156,7 +156,40 @@
         min-height: 80px;
         max-height: 250px;
         overflow-y: auto;
+        overflow-x: auto;
         scrollbar-width: thin;
+    }
+
+    .summary-panel .data-table {
+        table-layout: fixed;
+        width: 100%;
+        min-width: 100% !important; /* Global min-width:600px kuralini burada iptal eder */
+    }
+
+    .summary-panel .data-table th:first-child,
+    .summary-panel .data-table td:first-child {
+        width: 72%;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .summary-panel .data-table th:last-child,
+    .summary-panel .data-table td:last-child {
+        width: 28%;
+        text-align: right;
+    }
+
+    .summary-panel .summary-count-col,
+    .summary-panel .summary-count-cell {
+        width: 28% !important;
+        min-width: 84px;
+        text-align: right !important;
+        font-weight: 700 !important;
+        color: var(--text-primary) !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        display: table-cell !important;
     }
     
     .summary-panel .data-table th {
@@ -483,18 +516,18 @@
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
-                    <tr><th data-t="Çalışma Türü">Çalışma Türü</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                    <tr><th data-t="Çalışma Türü">Çalışma Türü</th><th class="summary-count-col" style="text-align:right;" data-t="Toplam">Toplam</th></tr>
                 </thead>
                 <tbody>
                     {% for item in calisma_durumu %}
                     <tr class="summary-row" data-cat="calisma" data-val="{{ item.tur }}">
-                        <td>{{ item.tur }}</td>
-                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                        <td title="{{ item.tur }}">{{ item.tur }}</td>
+                        <td class="summary-count-cell">{{ item.toplam or 0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td style="font-size:0.8rem;" data-t="Toplam Kayıt:">Toplam Kayıt:</td><td style="text-align:right; color:#2563eb;">{{ toplam_personel }}</td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Kayıt:">Toplam Kayıt:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_personel or 0 }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -508,18 +541,18 @@
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
-                    <tr><th data-t="Kadro Unvanı">Kadro Unvanı</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                    <tr><th data-t="Kadro Unvanı">Kadro Unvanı</th><th class="summary-count-col" style="text-align:right;" data-t="Toplam">Toplam</th></tr>
                 </thead>
                 <tbody>
                     {% for item in kadro_unvan %}
                     <tr class="summary-row" data-cat="kadro" data-val="{{ item.tur }}">
-                        <td>{{ item.tur }}</td>
-                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                        <td title="{{ item.tur }}">{{ item.tur }}</td>
+                        <td class="summary-count-cell">{{ item.toplam or 0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td style="font-size:0.8rem;" data-t="Toplam Unvan:">Toplam Unvan:</td><td style="text-align:right; color:#2563eb;">{{ kadro_unvan|length }}</td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Unvan:">Toplam Unvan:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_unvan or 0 }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -533,18 +566,18 @@
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
-                    <tr><th data-t="Personel Türü">Personel Türü</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                    <tr><th data-t="Personel Türü">Personel Türü</th><th class="summary-count-col" style="text-align:right;" data-t="Toplam">Toplam</th></tr>
                 </thead>
                 <tbody>
                     {% for item in personel_tur %}
                     <tr class="summary-row" data-cat="personel_tur" data-val="{{ item.tur }}">
-                        <td>{{ item.tur }}</td>
-                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                        <td title="{{ item.tur }}">{{ item.tur }}</td>
+                        <td class="summary-count-cell">{{ item.toplam or 0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td style="font-size:0.8rem;" data-t="Toplam Tür:">Toplam Tür:</td><td style="text-align:right; color:#2563eb;">{{ personel_tur|length }}</td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Tür:">Toplam Tür:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_tur or 0 }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -558,18 +591,18 @@
         <div class="table-wrapper">
             <table class="data-table">
                 <thead>
-                    <tr><th data-t="Hizmet Sınıfı">Hizmet Sınıfı</th><th style="text-align:right;" data-t="Toplam">Toplam</th></tr>
+                    <tr><th data-t="Hizmet Sınıfı">Hizmet Sınıfı</th><th class="summary-count-col" style="text-align:right;" data-t="Toplam">Toplam</th></tr>
                 </thead>
                 <tbody>
                     {% for item in hizmet_sinifi %}
                     <tr class="summary-row" data-cat="hizmet" data-val="{{ item.tur }}">
-                        <td>{{ item.tur }}</td>
-                        <td style="text-align: right; font-weight: 600;">{{ item.toplam }}</td>
+                        <td title="{{ item.tur }}">{{ item.tur }}</td>
+                        <td class="summary-count-cell">{{ item.toplam or 0 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td style="font-size:0.8rem;" data-t="Toplam Sınıf:">Toplam Sınıf:</td><td style="text-align:right; color:#2563eb;">{{ hizmet_sinifi|length }}</td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Sınıf:">Toplam Sınıf:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_sinif or 0 }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>

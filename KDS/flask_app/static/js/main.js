@@ -51,7 +51,7 @@ const translations = {
         'Sunucu Bağlantısı': 'Sunucu Bağlantısı',
         '✅ Doğrulandı': '✅ Doğrulandı',
         '❌ Bağlantı Yok': '❌ Bağlantı Yok',
-        'Sorgu Performance': 'Sorgu Performansı',
+        'Sorgu Performansı': 'Sorgu Performansı',
         'sn': 'sn',
         'Ölçülmedi': 'Ölçülmedi',
         'Son Güncelleme': 'Son Güncelleme',
@@ -64,6 +64,8 @@ const translations = {
         'Bu Yıl': 'Bu Yıl',
         'Geçen Yıl': 'Geçen Yıl',
         'Özel': 'Özel',
+        'Başlangıç Tarihi': 'Başlangıç Tarihi',
+        'Bitiş Tarihi': 'Bitiş Tarihi',
         'Aktif Dönem': 'Aktif Dönem',
         'Hekim Poliklinik Hasta Analizi': 'Hekim Poliklinik Hasta Analizi',
         'Toplam Kayıt': 'Toplam Kayıt',
@@ -339,7 +341,97 @@ const translations = {
         'ÇALIŞIYOR': 'ÇALIŞIYOR',
         'İZİNLİ': 'İZİNLİ',
         'RAPORLU': 'RAPORLU',
-        'GÖREVLENDİRME': 'GÖREVLENDİRME'
+        'GÖREVLENDİRME': 'GÖREVLENDİRME',
+        'GEÇİCİ GÖREVLİ GİDEN': 'GEÇİCİ GÖREVLİ GİDEN',
+        '1.ÖLÇÜ': '1.ÖLÇÜ',
+        'Akrilik tam protez, tek çene': 'Akrilik tam protez, tek çene',
+        'Alveol plastiği, yarım çene': 'Alveol plastiği, yarım çene',
+        'AMPUTASYON (DOLGU HARİÇ)': 'AMPUTASYON (DOLGU HARİÇ)',
+        'DOLGU': 'DOLGU',
+        'DİŞ ÇEKİMİ': 'DİŞ ÇEKİMİ',
+        'KANAL TEDAVİSİ': 'KANAL TEDAVİSİ',
+        'MUAYENE': 'MUAYENE',
+        '4/D Sürekli İşçi': '4/D Sürekli İşçi',
+        'Akademik': 'Akademik',
+        'Hizmet Alım Personeli': 'Hizmet Alım Personeli',
+        'Memur': 'Memur',
+        'Öğrenci': 'Öğrenci',
+        'Eğitim ve Öğretim Hizmetleri': 'Eğitim ve Öğretim Hizmetleri',
+        'Genel İdare Hizmetleri': 'Genel İdare Hizmetleri',
+        'Sağlık Hizmetleri': 'Sağlık Hizmetleri',
+        'Teknik Hizmetler': 'Teknik Hizmetler',
+        'Yardımcı Hizmetler': 'Yardımcı Hizmetler',
+        '5. Sınıf Öğrenci': '5. Sınıf Öğrenci',
+        'Araştırma Görevlisi': 'Araştırma Görevlisi',
+        'Bilgisayar İşletmeni': 'Bilgisayar İşletmeni',
+        'Çözümleyici': 'Çözümleyici',
+        'Daire Başkanı': 'Daire Başkanı',
+        'Diş Hekimi': 'Diş Hekimi',
+        'Tedavi Grupları Analizi': 'Tedavi Grupları Analizi',
+        '📊 Performans Kıyaslama': '📊 Performans Kıyaslama',
+        '🔍 Grup Detayları': '🔍 Grup Detayları',
+        'Gelire Göre Top': 'Gelire Göre Top',
+        'İşleme Göre Top': 'İşleme Göre Top',
+        '💡 Verimlilik Analizi (Birim Başı Gelir)': '💡 Verimlilik Analizi (Birim Başı Gelir)',
+        '🎯 Sistem Analizi': '🎯 Sistem Analizi',
+        'Detaylı incelemek için bir grup seçin:': 'Detaylı incelemek için bir grup seçin:',
+        'Tetkik Adı': 'Tetkik Adı',
+        'İşlem Adedi': 'İşlem Adedi',
+        'Birim Başı Gelir': 'Birim Başı Gelir',
+        'İşlem Adeti (Hacim)': 'İşlem Adeti (Hacim)',
+        'Verimlilik': 'Verimlilik',
+        'gelir': 'gelir',
+        'işlem': 'işlem',
+        'ÖĞRETİM ÜYESİ FARKI': 'ÖĞRETİM ÜYESİ FARKI',
+        'Laboratuvar Hizmetleri': 'Laboratuvar Hizmetleri',
+        'TEDAVİ': 'TEDAVİ',
+        'Malzeme': 'Malzeme',
+        'Radyoloji': 'Radyoloji',
+        'Poliklinik': 'Poliklinik',
+        'DİŞ / ODONTOJENİK KİST': 'DİŞ / ODONTOJENİK KİST',
+        'Tekil Hasta': 'Tekil Hasta',
+        'Toplam Ciro': 'Toplam Ciro',
+        'Grup Sayısı': 'Grup Sayısı',
+        'İşlem Hacmi': 'İşlem Hacmi',
+        'TEDAVİ': 'TEDAVİ',
+        'Malzeme': 'Malzeme',
+        'Laboratuvar Hizmetleri': 'Laboratuvar Hizmetleri',
+        'ÖĞRETİM ÜYESİ FARKI': 'ÖĞRETİM ÜYESİ FARKI',
+        'Toplam Randevu': 'Toplam Randevu',
+        'Sadakat Oranı': 'Sadakat Oranı',
+        'Akıllı Yorumlar': 'Akıllı Yorumlar',
+        'Web Randevusu': 'Web Randevusu',
+        'RANDEVU': 'RANDEVU',
+        'Ana Randevu Grubu': 'Ana Randevu Grubu',
+        'PERIODONTOLOJİ': 'PERIODONTOLOJİ',
+        'ÇOCUK DİŞ HEKİMLİĞİ': 'ÇOCUK DİŞ HEKİMLİĞİ',
+        '1.ÖLÇÜ PROTEZ': '1.ÖLÇÜ PROTEZ',
+        'BİTİM': 'BİTİM',
+        'ÇEKİM': 'ÇEKİM',
+        'KRON SÖKÜMÜ': 'KRON SÖKÜMÜ',
+        'DETERTRAJ': 'DETERTRAJ',
+        'FLEP': 'FLEP',
+        'DİŞLİ PROVA': 'DİŞLİ PROVA',
+        'DENTİN PROVA': 'DENTİN PROVA',
+        'PREPARASYON': 'PREPARASYON',
+        'FİSSÜR SEALANT UYGULAMASI': 'FİSSÜR SEALANT UYGULAMASI',
+        'METAL PROVA': 'METAL PROVA',
+        'SDG-BDG-Mukogingival': 'SDG-BDG-Mukogingival',
+        'ANATOMİK ÖLÇÜ': 'ANATOMİK ÖLÇÜ',
+        '2.ÖLÇÜ PROTEZ': '2.ÖLÇÜ PROTEZ',
+        'Greft - Membran': 'Greft - Membran',
+        'SİNÜS LİFT': 'SİNÜS LİFT',
+        'PROTEZ': 'PROTEZ',
+        'AMELİYATA SEVK': 'AMELİYATA SEVK',
+        'INSIGHT_APPOINTMENT_SUCCESS': 'Kurum genelinde randevuların <strong>%{0}</strong> kadarı hizmete dönüşüyor.',
+        'INSIGHT_APPOINTMENT_SUGGESTION': 'Öneri: Sadakat oranı %70\'in altında kalan hekimler için SMS onay sistemi zorunlu hale getirilebilir.',
+        'INSIGHT_APPOINTMENT_WORST_POL': 'En fazla randevu kaybı (No show) <strong>{0}</strong> polikliniğinde.',
+        'INSIGHT_GROUP_STATS': '{0}: {1} gelir, {2} işlem',
+        'INSIGHT_TOP3_SHARE': 'İlk 3 grup, toplam gelirin <strong>%{0}</strong>\'ini oluşturuyor.',
+        'INSIGHT_MAX_VAL': 'Seçilen dönemde, benzersiz hasta sayısına göre en yüksek değer {1} tarafından {0} olarak kaydedilmiştir.',
+        'INSIGHT_TOP_PERF': 'Seçilen dönemde en yüksek performansı {0} {1} ile {2} göstermiştir.',
+        'Kayıt Sayısı': 'Kayıt Sayısı',
+        'Benzersiz Hasta Sayısı': 'Benzersiz Hasta Sayısı'
     },
     'en': {
         'Kurum Performans Yönetim Sistemi': 'Institution Performance<br>Management System',
@@ -388,7 +480,7 @@ const translations = {
         'Sunucu Bağlantısı': 'Server Connection',
         '✅ Doğrulandı': '✅ Verified',
         '❌ Bağlantı Yok': '❌ No Connection',
-        'Sorgu Performance': 'Query Performance',
+        'Sorgu Performansı': 'Query Performance',
         'sn': 'sec',
         'Ölçülmedi': 'Not Measured',
         'Son Güncelleme': 'Last Update',
@@ -401,6 +493,8 @@ const translations = {
         'Bu Yıl': 'This Year',
         'Geçen Yıl': 'Last Year',
         'Özel': 'Custom',
+        'Başlangıç Tarihi': 'Start Date',
+        'Bitiş Tarihi': 'End Date',
         'Aktif Dönem': 'Active Period',
         'Hekim Poliklinik Hasta Analizi': 'MD Polyclinic Patient Analysis',
         'Toplam Kayıt': 'Total Records',
@@ -678,8 +772,65 @@ const translations = {
         'Gün': 'Days',
         'Malzeme Tüketim': 'Material Consumption',
         '📦 Kurum Malzeme Tüketim Analizi': '📦 Institution Material Consumption Analysis',
+        '📊 Günlük Tüketim ve Hız Analizi': '📊 Daily Consumption and Speed Analysis',
+        '🔗 Tetkik (İşlem) Bazlı Malzeme Detayı': '🔗 Procedure-Based Material Details',
+        '🩺 Branş ve Branş İçi Hekim Analizi': '🩺 Specialty and Intra-Specialty Physician Analysis',
+        '🎈 Maliyet & Hasta İlişkisi': '🎈 Cost & Patient Relationship',
+        '📋 Genel Stok Tüketim Sıralaması': '📋 General Stock Consumption Ranking',
+        '🧭 Malzeme Mevcut Durum': '🧭 Current Material Status',
+        '🧪 Miad Seviye Denetim': '🧪 Expiry Level Audit',
+        'Analiz Edilecek İşlem': 'Procedure to Analyze',
+        'İşlem Maliyeti': 'Procedure Cost',
+        'Malzeme Çeşidi': 'Material Variety',
+        'Stok Adı': 'Stock Name',
+        'Tüketim Miktarı': 'Consumption Quantity',
+        'Branş içi hekim dağılımı için seçin:': 'Select for intra-specialty physician distribution:',
+        '🎈 Maliyet & Hasta İlişkisi (Balon: Hasta Başı Maliyet)': '🎈 Cost & Patient Relationship (Bubble: Cost per Patient)',
+        '🎯 Stratejik Denetim Notları': '🎯 Strategic Audit Notes',
+        'Stratejik Denetim Notları': 'Strategic Audit Notes',
         'Toplam Tüketim (Adet)': 'Total Consumption (Units)',
         'Farklı Malzeme': 'Distinct Materials',
+        'TÜM İŞLEMLER': 'ALL PROCEDURES',
+        'Malzeme Dağılım Tablosu': 'Material Distribution Table',
+        '{0} kalem': '{0} items',
+        'Seçilen işlem için satır bulunamadı.': 'No rows found for the selected procedure.',
+        'Stok Mevcut Durum Tablosu': 'Current Stock Status Table',
+        'Mevcut Miktar': 'Current Quantity',
+        'Min Seviye': 'Min Level',
+        'Max Seviye': 'Max Level',
+        'Kritik': 'Critical',
+        'Stoksuz': 'Out of Stock',
+        'Yeterli': 'Sufficient',
+        'Veri kaynağı henüz bağlanmadı. SQL hazır olduğunda otomatik dolacaktır.': 'Data source is not connected yet. It will populate automatically when SQL is ready.',
+        'Miad Takip Tablosu': 'Expiry Tracking Table',
+        'Lot / Seri No': 'Lot / Serial No',
+        'Miktar': 'Quantity',
+        'Son Kullanma Tarihi': 'Expiration Date',
+        'Miadı Geçmiş': 'Expired',
+        'Yaklaşan': 'Approaching',
+        'Güvenli': 'Safe',
+        'En yuksek malzeme gideri {0} bransinda gerceklesti.': 'The highest material expense occurred in the {0} specialty.',
+        '5 gunluk hareketli ortalamaya gore tuketim hizi gunluk {0} adet seviyesinde.': 'Based on the 5-day moving average, daily consumption speed is at {0} units.',
+        'En yogun tuketim gunu: {0}.': 'Most intensive consumption day: {0}.',
+        'Günlük Tüketim': 'Daily Consumption',
+        '5 Günlük Ort.': '5-Day Avg.',
+        'Tarih': 'Date',
+        'Adet': 'Count',
+        'BILINMEYEN BRANS': 'UNKNOWN SPECIALTY',
+        'BILINMEYEN HEKIM': 'UNKNOWN PHYSICIAN',
+        'Brans': 'Specialty',
+        'En Cok Tuketen 10 Brans': 'Top 10 Highest-Consuming Specialties',
+        'bransAdi': 'Specialty',
+        'Toplam Tutar': 'Total Amount',
+        'Tuketim Miktari': 'Consumption Quantity',
+        'Kayit Adedi': 'Record Count',
+        'Hekim Paylari': 'Physician Shares',
+        'Maliyet & Hasta Sayisi Iliskisi (Balon: Hasta Basi Maliyet)': 'Cost & Patient Count Relationship (Bubble: Cost per Patient)',
+        'hastaAdSoyad': 'Patient Name Surname',
+        'toplam': 'Total',
+        'stokAd': 'Stock Name',
+        'dusumMiktar': 'Consumption Quantity',
+        'BILINMEYEN STOK': 'UNKNOWN STOCK',
         'Sterilizasyon': 'Sterilization',
         '💉 Sterilizasyon Maliyet Analizi': '💉 Sterilization Cost Analysis',
         'Toplam Maliyet': 'Total Cost',
@@ -732,6 +883,147 @@ const translations = {
         'İZİNLİ': 'ON LEAVE',
         'RAPORLU': 'ON MEDICAL LEAVE',
         'GÖREVLENDİRME': 'ASSIGNED',
+        'GEÇİCİ GÖREVLİ GİDEN': 'TEMPORARY ASSIGNMENT (OUT)',
+        '1.ÖLÇÜ': '1st Impression',
+        'Akrilik tam protez, tek çene': 'Acrylic complete denture, single jaw',
+        'Alveol plastiği, yarım çene': 'Alveoloplasty, half jaw',
+        'AMPUTASYON (DOLGU HARİÇ)': 'Amputation (Excluding Filling)',
+        'DOLGU': 'FILLING',
+        'DİŞ ÇEKİMİ': 'TOOTH EXTRACTION',
+        'KANAL TEDAVİSİ': 'ROOT CANAL TREATMENT',
+        'MUAYENE': 'EXAMINATION',
+        '4/D Sürekli İşçi': '4/D Permanent Worker',
+        'Akademik': 'Academic',
+        'Hizmet Alım Personeli': 'Service Procurement Personnel',
+        'Memur': 'Civil Servant',
+        'Öğrenci': 'Student',
+        'Eğitim ve Öğretim Hizmetleri': 'Education and Training Services',
+        'Genel İdare Hizmetleri': 'General Administration Services',
+        'Sağlık Hizmetleri': 'Health Services',
+        'Teknik Hizmetler': 'Technical Services',
+        'Yardımcı Hizmetler': 'Auxiliary Services',
+        '5. Sınıf Öğrenci': '5th Year Student',
+        'T.C. SGK-BAĞ-KUR İL MÜDÜRLÜĞÜ': 'T.C. SSI-BAĞ-KUR Provincial Dir.',
+        'Tedavi Grupları Analizi': 'Treatment Groups Analysis',
+        '📊 Performans Kıyaslama': '📊 Performance Comparison',
+        '🔍 Grup Detayları': '🔍 Group Details',
+        'Gelire Göre Top': 'Top by Revenue',
+        'İşleme Göre Top': 'Top by Procedure Count',
+        '💡 Verimlilik Analizi (Birim Başı Gelir)': '💡 Efficiency Analysis (Revenue Per Unit)',
+        '🎯 Sistem Analizi': '🎯 System Analysis',
+        'Detaylı incelemek için bir grup seçin:': 'Select a group for detailed review:',
+        'Tetkik Adı': 'Procedure Name',
+        'İşlem Adedi': 'Procedure Count',
+        'Birim Başı Gelir': 'Revenue Per Unit',
+        'İşlem Adeti (Hacim)': 'Procedure Count (Volume)',
+        'Verimlilik': 'Efficiency',
+        'gelir': 'revenue',
+        'işlem': 'procedure',
+        'DİŞ / ODONTOJENİK KİST': 'DENTAL / ODONTOGENIC CYST',
+        'Tekil Hasta': 'Unique Patients',
+        'Toplam Ciro': 'Total Revenue',
+        'Grup Sayısı': 'Group Count',
+        'İşlem Hacmi': 'Procedure Volume',
+        'TEDAVİ': 'TREATMENT',
+        'Malzeme': 'Materials',
+        'Radyoloji': 'Radiology',
+        'Poliklinik': 'Clinic',
+        'ÖĞRETİM ÜYESİ FARK': 'ACADEMIC FACULTY DIFFERENTIAL',
+        'ÖĞRETİM ÜYESİ FARKI': 'ACADEMIC FACULTY DIFFERENTIAL',
+        'Laboratuvar Hizmetleri': 'Laboratory Services',
+        'Labaratuvar Hizmetleri': 'Laboratory Services',
+        'LABARATUVAR HİZMETLERİ': 'LABORATORY SERVICES',
+        'LABORATUVAR HİZMETLERİ': 'LABORATORY SERVICES',
+        'Laboratuar Hizmetleri': 'Laboratory Services',
+        'LABORATUAR HİZMETLERİ': 'LABORATORY SERVICES',
+        'PROTETİK DİŞ TEDAVİSİ': 'PROSTHODONTICS',
+        'AĞIZ DİŞ VE ÇENE CERRAHİSİ': 'ORAL & MAXILLOFACIAL SURGERY',
+        'Toplam Randevu': 'Total Appointments',
+        'Sadakat Oranı': 'Loyalty Rate',
+        'Akıllı Yorumlar': 'Smart Insights',
+        'Web Randevusu': 'Web Appointments',
+        'RANDEVU': 'APPOINTMENT',
+        'Ana Randevu Grubu': 'Main Appointment Group',
+        'PERIODONTOLOJİ': 'Periodontology',
+        'ÇOCUK DİŞ HEKİMLİĞİ': 'Paedodontics',
+        '1.ÖLÇÜ PROTEZ': '1st Impression - Denture',
+        'BİTİM': 'Completion',
+        'ÇEKİM': 'Extraction',
+        'KRON SÖKÜMÜ': 'Crown Removal',
+        'DETERTRAJ': 'Scaling',
+        'FLEP': 'Flap Surgery',
+        'DİŞLİ PROVA': 'Dentition Trial',
+        'DENTİN PROVA': 'Dentin Trial',
+        'PREPARASYON': 'Preparation',
+        'FİSSÜR SEALANT UYGULAMASI': 'Fissure Sealant Application',
+        'METAL PROVA': 'Metal Trial',
+        'SDG-BDG-Mukogingival': 'SDG-BDG-Mucogingival',
+        'ANATOMİK ÖLÇÜ': 'Anatomical Impression',
+        '2.ÖLÇÜ PROTEZ': '2nd Impression - Denture',
+        'Greft - Membran': 'Graft - Membrane',
+        'SİNÜS LİFT': 'Sinus Lift',
+        'PROTEZ': 'PROSTHESIS',
+        'AMELİYATA SEVK': 'Referral for Surgery',
+        'INSIGHT_APPOINTMENT_SUCCESS': 'Across the institution, <strong>%{0}</strong> of appointments are converted to services.',
+        'INSIGHT_APPOINTMENT_SUGGESTION': 'Suggestion: An SMS confirmation system could be made mandatory for physicians whose loyalty rate falls below 70%.',
+        'INSIGHT_APPOINTMENT_WORST_POL': 'The highest appointment loss (No show) is in the <strong>{0}</strong> clinic.',
+        'INSIGHT_GROUP_STATS': '{0}: {1} revenue, {2} procedures',
+        'INSIGHT_TOP3_SHARE': 'The top 3 groups account for <strong>{0}%</strong> of the total revenue.',
+        'Araştırma Görevlisi': 'Research Assistant',
+        'Bilgisayar İşletmeni': 'Computer Operator',
+        'Çözümleyici': 'Analyst',
+        'Daire Başkanı': 'Department Head',
+        'Diş Hekimi': 'Dentist',
+        'En Çok Hasta Bakan Hekimler': 'Top MDs by Patient Count',
+        'En Düşük Hasta Bakan Hekimler': 'Bottom MDs by Patient Count',
+        'Haftalık Gün Dağılımı': 'Weekly Day Distribution',
+        'Pazartesi': 'Monday',
+        'Salı': 'Tuesday',
+        'Çarşamba': 'Wednesday',
+        'Perşembe': 'Thursday',
+        'Cuma': 'Friday',
+        'Cumartesi': 'Saturday',
+        'Pazar': 'Sunday',
+        'Kurum / Sigorta Dağılımı': 'Institution / Insurance Distribution',
+        'Gunluk Basvuru Trendi': 'Daily Application Trend',
+        'Gunluk Trend': 'Daily Trend',
+        '7 Gunluk Ortalama': '7-Day Average',
+        'Kilit Noktalar': 'Key Points',
+        'Tepe:': 'Peak:',
+        'Son:': 'Last:',
+        'Basvuru Sayisi': 'Applications',
+        'Kayit_Sayisi': 'Record Count',
+        'Hasta Sayısı': 'Patient Count',
+        'Benzersiz_Hasta_Sayisi': 'Unique Patient Count',
+        'Gun Ici Saatlik Hasta Trafigi': 'Hourly Patient Traffic (Daytime)',
+        'Saat Dilimi': 'Time Slot',
+        'Saatlik Hacim': 'Hourly Volume',
+        'Akis Cizgisi': 'Flow Line',
+        'Saatlik Ortalama': 'Hourly Average',
+        'En Yogun Saat:': 'Busiest Hour:',
+        'Branş Dağılımı': 'Specialty Distribution',
+        'SGK (S.S.K. EMEKLİ)': 'SSI (SSK Retired)',
+        'SGK (S.S.K. ÇALIŞAN)': 'SSI (SSK Employee)',
+        'EMEKLİ SANDIĞI ÇALIŞAN': 'Retirement Fund Employee',
+        'EMEKLİ SANDIĞI EMEKLİ': 'Retirement Fund Retired',
+        'SOSYAL SİGORTALAR KURUMU (BAĞKUR EMEKLİ)': 'SSI (BAĞ-KUR Retired)',
+        'BAĞKUR TARIM SİGORTALI': 'BAĞ-KUR Agricultural Insured',
+        '60/C1-C3-C9 YEŞİLKART': '60/C1-C3-C9 Green Card',
+        'T.C. SGK-SSK İL MÜDÜRLÜĞÜ': 'T.C. SSI-SSK Provincial Dir.',
+        'T.C. SGK-EMEKLİ SANDIĞI': 'T.C. SSI-Retirement Fund',
+        'T.C. SGK-BAĞ-KUR İL MÜDÜRLÜĞÜ': 'T.C. SSI-BAĞ-KUR Provincial Dir.',
+        'PROTETİK DİŞ TEDAVİSİ': 'Prosthodontics',
+        'AĞIZ DİŞ VE ÇENE CERRAHİSİ': 'Oral and Maxillofacial Surgery',
+        'AĞIZ DİŞ VE ÇENE RADYOLOJİSİ': 'Oral and Maxillofacial Radiology',
+        'ENDODONTİ': 'Endodontics',
+        'ORTODONTİ': 'Orthodontics',
+        'PEDODONTİ': 'Pedodontics',
+        'PERIODONTOLOJİ': 'Periodontology',
+        'RESTORATİF DİŞ TEDAVİSİ': 'Restorative Dentistry',
+        'INSIGHT_MAX_VAL': 'In the selected period, the highest value was {0} by {1} based on unique patient count.',
+        'INSIGHT_TOP_PERF': 'The top performing physician in the selected period was {2} with {0} {1}.',
+        'Kayıt Sayısı': 'Total Records',
+        'Benzersiz Hasta Sayısı': 'Unique Patient Count',
         '📊 Personel Türü': '📊 Personnel Type'
     }
 };
@@ -749,35 +1041,102 @@ window.KDS_i18n = {
         if (typeof Plotly === 'undefined') return;
         
         document.querySelectorAll('.js-plotly-plot, .plotly-graph-div').forEach(plotEl => {
-            // 1. Relayout Title
             const container = plotEl.closest('.chart-container') || plotEl.closest('.card-body');
+            
+            // 1. Relayout Title
             if (container) {
                 const titleEl = container.querySelector('.chart-title') || container.querySelector('h4') || container.querySelector('h3');
                 if (titleEl) {
-                    // We have a better-looking HTML title, so hide the Plotly internal one
+                    // We have an external HTML title, hide Plotly's internal title
                     Plotly.relayout(plotEl, { 'title.text': '' });
+                } else {
+                    // No external title, try to translate the internal one
+                    const layout = plotEl.layout || {};
+                    if (layout.title && layout.title.text) {
+                        const translatedTitle = this.get(layout.title.text);
+                        if (translatedTitle !== layout.title.text) {
+                            Plotly.relayout(plotEl, { 'title.text': translatedTitle });
+                        }
+                    }
                 }
             }
 
             // 2. Restyle Axis Titles
             const layout = plotEl.layout || {};
             const updateObj = {};
-            if (layout.xaxis && layout.xaxis.title && layout.xaxis.title.text) {
-                updateObj['xaxis.title.text'] = this.get(layout.xaxis.title.text);
+            
+            // Standardize axis titles if they match known data keys
+            const translateAxis = (axis) => {
+                if (axis && axis.title && axis.title.text) {
+                    let key = axis.title.text;
+                    // Fix underscores in keys like Kayit_Sayisi
+                    if (!this.translations['tr'][key] && this.translations['tr'][key.replace(/_/g, ' ')]) {
+                        key = key.replace(/_/g, ' ');
+                    }
+                    return this.get(key);
+                }
+                return null;
+            };
+
+            const xTrans = translateAxis(layout.xaxis);
+            if (xTrans) updateObj['xaxis.title.text'] = xTrans;
+
+            const yTrans = translateAxis(layout.yaxis);
+            if (yTrans) updateObj['yaxis.title.text'] = yTrans;
+
+            // 3. Annotations (e.g., peak values)
+            if (layout.annotations && layout.annotations.length > 0) {
+                const newAnnotations = layout.annotations.map(ann => {
+                    if (ann.text) {
+                        // Handle patterns like "Tepe: 123" -> translate "Tepe:"
+                        let newText = ann.text;
+                        for (let k in (this.translations['tr'] || {})) {
+                            if (newText.startsWith(k)) {
+                                newText = newText.replace(k, this.get(k));
+                                break;
+                            }
+                        }
+                        return { ...ann, text: newText };
+                    }
+                    return ann;
+                });
+                updateObj['annotations'] = newAnnotations;
             }
-            if (layout.yaxis && layout.yaxis.title && layout.yaxis.title.text) {
-                updateObj['yaxis.title.text'] = this.get(layout.yaxis.title.text);
-            }
+
             if (Object.keys(updateObj).length > 0) {
                 Plotly.relayout(plotEl, updateObj);
             }
 
-            // 3. Restyle Legends/Trace Names (Data-level leaks)
+            // 4. Restyle Legends/Trace Names AND Categorical Data
             if (plotEl.data) {
-                const newNames = plotEl.data.map(trace => {
-                    const key = trace.name || "";
-                    return this.get(key);
+                const restyleObj = {};
+                
+                // Translate Trace Names
+                const newNames = plotEl.data.map(trace => this.get(trace.name || ""));
+                restyleObj['name'] = newNames;
+
+                // Translate Categorical Data (for Pie labels, Bar categories etc.)
+                plotEl.data.forEach((trace, i) => {
+                    // Pie Chart Labels
+                    if (trace.labels) {
+                        const newLabels = trace.labels.map(l => this.get(l));
+                        Plotly.restyle(plotEl, { labels: [newLabels] }, [i]);
+                    }
+                    // Bar/Scatter Categories (X or Y axis)
+                    if (trace.orientation === 'h' && trace.y) {
+                        const newY = trace.y.map(val => this.get(val));
+                        Plotly.restyle(plotEl, { y: [newY] }, [i]);
+                    } else if (trace.x && Array.isArray(trace.x)) {
+                        const newX = trace.x.map(val => this.get(val));
+                        Plotly.restyle(plotEl, { x: [newX] }, [i]);
+                    }
+                    // Hover Text
+                    if (trace.text && Array.isArray(trace.text)) {
+                        const newText = trace.text.map(t => this.get(t));
+                        Plotly.restyle(plotEl, { text: [newText] }, [i]);
+                    }
                 });
+
                 Plotly.restyle(plotEl, { name: newNames });
             }
         });
@@ -786,15 +1145,37 @@ window.KDS_i18n = {
 
 function applyTranslations(lang) {
     document.querySelectorAll('[data-t]').forEach(el => {
-        const key = el.getAttribute('data-t');
-        if (translations[lang] && translations[lang][key]) {
-            const val = translations[lang][key];
+        let key = el.getAttribute('data-t');
+        let translated = "";
+
+        // Support for placeholder-based translations (e.g., KEY|val1|val2)
+        if (key.includes('|')) {
+            const parts = key.split('|');
+            const baseKey = parts[0];
+            let template = (translations[lang] && translations[lang][baseKey]) || (translations['tr'][baseKey] || baseKey);
+            
+            for (let i = 1; i < parts.length; i++) {
+                // Also translate placeholders if they are keys themselves (like metric labels)
+                let val = parts[i];
+                if (translations[lang] && translations[lang][val]) {
+                    val = translations[lang][val];
+                }
+                template = template.replace('{' + (i - 1) + '}', val);
+            }
+            translated = template;
+        } else {
+            translated = (translations[lang] && translations[lang][key]) || (translations['tr'][key] || key);
+        }
+
+        if (translated) {
             if (el.tagName === 'OPTION') {
-                el.text = val;
+                el.text = translated;
             } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                el.placeholder = val;
+                el.placeholder = translated;
             } else {
-                el.innerHTML = val;
+                // If it contains HTML spans (like the emoji), we might want to preserve it
+                // but usually data-t is for the whole content.
+                el.innerHTML = translated;
             }
         }
     });

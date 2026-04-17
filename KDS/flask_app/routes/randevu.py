@@ -67,7 +67,7 @@ def randevu():
         plot_bgcolor='rgba(0,0,0,0)',
         xaxis=dict(showgrid=False, title='Sadakat Oranı', range=[0, 105]),
         yaxis=dict(title='', tickfont=dict(size=10)),
-        coloraxis_colorbar=dict(title='Sadakat_Orani', tickformat='.0f'),
+        coloraxis_colorbar=dict(title='Sadakat Oranı', tickformat='.0f'),
         showlegend=False,
     )
 
@@ -122,21 +122,14 @@ def randevu():
     insights.append({
         'type': 'success',
         'icon': '✅',
-        'text': f"Kurum genelinde randevuların <strong>%{sadakat_orani}</strong> kadarı hizmete dönüşüyor.",
+        'text': f"INSIGHT_APPOINTMENT_SUCCESS|{sadakat_orani}",
     })
 
-    if sadakat_orani < 70:
-        insights.append({
-            'type': 'info',
-            'icon': '📋',
-            'text': "Öneri: Sadakat oranı %70'in altında kalan hekimler için SMS onay sistemi zorunlu hale getirilebilir.",
-        })
-    else:
-        insights.append({
-            'type': 'info',
-            'icon': '📋',
-            'text': "Öneri: Sadakat oranı %70'in altında kalan hekimler için SMS onay sistemi zorunlu hale getirilebilir.",
-        })
+    insights.append({
+        'type': 'info',
+        'icon': '📋',
+        'text': "INSIGHT_APPOINTMENT_SUGGESTION",
+    })
 
     if not df.empty:
         gelmedi_df = df[df['Durum'].isin(['Gelmedi'])]
@@ -145,7 +138,7 @@ def randevu():
             insights.append({
                 'type': 'warning',
                 'icon': '⚠️',
-                'text': f"En fazla randevu kaybı (No show) <strong>{worst_pol}</strong> polikliniğinde.",
+                'text': f"INSIGHT_APPOINTMENT_WORST_POL|{worst_pol}",
             })
 
     charts = {

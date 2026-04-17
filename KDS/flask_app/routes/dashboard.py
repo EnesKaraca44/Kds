@@ -15,7 +15,22 @@ dashboard_bp = Blueprint('dashboard', __name__)
 def get_date_range():
     """URL parametrelerinden veya varsayılandan tarih aralığını alır."""
     today = date.today()
-    quick = request.args.get('quick', 'bu-ay')
+    quick = request.args.get('quick')
+
+    if not quick:
+        # Keep user's last selected date range across page switches/tabs.
+        sd_session = session.get('start_date')
+        ed_session = session.get('end_date')
+        if sd_session and ed_session:
+            try:
+                sd = date.fromisoformat(sd_session)
+                ed = date.fromisoformat(ed_session)
+                session['start_date'] = sd.isoformat()
+                session['end_date'] = ed.isoformat()
+                return sd, ed
+            except ValueError:
+                pass
+        quick = 'bu-ay'
     
     if quick == 'bugun':
         sd, ed = today, today
@@ -38,10 +53,14 @@ def get_date_range():
         sd = date(last_year, 1, 1)
         ed = date(last_year, 12, 31)
     elif quick == 'ozel':
-        sd_str = request.args.get('start', today.replace(day=1).isoformat())
-        ed_str = request.args.get('end', today.isoformat())
-        sd = date.fromisoformat(sd_str)
-        ed = date.fromisoformat(ed_str)
+        sd_str = request.args.get('start')
+        ed_str = request.args.get('end')
+        try:
+            # If empty string or invalid format, fallback to default month start/today
+            sd = date.fromisoformat(sd_str) if sd_str else today.replace(day=1)
+            ed = date.fromisoformat(ed_str) if ed_str else today
+        except (ValueError, TypeError):
+            sd, ed = today.replace(day=1), today
     else:
         sd, ed = today.replace(day=1), today
 

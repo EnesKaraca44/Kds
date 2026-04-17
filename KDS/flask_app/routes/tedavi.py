@@ -151,15 +151,11 @@ def tedavi():
         sorted_rev = summary.sort_values('TOPLAM_CIRO', ascending=False)
         top3 = sorted_rev.head(3)
         for _, r in top3.iterrows():
-            insights.append({
-                "title": str(r[group_col]),
-                "ciro": float(r['TOPLAM_CIRO']),
-                "islem": int(r['ISLEM_ADETI']),
-            })
+            insights.append(f"INSIGHT_GROUP_STATS|{str(r[group_col])}|{float(r['TOPLAM_CIRO'])}|{int(r['ISLEM_ADETI'])}")
         total = float(summary['TOPLAM_CIRO'].sum())
         if total > 0:
             pct = float(top3['TOPLAM_CIRO'].sum()) / total * 100.0
-            insights.append({"share_pct": pct})
+            insights.append(f"INSIGHT_TOP3_SHARE|{round(pct, 1)}")
     except Exception:
         insights = []
 
