@@ -1,134 +1,68 @@
 import pandas as pd
 from .baglanti import baglanti_olustur
+from .cache_helper import ttl_cache
+from .sql_api_client import get_remote_sql
 
 
+def _read_sql_with_optional_params(conn, sql, start_date, end_date):
+    """
+    API'den gelen SQL {start_date}/{end_date} veya @...@ ile dolu olabilir;
+    bazen ODBC ? parametreleri kalir (eski sablon).
+    """
+    qmarks = sql.count("?")
+    if qmarks == 0:
+        return pd.read_sql(sql, conn)
+    if qmarks == 2:
+        return pd.read_sql(sql, conn, params=(start_date, end_date))
+    if qmarks == 4:
+        return pd.read_sql(sql, conn, params=(start_date, end_date, start_date, end_date))
+    return pd.read_sql(sql, conn)
+
+
+@ttl_cache(maxsize=32, ttl=600)
 def hekim_puan_verisi_yukle(start_date, end_date):
+    """Hekim hizmet puan detay verisi; SQL Rapor API'den (HEKIM_PUAN_TAB1) gelir."""
     conn = baglanti_olustur()
     if not conn:
         return None
 
-    query = """
-    select 
-     HASTA_KODU
-     ,konsultanHekimKimlikAd as KonAd
-     ,hekimAdSoyad as TETKIK_DOKTOR_ADI
-     ,birimAd
-     ,stokAd as TETKIK_ADI
-     ,kimlikId as TETKIK_DOKTOR_ID
-     ,cast(hizmetKod as nvarchar)as TETKIK_BUTCE_KODU
-     ,cast (islemTrh as date) as TETKIK_TARIHI
-     ,isnull(mesaiIciPuan,0) as mesaiIciPuan
-     , isnull(mesaiDisiPuan,0) as mesaiDisiPuan
-     , isnull(Toplampuan,0) as Toplampuan
-     ,hastaKimlikId 
-     ,cast(birimPuan as decimal(27,13))as birimPuan
-     ,uygulamaYer as TETKIK_DIS_NO
-     ,hstAdet as TETKIK_ADET
-     , dbo.IntegerIntoTime(islemSaat ) as TETKIK_SAATI
-     ,gelisNo as HASTA_GELIS_NO 
-     ,gelisTrh as HASTA_GELIS_TARIHI
-     ,hizmetPuanAlmasin
-     ,hizmetPuanDegisiklikTrh
-     ,medulaGonderimDurumu 
-     ,hastaAdSoyad as HASTA_ADI_SOYADI
-     ,birimFiyat as TETKIK_BIRIM_UCRET
-     ,miktar
-     ,tutar
-     ,paraBirim 
-     ,dovizKuru 
-     ,tutarDvz
-     ,farkUcret
-     ,KatilimPayi 
-     ,KurumKatilim  
-    from (  
-    select skh.HIZMET_TANIMI as stokAd,
-    skh.HIZMET_SUT_KODU as hizmetKod,  
-    case when (isnull(skh.HIZMET_UCRET_TUR_ID,0) <> 2 
-              and td.TUR_DEGER_KOD='MESAIICI' 
-              and (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null)) 
-         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1) * sdo.D_ORAN) 
-    end as mesaiIciPuan,
-    case when (isnull(skh.HIZMET_UCRET_TUR_ID,0) <> 2 
-              and td.TUR_DEGER_KOD='MESAIDISI' 
-              and (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null)) 
-         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1) * sdo.D_ORAN) 
-    end as mesaiDisiPuan,
-    case when (shh.HIZMET_PUAN_ALMASIN = 0 or shh.HIZMET_PUAN_ALMASIN is null) 
-         then sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1)) 
-    end as Toplampuan,
-    td.TUR_DEGER_KOD as mesaiDurum,sd.KIMLIK_ID as kimlikId ,
-    shh.HASTA_KIMLIK_ID as hastaKimlikId ,
-    (sd.DOKTOR_AD+' '+sd.DOKTOR_SOYAD) as hekimAdSoyad,
-    (sdk.DOKTOR_AD+' '+sdk.DOKTOR_SOYAD) as konsultanHekimKimlikAd,
-    b.BIRIM_AD as birimAd,
-    sum(shh.HIZMET_PUAN1*isnull(shh.HIZMET_PUAN1_CARPAN,1)) as birimPuan 
-    ,shru.HST_GELIS_KOD as gelisNo,shh.ISLEM_TRH as islemTrh ,
-    SHRU.HST_GELIS_ID as hstGelisId,
-    shru.HST_GELIS_TRH as gelisTrh,
-    shh.ISLEM_SAAT as islemSaat,
-    shh.STOK_ID as stokId,
-    shh.SBS_HASTA_HAREKET_ID as sbsHastaHareketId,
-    shh.HIZMET_PUAN_ALMASIN as hizmetPuanAlmasin, 
-    case when skh.HIZMET_UYGULAMA_YERI = 1 then 'Dis' 
-         when skh.HIZMET_UYGULAMA_YERI = 2 then 'YarımCene' 
-         when skh.HIZMET_UYGULAMA_YERI = 3 then 'TamCene' 
-         when skh.HIZMET_UYGULAMA_YERI = 4 then 'Agiz' 
-         else 'Agiz' end as uygulamaYer,
-    isnull(shh.HST_MIKTAR,shh.HST_ADET) as hstAdet, 
-    shh.HIZMET_PUAN_DEGISIKLIK_TRH as hizmetPuanDegisiklikTrh,
-    cast(isnull(shh.MEDULA_GONDERIM_DURUMU,0) as integer) as medulaGonderimDurumu, 
-    sh.HASTA_KODU as HASTA_KODU,
-    hastakimlik.KIMLIK_AD+' '+hastakimlik.KIMLIK_SOYAD as hastaAdSoyad,
-    shh.HST_BIRIM_FIYAT as birimFiyat, 
-    shh.HST_MIKTAR as miktar,
-    (shh.HST_BIRIM_FIYAT * shh.HST_MIKTAR) * sdo.D_ORAN as tutar,
-    isnull(pr.PARA_BIRIM_AD,'TL') as paraBirim,
-    shh.DOVIZ_KURU as dovizKuru,
-    shh.TUTAR_DVZ as tutarDvz,
-    shh.FARK_UCRET as farkUcret,
-    shh.KATILIM_PAYI as katilimPayi,
-    case when isnull(skh.HIZMET_KURUM_KATILIM_DURUM,0) <> 0 then shh.KURUM_KATILIM else 0 end as kurumKatilim
-     from SBS_HASTA_HAREKET as shh with(nolock) 
-    left join SBS_DOKTOR as sd with (nolock) on shh.HEKIM_KIMLIK_ID = sd.KIMLIK_ID and (isnull(sd.PSF_ID,0) = 0) 
-    inner join SBS_HASTA_RESMI_UCRETLI as shru with (nolock) on shru.HST_GELIS_ID = shh.HST_GELIS_ID and (isnull(shru.PSF_ID,0) = 0) 
-    inner join STOK_KART_HIZMET as skh with (nolock) on skh.STOK_ID = shh.STOK_ID and (isnull(skh.PSF_ID,0) = 0)  
-    inner join SBS_HASTA as sh with (nolock) on sh.HASTA_KIMLIK_ID = shru.HASTA_KIMLIK_ID and (isnull(sh.PSF_ID,0) = 0) 
-    inner join KIMLIK as hastaKimlik with (nolock) on hastaKimlik.KIMLIK_ID = shh.HASTA_KIMLIK_ID and (isnull(hastaKimlik.PSF_ID,0) = 0) 
-    inner join SBS_KLINIK as sk with (nolock) on sk.BIRIM_ID = shh.KLINIK_BIRIM_ID and (isnull(sk.PSF_ID,0) = 0) 
-    left join TUR_DETAY as td with (nolock) on td.TUR_DETAY_ID = sk.MESAI_DURUMU and (isnull(td.PSF_ID,0) = 0) 
-    left join SBS_DOKTOR as sdk with (nolock) on sdk.KIMLIK_ID = shh.KONSULTAN_HEKIM_KIMLIK_ID and (isnull(sdk.PSF_ID,0) = 0) 
-    left join BIRIM as b with(nolock) on b.BIRIM_ID = shh.KLINIK_BIRIM_ID and (isnull(b.PSF_ID,0) = 0) 
-    left join PARA_BIRIM as PR with(nolock) on pr.PARA_BIRIM_ID = shh.DOVIZ_TUR_ID
-    INNER JOIN SBS_DOKTOR_ORAN AS sdo WITH (NOLOCK) 
-        ON K = SIGN(ISNULL(NULLIF(shh.KONSULTAN_HEKIM_KIMLIK_ID, shh.HEKIM_KIMLIK_ID), 0)) 
-        AND D = SIGN(ISNULL(shh.HEKIM_KIMLIK_ID, 0)) 
-        AND C = SIGN(ISNULL(shh.OGRENCI_HEKIM_KIMLIK_ID, 0)) 
-        AND sdo.TASLAK_ID = 1 
-        AND ISNULL(sdo.PSF_ID, 0) = 0
-    WHERE (isnull(shh.PSF_ID,0) = 0) 
-        AND isnull(EK_ODEME_YANSIMASIN,0) <= 0
-        AND (shh.ISLEM_TRH >= ?) AND (shh.ISLEM_TRH < DATEADD(day, 1, ?))
-    group by sh.HASTA_KODU, td.TUR_DEGER_KOD, sd.KIMLIK_ID, shru.HST_GELIS_KOD, b.BIRIM_AD,
-        (sd.DOKTOR_AD+' '+sd.DOKTOR_SOYAD), (sdk.DOKTOR_AD+' '+sdk.DOKTOR_SOYAD),
-        shru.HST_GELIS_TRH, shh.HASTA_KIMLIK_ID, SHRU.HST_GELIS_ID, skh.HIZMET_TANIMI,
-        skh.HIZMET_SUT_KODU, shh.ISLEM_TRH, shh.ISLEM_SAAT, shh.HIZMET_PUAN_ALMASIN,
-        shh.HIZMET_PUAN1, skh.HIZMET_UYGULAMA_YERI, shh.HST_MIKTAR, shh.HST_ADET,
-        shh.STOK_ID, shh.SBS_HASTA_HAREKET_ID, shh.MEDULA_GONDERIM_DURUMU,
-        shh.HIZMET_PUAN_DEGISIKLIK_TRH, hastakimlik.KIMLIK_AD+' '+hastakimlik.KIMLIK_SOYAD,
-        shh.HST_BIRIM_FIYAT, pr.PARA_BIRIM_AD, shh.DOVIZ_KURU, shh.TUTAR_DVZ,
-        shh.FARK_UCRET, shh.KATILIM_PAYI, shh.KURUM_KATILIM, skh.HIZMET_KURUM_KATILIM_DURUM,
-        sdo.D_ORAN, sdo.K_ORAN, sdo.C_ORAN, skh.HIZMET_UCRET_TUR_ID
-    ) as doktorT 
-    where 1=1
-    AND (islemTrh >= ?) AND (islemTrh < DATEADD(day, 1, ?))
-    order by stokAd
-    """
-
     try:
-        df = pd.read_sql(query, conn, params=(start_date, end_date, start_date, end_date))
+        sql = get_remote_sql(
+            "hekim_puan.hekim_puan_verisi_yukle",
+            {"start_date": start_date, "end_date": end_date},
+        )
+        if not sql:
+            return None
+        
+        # Daha güvenli bir değişim için Regex (Büyük/Küçük harf duyarsız) kullanıyoruz
+        import re
+        # 1. Tarih konusunu düzeltiyoruz: 
+        # Sorgudaki tüm tırnak içindeki tarihleri (YYYY-MM-DD, YYYY.MM.DD vb.) yakalıyoruz
+        found_dates = re.findall(r"'\d{1,4}[./-]\d{1,2}[./-]\d{1,4}(?:\s\d{2}:\d{2}:\d{2})?'", sql)
+        if len(found_dates) >= 2:
+            sql = sql.replace(found_dates[0], f"'{start_date}'")
+            for i in range(1, len(found_dates)):
+                sql = sql.replace(found_dates[i], f"'{end_date}'")
+        
+        df = _read_sql_with_optional_params(conn, sql, start_date, end_date)
+        
+        with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\debug_log.txt", "w", encoding="utf-8") as f:
+            f.write("SQL BASARILI\n")
+            f.write(f"SQL Uzunlugu: {len(sql)}\n")
+            f.write(f"Donen Satir: {len(df) if df is not None else 0}\n")
+            f.write(f"SQL:\n{sql}\n")
+
         return df
     except Exception as e:
-        print(f"Hekim Puan Verisi Yükleme Hatası: {e}")
+        with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\debug_log.txt", "w", encoding="utf-8") as f:
+            f.write(f"SQL HATASI: {str(e)}\n\n")
+            import traceback
+            f.write(traceback.format_exc())
+            try:
+                f.write(f"\n\nSQL:\n{sql}\n")
+            except:
+                pass
+        print(f"Hekim Puan Verisi Yükleme Hatasi: {e}")
         return None
     finally:
         conn.close()

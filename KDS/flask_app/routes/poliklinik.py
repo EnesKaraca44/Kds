@@ -15,18 +15,18 @@ poliklinik_bp = Blueprint('poliklinik', __name__)
 
 def _extract_hour(value):
     text = str(value).strip()
-    if not text or text.lower() == 'nan':
+    if not text or text.lower() == 'nan': #Eğer yazı tamamen boşsa işlemi durdur.
         return None
 
-    # Prefer the hour right before ":" so values like "09:15" or
-    # "2025-01-05 09:15:00" resolve to 9 instead of 2025.
+    
+    # "09:15" veya "2025-01-05 09:15:00" gibi değerlerde 2025 yerine 9'u bulmayı tercih eder.
     match = re.search(r'([01]?\d|2[0-3])(?=:)', text)
     if match:
-        return int(match.group(1))
+        return int(match.group(1))  #Bu bir kuraldır: "Ya 0 ile 19 arası bir sayı bul ya da 20 ile 23 arası bir sayı bul" der.
 
     exact = re.fullmatch(r'([01]?\d|2[0-3])', text)
     if exact:
-        return int(exact.group(1))
+        return int(exact.group(1))  #Eğer yukarıdaki kurala uygun bir şey bulunduysa içeri gir.
 
     return None
 
@@ -55,7 +55,7 @@ def poliklinik():
         Benzersiz_Hasta_Sayisi=('HstKod', 'nunique')
     ).reset_index()
 
-    # Query Parameters for sorting
+    # Sıralama için sorgu parametreleri
     sort_by = request.args.get('sort', 'Kayit_Sayisi')
     if sort_by not in ['Kayit_Sayisi', 'Benzersiz_Hasta_Sayisi', 'Hekim_Bazli_Hasta_Sayilari']:
         sort_by = 'Kayit_Sayisi'
@@ -65,6 +65,7 @@ def poliklinik():
     hekim_hasta_toplam = 0
 
     if not doc_perf.empty and sort_by != 'Hekim_Bazli_Hasta_Sayilari':
+        #Veri setindeki en yüksek değere sahip ilk 15 doktoru seçer.
         top_data = doc_perf.nlargest(15, sort_by).sort_values(sort_by, ascending=True)
         fig_top = px.bar(
             top_data,
@@ -74,7 +75,7 @@ def poliklinik():
             color=sort_by,
             color_continuous_scale='Blues',
             text_auto='.0f',
-            # title="En Çok Hasta Bakan Hekimler", # Handled by HTML
+            # title="En Çok Hasta Bakan Hekimler"
         )
         fig_top.update_layout(
             template='plotly_white',
@@ -85,7 +86,7 @@ def poliklinik():
             coloraxis_showscale=False,
             margin=dict(l=20, r=20, t=40, b=20),
         )
-
+        #En Düşük 15 Doktor
         bot_data = doc_perf[doc_perf[sort_by] > 0].nsmallest(15, sort_by).sort_values(sort_by, ascending=False)
         fig_bot = px.bar(
             bot_data,
@@ -106,6 +107,8 @@ def poliklinik():
             coloraxis_showscale=False,
             margin=dict(l=20, r=20, t=40, b=20),
         )
+
+        #Eğer kullanıcı grafik değil de "Ben tüm listeyi tablo olarak görmek istiyorum" dediyse burası çalışır.
     elif sort_by == 'Hekim_Bazli_Hasta_Sayilari':
         # Resimdeki tablo: tüm hekimler + benzersiz hasta sayısı
         table_df = (
@@ -113,6 +116,8 @@ def poliklinik():
             .sort_values(['Benzersiz_Hasta_Sayisi', 'DOKTOR_ADI'], ascending=[False, True])
             .copy()
         )
+         #Listedeki tüm hasta sayılarını toplayıp genel toplamı bulur.
+        #Tabloyu satır satır okur ve hekim_hasta_table sepetine ekler.
         hekim_hasta_toplam = int(table_df['Benzersiz_Hasta_Sayisi'].sum()) if not table_df.empty else 0
         hekim_hasta_table = [
             {"ad": str(r["DOKTOR_ADI"]), "toplam": int(r["Benzersiz_Hasta_Sayisi"])}
@@ -145,7 +150,7 @@ def poliklinik():
 
     # Tab 2: Kurum dağılımı
     kurum_data = df.groupby('KrmAdi').size().reset_index(name='Sayi').nlargest(10, 'Sayi')
-    if not kurum_data.empty:
+    if not kurum_data.empty: #Veri varsa bir pasta grafiği çizer.
         fig_kurum = px.pie(kurum_data, values='Sayi', names='KrmAdi', hole=0.5,
                            color_discrete_sequence=px.colors.qualitative.Bold) # title Handled by HTML
         fig_kurum.update_traces(textinfo='percent+label', textposition='outside')
@@ -163,10 +168,12 @@ def poliklinik():
     all_dates = pd.date_range(start=sd, end=ed).date
     daily_raw = df.groupby(df['KAYIT_TARIHI'].dt.date).size().reset_index(name='Sayi')
     daily_trend = pd.DataFrame({'KAYIT_TARIHI': all_dates})
+    #Yarattığımız boş takvim ile gerçek hasta sayılarını birleştirir.
     daily_trend = pd.merge(daily_trend, daily_raw, on='KAYIT_TARIHI', how='left').fillna(0)
     daily_trend['Sayi'] = daily_trend['Sayi'].astype(int)
+    #7 günlük hareketli ortalama hesaplar. Bu, günlük iniş çıkışlardaki gürültüyü siler
     daily_trend['Hareketli_Ortalama'] = daily_trend['Sayi'].rolling(window=7, min_periods=1).mean()
-    peak_day = daily_trend.loc[daily_trend['Sayi'].idxmax()]
+    peak_day = daily_trend.loc[daily_trend['Sayi'].idxmax()] #idxmax(): Veri içindeki en yüksek (tepe) noktayı bulur.
     trend_avg = float(daily_trend['Sayi'].mean()) if not daily_trend.empty else 0.0
 
     last_day = daily_trend.iloc[-1]
@@ -179,7 +186,7 @@ def poliklinik():
             mode='lines',
             name='Gunluk Trend',
             line=dict(color='rgba(59, 130, 246, 0.45)', width=1.8),
-            fill='tozeroy',
+            fill='tozeroy', #Çizgi grafiğinin altını hafif bir mavi renkle boyar.
             fillcolor='rgba(59, 130, 246, 0.10)',
             hovertemplate='Tarih: %{x}<br>Basvuru: %{y}<extra></extra>',
         )
@@ -225,7 +232,7 @@ def poliklinik():
         yaxis=dict(showgrid=True, gridcolor='rgba(15,23,42,0.08)', zeroline=False, title="Basvuru Sayisi"),
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         margin=dict(l=40, r=20, t=70, b=40),
-        shapes=[
+        shapes=[  #Grafiğin tam ortasından yatay, kesik bir çizgi geçirir. Bu çizgi, tüm dönemin ortalama hasta sayısını temsil eder.
             dict(
                 type='line',
                 xref='paper',
@@ -239,24 +246,25 @@ def poliklinik():
     )
 
     # Tab 3: Yoğunluk Analizi (Line Chart)
-    # Original Streamlit logic: df['Saat'].str[:2]
-    # Here we clean the Saat column just in case.
+    #09:15" verisinden 9 rakamını çeker.
     df['Saat_H'] = df['Saat'].apply(_extract_hour)
     df['Saat_H'] = df['Saat_H'].fillna(-1).astype(int)
     
     saat_traffic = df[df['Saat_H'].between(0, 23)].groupby('Saat_H').size().reset_index(name='Sayi')
     
-    # Tüm 24 saati garanti altına alalım
+    # Sadece 0 ile 23 arasındaki geçerli saatleri alır, her saatte kaç hasta geldiğini sayar.
     tum_saatler = pd.DataFrame({'Saat_H': range(24)})
     saat_traffic = pd.merge(tum_saatler, saat_traffic, on='Saat_H', how='left').fillna(0)
     saat_traffic['Sayi'] = saat_traffic['Sayi'].astype(int)
     
     saat_traffic['Saat_Baslangic'] = saat_traffic['Saat_H'].apply(lambda x: f"{int(x):02d}")
-    peak_hour = saat_traffic.loc[saat_traffic['Sayi'].idxmax()]
+    #idxmax(): Günün en yoğun saatini (zirve noktasını) bulur.
+    peak_hour = saat_traffic.loc[saat_traffic['Sayi'].idxmax()] 
     hourly_avg = float(saat_traffic['Sayi'].mean()) if not saat_traffic.empty else 0.0
     top_hours = set(saat_traffic.nlargest(3, 'Sayi')['Saat_H'].tolist())
     bar_colors = ['#1d4ed8' if h in top_hours else '#93c5fd' for h in saat_traffic['Saat_H']]
 
+     #Sütun (Bar) Grafiği Çizimi
     fig_hourly = go.Figure()
     fig_hourly.add_trace(
         go.Bar(
@@ -270,6 +278,7 @@ def poliklinik():
             hovertemplate='Saat: %{x:02d}:00<br>Hasta: %{y}<extra></extra>',
         )
     )
+    #Çizgi (Scatter) Grafiği Ekleme
     fig_hourly.add_trace(
         go.Scatter(
             x=saat_traffic['Saat_H'],
@@ -281,6 +290,7 @@ def poliklinik():
             hovertemplate='Saat: %{x:02d}:00<br>Hasta: %{y}<extra></extra>',
         )
     )
+    #Ortalama Çizgisi ve Tasarım Detayları
     fig_hourly.add_trace(
         go.Scatter(
             x=[0, 23],
@@ -293,7 +303,7 @@ def poliklinik():
     )
     fig_hourly.update_layout(
         template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
-        # title='Gun Ici Saatlik Hasta Trafigi', # Handled by HTML
+        # title='Gun Ici Saatlik Hasta Trafigi
         hovermode='x unified',
         xaxis=dict(
             showgrid=False,
@@ -306,6 +316,7 @@ def poliklinik():
         yaxis=dict(showgrid=True, gridcolor='rgba(15,23,42,0.08)', zeroline=False, title="Hasta Sayisi"),
         legend=dict(orientation='h', yanchor='bottom', y=1.02, xanchor='right', x=1),
         margin=dict(l=20, r=20, t=60, b=30),
+        #İşaretlemeler (Annotations) ve Gölgelendirme
         annotations=[
             dict(
                 x=peak_hour['Saat_H'],
@@ -319,7 +330,7 @@ def poliklinik():
                 bordercolor='#93c5fd',
             )
         ],
-        shapes=[
+        shapes=[ #Grafiğin arka planında, 08:00 ile 17:00 arasını çok hafif bir renkle boyar.
             dict(
                 type='rect',
                 xref='x',
@@ -345,6 +356,7 @@ def poliklinik():
     )
 
     # Tab 4: Hekim Detay (Dropdown + Metrics + Pie Chart)
+    #sayfadaki aşağı açılır listeden (dropdown) bir doktor seçilmesini sağlar
     hekim_list = sorted([str(x) for x in df_filtered['DOKTOR_ADI'].dropna().unique()])
     selected_hekim = request.args.get('hekim')
     if not selected_hekim and hekim_list:
@@ -354,6 +366,7 @@ def poliklinik():
     hekim_brans_sayisi = 0
     fig_hekim_pie = None
 
+#Seçilen doktorun hastanedeki performans detayları burada hesaplanır.
     if selected_hekim and selected_hekim in hekim_list:
         df_hekim = df_filtered[df_filtered['DOKTOR_ADI'] == selected_hekim]
         hekim_toplam_kayit = len(df_hekim)
@@ -364,6 +377,7 @@ def poliklinik():
         fig_hekim_pie.update_traces(textinfo='percent', textposition='inside')
         fig_hekim_pie.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
 
+     #Hazırlanan tüm grafikler web sayfasında görüntülenebilmesi için HTML formatına çevrilir.
     charts = {
         'fig_top': fig_top.to_html(full_html=False, include_plotlyjs=False),
         'fig_bot': fig_bot.to_html(full_html=False, include_plotlyjs=False),
@@ -373,7 +387,7 @@ def poliklinik():
         'fig_hourly': fig_hourly.to_html(full_html=False, include_plotlyjs=False),
         'fig_hekim_pie': fig_hekim_pie.to_html(full_html=False, include_plotlyjs=False) if fig_hekim_pie else "",
     }
-
+    #Bu kısım, yöneticinin en önemli veriyi tek bakışta görmesi için kısa bir özet metni hazırlar.
     insight_text = ""
     if not doc_perf.empty:
         if sort_by == 'Hekim_Bazli_Hasta_Sayilari':
@@ -388,6 +402,7 @@ def poliklinik():
             metric_label = "Kayıt Sayısı" if sort_by == 'Kayit_Sayisi' else "Benzersiz Hasta Sayısı"
             insight_text = f"INSIGHT_TOP_PERF|{top_doc_val}|{metric_label}|{top_doc_name}"
 
+#Tüm hesaplamalar biter ve her şey poliklinik.html isimli tasarım dosyasına gönderilir.
     return render_template('poliklinik.html',
         start_date=sd, end_date=ed, no_data=False,
         toplam_kayit=toplam_kayit, benzersiz_hasta=benzersiz_hasta,

@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+{% block title %}Protez Takibi{% endblock %}
+{% block page_title %}<span data-t="🦷 Protez Takibi">🦷 Protez Takibi</span>{% endblock %}
+
+{% block head %}
+<style>
+    .pt-metrics {
+        display: grid;
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    /* Red card local override to match reference image */
+    .metric-card.card-red { 
+        background: linear-gradient(135deg, #ef4444, #991b1b) !important; 
+    }
+
+    .pt-tabs {
+        margin-top: 6px;
+        margin-bottom: 14px;
+    }
+
+    .pt-tabs .tab-btn {
+        font-size: 0.85rem;
+    }
+
+    .pt-panel {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: 14px;
+        padding: 16px;
+    }
+
+    .pt-section-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 14px;
+    }
+
+    .pt-two-col {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+
+    .pt-placeholder {
+        border: 1px dashed var(--border-color);
+        border-radius: 12px;
+        min-height: 280px;
+        padding: 14px;
+        background: rgba(148, 163, 184, 0.06);
+    }
+
+    .pt-placeholder h4 {
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+        color: var(--text-primary);
+    }
+
+    .pt-placeholder p {
+        margin: 0;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .pt-no-data {
+        min-height: 260px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        font-size: 0.9rem;
+        color: var(--text-muted);
+        border: 1px dashed var(--border-color);
+        border-radius: 10px;
+        background: rgba(148, 163, 184, 0.04);
+        padding: 14px;
+    }
+
+    .pt-list-placeholder {
+        min-height: 360px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .pt-table-wrap {
+        max-height: 300px;
+        overflow: auto;
+        border: 1px solid var(--border-color);
+        border-radius: 10px;
+        background: var(--bg-card);
+    }
+
+    .pt-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.78rem;
+    }
+
+    .pt-table th,
+    .pt-table td {
+        padding: 8px 10px;
+        border-bottom: 1px solid var(--border-color);
+        text-align: left;
+        white-space: nowrap;
+    }
+
+    .pt-table th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: #f8fafc;
+        color: #475569;
+        font-weight: 700;
+    }
+
+    .theme-dark .pt-table th {
+        background: #0f172a;
+        color: #cbd5e1;
+    }
+
+    .pt-list-toolbar {
+        margin-bottom: 10px;
+    }
+
+    .pt-list-search {
+        width: 100%;
+        max-width: 420px;
+        padding: 8px 10px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-card);
+        color: var(--text-primary);
+    }
+
+    @media (max-width: 1200px) {
+        .pt-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @media (max-width: 900px) {
+        .pt-two-col {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="metrics-grid pt-metrics">
+    <div class="metric-card card-blue">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-value">{{ toplam_hasta|default(0)|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
+        </div>
+    </div>
+    <div class="metric-card card-purple">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-value">{{ toplam_islem|default(0)|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Toplam İşlem (Diş)">Toplam İşlem (Diş)</div>
+        </div>
+    </div>
+    <div class="metric-card card-red">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-value">{{ tamamlanan|default(0)|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Tamamlanan (T3)">Tamamlanan (T3)</div>
+        </div>
+    </div>
+    <div class="metric-card card-orange">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-value">{{ devam_eden|default(0)|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Devam Eden (T2)">Devam Eden (T2)</div>
+        </div>
+    </div>
+    <div class="metric-card card-green">
+        <div class="metric-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"></path><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+        </div>
+        <div class="metric-body">
+            <div class="metric-value">%{{ genel_rpt_orani|default(0)|round(2) }}</div>
+            <div class="metric-label" data-t="Genel RPT Oranı">Genel RPT Oranı</div>
+            <div class="metric-delta">↕ {{ rpt_adedi|default(0)|turkish_number(0) }} RPT</div>
+        </div>
+    </div>
+</div>
+
+<div class="tabs pt-tabs" data-target="#protezTakipTabs">
+    <button class="tab-btn active" data-t="📊 Genel Durum">📊 Genel Durum</button>
+    <button class="tab-btn" data-t="📉 RPT Performans">📉 RPT Performans</button>
+    <button class="tab-btn" data-t="🚨 Kritik Takipler">🚨 Kritik Takipler</button>
+    <button class="tab-btn" data-t="🧩 İşlem Dağılımı">🧩 İşlem Dağılımı</button>
+    <button class="tab-btn" data-t="📋 İşlem Listesi">📋 İşlem Listesi</button>
+</div>
+
+<div id="protezTakipTabs">
+    <div class="tab-content active">
+        <div class="pt-panel">
+            <div class="pt-section-title" data-t="Genel Durum Özeti">Genel Durum Özeti</div>
+            <div class="pt-two-col">
+                <div class="pt-placeholder">
+                    <h4 data-t="👨‍⚕️ En Yoğun 15 Hekim (İş Yükü)">👨‍⚕️ En Yoğun 15 Hekim (İş Yükü)</h4>
+                    {% if has_hekim_data %}
+                    {{ fig_hekim | safe }}
+                    {% else %}
+                    <div class="pt-no-data" data-t="Bu grafik için gösterilecek veri bulunamadı.">Bu grafik için gösterilecek veri bulunamadı.</div>
+                    {% endif %}
+                </div>
+                <div class="pt-placeholder">
+                    <h4 data-t="🧪 Laboratuvar Hacmi">🧪 Laboratuvar Hacmi</h4>
+                    {% if has_servis_data %}
+                    {{ fig_servis | safe }}
+                    {% else %}
+                    <div class="pt-no-data" data-t="Bu grafik için gösterilecek veri bulunamadı.">Bu grafik için gösterilecek veri bulunamadı.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="pt-panel">
+            <div class="pt-section-title" data-t="Hekim Bazlı RPT Analizi (Top 15)">Hekim Bazlı RPT Analizi (Top 15)</div>
+            <div class="pt-placeholder">
+                <h4 data-t="📈 RPT Performans Grafiği">📈 RPT Performans Grafiği</h4>
+                {{ fig_rpt | safe }}
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="pt-panel">
+            <div class="pt-section-title" data-t="Operasyonel Darboğazlar">Operasyonel Darboğazlar</div>
+            <div class="pt-two-col">
+                <div class="pt-placeholder">
+                    <h4 data-t="⏳ 30 Günden Fazla Süren İşler">⏳ 30 Günden Fazla Süren İşler</h4>
+                    {% if kritik_30gun_rows %}
+                    <div class="pt-table-wrap">
+                        <table class="pt-table">
+                            <thead>
+                                <tr>
+                                    {% for k in kritik_30gun_rows[0].keys() %}
+                                    <th>{{ k }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in kritik_30gun_rows %}
+                                <tr>
+                                    {% for v in row.values() %}
+                                    <td>{{ v }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="pt-no-data" data-t="30 günden fazla süren iş bulunamadı.">30 günden fazla süren iş bulunamadı.</div>
+                    {% endif %}
+                </div>
+                <div class="pt-placeholder">
+                    <h4 data-t="💰 Vezne Onayı Bekleyen Teslimler">💰 Vezne Onayı Bekleyen Teslimler</h4>
+                    {% if vezne_bekleyen_rows %}
+                    <div class="pt-table-wrap">
+                        <table class="pt-table">
+                            <thead>
+                                <tr>
+                                    {% for k in vezne_bekleyen_rows[0].keys() %}
+                                    <th>{{ k }}</th>
+                                    {% endfor %}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for row in vezne_bekleyen_rows %}
+                                <tr>
+                                    {% for v in row.values() %}
+                                    <td>{{ v }}</td>
+                                    {% endfor %}
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="pt-no-data" data-t="Vezne onayı bekleyen teslim bulunamadı.">Vezne onayı bekleyen teslim bulunamadı.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="pt-panel">
+            <div class="pt-section-title" data-t="İşlem ve Kırılım Analizi">İşlem ve Kırılım Analizi</div>
+            <div class="pt-two-col">
+                <div class="pt-placeholder">
+                    <h4 data-t="🔝 Top 10 İşlem">🔝 Top 10 İşlem</h4>
+                    {% if has_top_islem_data %}
+                    {{ fig_top_islem | safe }}
+                    {% else %}
+                    <div class="pt-no-data" data-t="İşlem dağılımı için veri bulunamadı.">İşlem dağılımı için veri bulunamadı.</div>
+                    {% endif %}
+                </div>
+                <div class="pt-placeholder">
+                    <h4 data-t="🧬 Lab-İşlem Kırılımı">🧬 Lab-İşlem Kırılımı</h4>
+                    {% if has_kirilim_data %}
+                    {{ fig_kirilim | safe }}
+                    {% else %}
+                    <div class="pt-no-data" data-t="Lab-işlem kırılımı için veri bulunamadı.">Lab-işlem kırılımı için veri bulunamadı.</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="pt-panel">
+            <div class="pt-section-title" data-t="Detaylı Takip Listesi">Detaylı Takip Listesi</div>
+            {% if islem_listesi_rows %}
+            <div class="pt-list-toolbar">
+                <input
+                    id="ptListSearch"
+                    class="pt-list-search"
+                    type="text"
+                    placeholder="Hasta, işlem veya doktor ara..."
+                    data-t-placeholder="Hasta, işlem veya doktor ara..."
+                >
+            </div>
+            <div class="pt-table-wrap">
+                <table class="pt-table" id="ptIslemListesiTable">
+                    <thead>
+                        <tr>
+                            {% for k in islem_listesi_rows[0].keys() %}
+                            <th>{{ k }}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in islem_listesi_rows %}
+                        <tr>
+                            {% for v in row.values() %}
+                            <td>{{ v }}</td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="pt-placeholder pt-list-placeholder" data-t="Detaylı takip listesi için veri bulunamadı.">
+                Detaylı takip listesi için veri bulunamadı.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const input = document.getElementById('ptListSearch');
+    const table = document.getElementById('ptIslemListesiTable');
+    if (!input || !table) return;
+
+    const rows = Array.from(table.querySelectorAll('tbody tr'));
+    input.addEventListener('input', function() {
+        const q = this.value.toLocaleLowerCase('tr').trim();
+        rows.forEach(row => {
+            const txt = row.textContent.toLocaleLowerCase('tr');
+            row.style.display = (!q || txt.includes(q)) ? '' : 'none';
+        });
+    });
+})();
+</script>
+{% endblock %}

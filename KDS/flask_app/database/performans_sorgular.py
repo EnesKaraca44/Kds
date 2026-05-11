@@ -1,13 +1,16 @@
 import pandas as pd
 from datetime import datetime
 from .baglanti import baglanti_olustur
+from .cache_helper import ttl_cache
 
 
+@ttl_cache(maxsize=32, ttl=600)
 def performans_gelir_verisi_yukle(start_date_str, end_date_str, test_type_filter_clause=""):
     conn = baglanti_olustur()
     if not conn:
         return pd.DataFrame()
 
+    # DEPRECATED: hekim_puan_sorgular.hekim_puan_verisi_yukle yerini aldı. Artık kullanılmıyor.
     sql_query = f"""
         SELECT
             VW_HASTANE.TETKIK_DOKTOR_ADI,

@@ -89,12 +89,61 @@ def personel_sorgulama():
     hizmet_sinifi = df_hizmet_ozet.rename(columns={'data1': 'tur', 'data2': 'toplam'}).to_dict(orient='records')
 
     # 5. Master Personel Listesi
+    # API'den gelen kolon isimleri sorgu koduna gore degisebiliyor.
+    # PersonelBilgi icin:
+    # - ad: data2
+    # - gorev kurumu: data8
+    # - durum: data25
+    # - gorev unvani: data6
     df_personel_listesi = get_personel_tam_liste(sd_str, ed_str)
-    personel_listesi = df_personel_listesi.rename(columns={
-        'data1': 'ad', 
-        'data3': 'kurum', 
-        'data4': 'unvan',
-    }).to_dict(orient='records')
+
+    def _pick_series(df, candidates, default_value=''):
+        for col in candidates:
+            if col in df.columns:
+                return df[col]
+        return pd.Series([default_value] * len(df), index=df.index)
+
+    def _normalize_calisma_durumu(raw_status, bitis_tarih=None):
+        value = (str(raw_status).strip() if raw_status is not None else "")
+        if value in ("ÇALIŞIYOR", "İZİNLİ", "RAPORLU", "GÖREVLENDİRME", "GEÇİCİ GÖREVLİ GİDEN"):
+            return value
+        # PersonelBilgi sorgusunda durum yerine "Asil/Aday" benzeri personel statüsü gelebiliyor.
+        # Bu durumda ekranı boş bırakmamak için aktif personeli "ÇALIŞIYOR" kabul ediyoruz.
+        if bitis_tarih and str(bitis_tarih).strip() not in ("", "-", "None", "nan"):
+            return "AYRILDI"
+        return "ÇALIŞIYOR"
+
+    if not df_personel_listesi.empty:
+        df_personel_listesi = df_personel_listesi.copy()
+        df_personel_listesi['ad'] = _pick_series(df_personel_listesi, ['ad', 'data2', 'data1'])
+        df_personel_listesi['kurum'] = _pick_series(df_personel_listesi, ['kurum', 'data8', 'data3'])
+        df_personel_listesi['unvan'] = _pick_series(df_personel_listesi, ['unvan', 'data6', 'data4'])
+        raw_status = _pick_series(df_personel_listesi, ['calisma_durumu', 'data25'])
+        bitis_tarih = _pick_series(df_personel_listesi, ['data21'])
+        df_personel_listesi['calisma_durumu'] = [
+            _normalize_calisma_durumu(s, b) for s, b in zip(raw_status, bitis_tarih)
+        ]
+        df_personel_listesi['kadro_unvan'] = _pick_series(df_personel_listesi, ['kadro_unvan', 'data5'])
+        df_personel_listesi['personel_turu'] = _pick_series(df_personel_listesi, ['personel_turu', 'data11'])
+        df_personel_listesi['hizmet_sinifi'] = _pick_series(df_personel_listesi, ['hizmet_sinifi', 'data10'])
+
+        def _summarize(df, col):
+            series = (
+                df[col]
+                .fillna('-')
+                .astype(str)
+                .str.strip()
+                .replace('', '-')
+            )
+            counts = series.value_counts(dropna=False)
+            return [{'tur': k, 'toplam': int(v)} for k, v in counts.items()]
+
+        # API mapping kaynakli panel aynilasmasini engellemek icin
+        # calisma ve kadro ozetini ana personel listesinden turet.
+        calisma_durumu = _summarize(df_personel_listesi, 'calisma_durumu')
+        kadro_unvan = _summarize(df_personel_listesi, 'kadro_unvan')
+
+    personel_listesi = df_personel_listesi.to_dict(orient='records')
 
     # KPI Değerleri
     toplam_personel = sum(d['toplam'] for d in calisma_durumu)

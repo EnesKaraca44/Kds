@@ -20,18 +20,46 @@ def hekim_puan():
 
     df_raw = hekim_puan_verisi_yukle(sd, ed)
     if df_raw is None or df_raw.empty:
-        return render_template('hekim_puan.html', start_date=sd, end_date=ed, no_data=True)
+        # scripts bloğu hekim_stats_dict vb. bekliyor; Undefined -> tojson TypeError olur
+        return render_template(
+            "hekim_puan.html",
+            start_date=sd,
+            end_date=ed,
+            no_data=True,
+            hekim_stats_dict={},
+            hekim_hizmet_dict={},
+            genel_cmi_gelir=0.0,
+            total_gelir=0.0,
+            aktif_hekim=0,
+        )
 
     df = df_raw.copy()
+    
+    # API artık doğru alias'larla dönüyor, bu yüzden sadece ufak eksik kontrolleri yapıyoruz
+    if 'TETKIK_TARIHI' not in df.columns:
+        df['TETKIK_TARIHI'] = sd
+    if 'TETKIK_ADET' not in df.columns:
+        df['TETKIK_ADET'] = 1
+
     puan_col = 'TETKIK_TOPLAM_PUAN' if 'TETKIK_TOPLAM_PUAN' in df.columns else 'Toplampuan'
-    df['TETKIK_TOPLAM_PUAN'] = pd.to_numeric(df[puan_col], errors='coerce').fillna(0)
-    df['TETKIK_ADET'] = pd.to_numeric(df['TETKIK_ADET'], errors='coerce').fillna(0)
-    df['TETKIK_BIRIM_UCRET'] = pd.to_numeric(df['TETKIK_BIRIM_UCRET'], errors='coerce').fillna(0)
-    df['TOPLAM_GELIR'] = df['TETKIK_ADET'] * df['TETKIK_BIRIM_UCRET']
+    df['TETKIK_TOPLAM_PUAN'] = pd.to_numeric(df.get(puan_col, 0), errors='coerce').fillna(0)
+    df['TETKIK_ADET'] = pd.to_numeric(df.get('TETKIK_ADET', 1), errors='coerce').fillna(0)
+    df['TETKIK_BIRIM_UCRET'] = pd.to_numeric(df.get('TETKIK_BIRIM_UCRET', 0), errors='coerce').fillna(0)
+    
+    if 'TOPLAM_GELIR' not in df.columns:
+        df['TOPLAM_GELIR'] = df['TETKIK_ADET'] * df['TETKIK_BIRIM_UCRET']
+    else:
+        df['TOPLAM_GELIR'] = pd.to_numeric(df['TOPLAM_GELIR'], errors='coerce').fillna(0)
+
+    # API artık RawData (ham veri) dönüyorsa, gruplamayı başarıyla yapabiliriz
+    if 'TETKIK_DOKTOR_ADI' not in df.columns:
+         df.rename(columns={df.columns[0]: 'TETKIK_DOKTOR_ADI'}, inplace=True)
 
     hekim_perf = df.groupby('TETKIK_DOKTOR_ADI').agg({
-        'TETKIK_TARIHI': 'nunique', 'HASTA_GELIS_NO': 'nunique',
-        'TETKIK_TOPLAM_PUAN': 'sum', 'TOPLAM_GELIR': 'sum'
+        'TETKIK_TARIHI': 'nunique', 
+        'HASTA_GELIS_NO': 'nunique',
+        'TETKIK_TOPLAM_PUAN': 'sum', 
+        'TOPLAM_GELIR': 'sum'
     }).reset_index()
     hekim_perf.columns = ['Hekim', 'Calisma_Gun', 'Toplam_Hasta', 'Toplam_Puan', 'Toplam_Gelir']
     import numpy as np

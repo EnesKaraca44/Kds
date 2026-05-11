@@ -75,6 +75,12 @@ def malzeme():
         df['hastaAdSoyad'] = ''
     if 'stokAd' not in df.columns:
         df['stokAd'] = ''
+    if 'bransAdi' not in df.columns:
+        df['bransAdi'] = ''
+    if 'doktorAdSoyad' not in df.columns:
+        df['doktorAdSoyad'] = ''
+    if 'tetkikAdi' not in df.columns:
+        df['tetkikAdi'] = ''
 
     no_data_1_5 = bool(df.empty)
     no_data_6_7 = bool(depo_df is None or depo_df.empty)
@@ -85,8 +91,12 @@ def malzeme():
         'Seçilen tarih aralığında depo kaydı bulunamadı.'
     )
 
-    daily = df.groupby('dusumTarih')['dusumMiktar'].sum().reset_index().sort_values('dusumTarih')
-    daily['5_Gunluk_Ort'] = daily['dusumMiktar'].rolling(window=5, min_periods=1).mean().round(1)
+    if df.empty or 'dusumTarih' not in df.columns:
+        daily = pd.DataFrame(columns=['dusumTarih', 'dusumMiktar'])
+        daily['5_Gunluk_Ort'] = pd.Series(dtype='float64')
+    else:
+        daily = df.groupby('dusumTarih')['dusumMiktar'].sum().reset_index().sort_values('dusumTarih')
+        daily['5_Gunluk_Ort'] = daily['dusumMiktar'].rolling(window=5, min_periods=1).mean().round(1)
 
     # Trend (ilk tasarimdaki sade dikey gorunum)
     fig_trend = go.Figure()

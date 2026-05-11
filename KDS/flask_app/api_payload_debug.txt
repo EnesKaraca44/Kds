@@ -1,0 +1,25 @@
+{
+  "okundu": "okunmadi",
+  "degisti": "",
+  "successful": true,
+  "messageCode": null,
+  "messageText": null,
+  "total": null,
+  "data": {
+    "logId": null,
+    "psfId": null,
+    "versionId": null,
+    "okundu": "okunmadi",
+    "degisti": "",
+    "merkeziVeriId": null,
+    "raporSqlId": null,
+    "iliskiliRaporSurumId": null,
+    "raporSqlKod": null,
+    "raporAnaSql": null,
+    "raporProjeSql": null,
+    "merkeziDbMi": false
+  },
+  "messageText1": null,
+  "sessionState": null,
+  "lockState": null
+}

@@ -527,7 +527,7 @@
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Kayıt:">Toplam Kayıt:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_personel or 0 }}</strong></td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Personel:">Toplam Personel:</span> &nbsp; <strong style="color:#2563eb;">{{ calisma_durumu | sum(attribute='toplam') }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -552,7 +552,7 @@
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Unvan:">Toplam Unvan:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_unvan or 0 }}</strong></td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Personel:">Toplam Personel:</span> &nbsp; <strong style="color:#2563eb;">{{ kadro_unvan | sum(attribute='toplam') }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -577,7 +577,7 @@
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Tür:">Toplam Tür:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_tur or 0 }}</strong></td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Personel:">Toplam Personel:</span> &nbsp; <strong style="color:#2563eb;">{{ personel_tur | sum(attribute='toplam') }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -602,7 +602,7 @@
                     {% endfor %}
                 </tbody>
                 <tfoot>
-                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Sınıf:">Toplam Sınıf:</span> &nbsp; <strong style="color:#2563eb;">{{ toplam_sinif or 0 }}</strong></td></tr>
+                    <tr><td colspan="2" style="font-size:0.8rem; text-align: left;"><span data-t="Toplam Personel:">Toplam Personel:</span> &nbsp; <strong style="color:#2563eb;">{{ hizmet_sinifi | sum(attribute='toplam') }}</strong></td></tr>
                 </tfoot>
             </table>
         </div>
@@ -788,6 +788,14 @@
     const clearFilterBtn = document.getElementById('clearFilterBtn');
     const detailBadge = document.getElementById('detailBadge');
 
+    function normalizeFilterText(v) {
+        return (v || '')
+            .toString()
+            .trim()
+            .toLocaleLowerCase('tr')
+            .replace(/\s+/g, ' ');
+    }
+
     function applyFilter() {
         let visibleCount = 0;
         let rowIndex = 1;
@@ -796,8 +804,9 @@
         detailRows.forEach(row => {
             let matchCategory = true;
             if (filterCat && filterVal) {
-                const rowVal = row.getAttribute('data-' + filterCat);
-                if (rowVal !== filterVal) matchCategory = false;
+                const primaryVal = row.getAttribute('data-' + filterCat);
+                const hasMatch = normalizeFilterText(primaryVal) === normalizeFilterText(filterVal);
+                if (!hasMatch) matchCategory = false;
             }
 
             let matchSearch = true;

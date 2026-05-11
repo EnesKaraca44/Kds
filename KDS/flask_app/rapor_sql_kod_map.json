@@ -1,0 +1,87 @@
+{
+  "personel.get_personel_calisma_durumu_ozet": [
+    "PersonelTurCount",
+    "PERSONEL_IZINLI",
+    "Personel_Izınlı",
+    "PERSONEL_TOPLAM",
+    "PERSONEL_GENEL"
+  ],
+  "personel.get_personel_calisma_durumu_detay": [
+    "PERSONEL_GENEL_DETAY",
+    "PERSONEL_IZIN_DETAY",
+    "PERSONEL_IZINLI_DETAY",
+    "PERSONEL_IZINLI",
+    "Personel_Izınlı"
+  ],
+  "personel.get_personel_tur_ozet": [
+    "PersonelTurCount"
+  ],
+  "personel.get_personel_kadro_unvan_ozet": [
+    "PersonelTurCount"
+  ],
+  "personel.get_personel_hizmet_sinif_ozet": [
+    "PersonelTurCount"
+  ],
+  "personel.get_personel_kadro_unvan_detay": [
+    "PERSONEL_GENEL_DETAY"
+  ],
+  "personel.get_personel_tur_detay": [
+    "PersonelTur",
+    "PERSONEL_GENEL_DETAY"
+  ],
+  "personel.get_personel_hizmet_sinif_detay": [
+    "PERSONEL_GENEL_DETAY"
+  ],
+  "personel.get_personel_tam_liste": [
+    "PersonelBilgi",
+    "PERSONEL_GENEL"
+  ],
+  "hekim_puan.hekim_puan_verisi_yukle": [
+    "HEKIM_PUAN_TAB1"
+  ],
+  "poliklinik.poliklinik_performans_verisi_yukle": [
+    "HEKIM_POLIKLINIK_HASTA_SAYFASI"
+  ],
+  "tedavi_grubu.tedavi_grubu_verisi_yukle": [
+    "TEDAVI_GRUPLARI_ANALIZ_SAYFASI"
+  ],
+  "malzeme.malzeme_tuketim_verisi_yukle": [
+    "MALZEME_TUKETIM_VERISI"
+  ],
+  "malzeme.depo_birim_liste_yukle": [
+    "DEPO_BIRIM_LISTE_YUKLE"
+  ],
+  "malzeme.depo_mevcut_verisi_yukle": [
+    "DEPO_MEVCUT_VERISI_YUKLE"
+  ],
+  "yabanci_hasta.yabanci_hasta_verisi_yukle": [
+    "YABANCI_HASTA_VERISI_YUKLE"
+  ],
+  "randevu.randevu_verisi_yukle": [
+    "HEKIM_RANDEVU_SADAKAT_ANALIZI"
+  ],
+  "fatura.fatura_gelir_verisi_yukle": [
+    "KURUM_GELIR_FATURA_ANALIZI"
+  ],
+  "vezne.kasa_ozet_verisi_yukle": [
+    "KASA_OZET_ANALIZ"
+  ],
+  "vezne.kasa_hareket_turu_verisi_yukle": [
+    "KASA_HAREKET_TURU_ANALIZ"
+  ],
+  "vezne.kasa_aylik_verisi_yukle": [
+    "KASA_AYLIK_ANALIZ"
+  ],
+  "protez_takibi.protez_suresi_gecen_hasta_birim_yukle": [
+    "PROTEZ_ANALIZ_1"
+  ],
+  "protez_takibi.asama_girilmemis_hasta_listesi_yukle": [
+    "PROTEZ_ANALIZ_2"
+  ],
+  "rontgen.rontgen_verisi_hekim": [
+    "RONTGEN_VERISI_HEKIM"
+  ],
+  "rontgen.rontgen_brans_verisi": [
+    "RONTGEN_BRANS_VERISI"
+  ]
+}

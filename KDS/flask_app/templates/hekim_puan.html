@@ -643,6 +643,7 @@ document.getElementById('hekimSelect')?.addEventListener('change', function() {
 });
 
 $(document).ready(function() {
+    {% if not no_data %}
     const currentLang = localStorage.getItem('kds-language') || 'tr';
     const dtLangUrl = currentLang === 'en' ? '//cdn.datatables.net/plug-ins/1.13.6/i18n/en-GB.json' : '//cdn.datatables.net/plug-ins/1.13.6/i18n/tr.json';
 
@@ -660,6 +661,7 @@ $(document).ready(function() {
         pageLength: 25,
         order: [[3, 'desc']]
     });
+    {% endif %}
 });
 </script>
 {% endblock %}
