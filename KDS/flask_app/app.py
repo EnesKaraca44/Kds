@@ -41,6 +41,7 @@ def create_app():
         'DİĞER': [
             {'url': '/tibbi-atik', 'icon': '⚗️', 'label': 'Tıbbi Atık Analizi'},
             {'url': '/protez', 'icon': '🦷', 'label': 'Protez Analizi'},
+            {'url': '/protez-takibi', 'icon': '🧾', 'label': 'Protez Takibi'},
             {'url': '/rontgen', 'icon': '🩻', 'label': 'Röntgen Analizi'},
         ]
     }
@@ -87,6 +88,28 @@ def create_app():
                     if matched_items:
                         filtered_nav[group_name] = matched_items
 
+                # Gecis donemi: "Protez Takibi" menusu DB'de henuz tanimli degilse,
+                # "Protez Analizi" yetkisi olan kullanicilara yeni sayfayi da goster.
+                if 'Protez Analizi' in menu_dict:
+                    protez_takibi_item = None
+                    for group_name, items in default_nav_items.items():
+                        for item in items:
+                            if item.get('label') == 'Protez Takibi':
+                                protez_takibi_item = (group_name, item)
+                                break
+                        if protez_takibi_item:
+                            break
+
+                    if protez_takibi_item:
+                        target_group, target_item = protez_takibi_item
+                        filtered_nav.setdefault(target_group, [])
+                        already_exists = any(
+                            i.get('label') == 'Protez Takibi'
+                            for i in filtered_nav[target_group]
+                        )
+                        if not already_exists:
+                            filtered_nav[target_group].append(dict(target_item))
+
                 if filtered_nav:
                     nav_items = filtered_nav
 
@@ -109,6 +132,7 @@ def create_app():
     from routes.sevk import sevk_bp
     from routes.tibbi_atik import tibbi_atik_bp
     from routes.protez import protez_bp
+    from routes.protez_takibi import protez_takibi_bp
     from routes.rontgen import rontgen_bp
     from routes.personel_sorgulama import personel_sorgulama_bp
 
@@ -125,6 +149,7 @@ def create_app():
     app.register_blueprint(sevk_bp)
     app.register_blueprint(tibbi_atik_bp)
     app.register_blueprint(protez_bp)
+    app.register_blueprint(protez_takibi_bp)
     app.register_blueprint(rontgen_bp)
     app.register_blueprint(personel_sorgulama_bp)
 

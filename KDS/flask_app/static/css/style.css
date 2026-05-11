@@ -826,6 +826,7 @@ body.sidebar-collapsed .main-content {
     background: rgba(255, 255, 255, 0.85);
     backdrop-filter: blur(4px);
     z-index: 9999;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
 }
@@ -841,6 +842,18 @@ body.sidebar-collapsed .main-content {
     border-top-color: var(--accent-primary);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
+}
+
+.logo-spinner {
+    width: 100px;
+    height: auto;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes logo-pulse {
+    0% { transform: scale(0.95); opacity: 0.8; }
+    50% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(0.95); opacity: 0.8; }
 }
 
 @keyframes spin {

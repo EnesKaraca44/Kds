@@ -1,7 +1,9 @@
 import pandas as pd
 from .baglanti import baglanti_olustur
+from .cache_helper import ttl_cache
 
 
+@ttl_cache(maxsize=32, ttl=600)
 def protez_verisi_yukle(start_date, end_date):
     conn = baglanti_olustur()
     if not conn:

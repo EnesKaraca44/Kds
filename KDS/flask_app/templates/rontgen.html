@@ -123,6 +123,27 @@
         background: rgba(0, 0, 0, 0.02);
     }
 
+    .rapor-raporlu-total {
+        font-weight: 800;
+        text-align: center;
+        color: #166534;
+        background: #dcfce7;
+        min-width: 90px;
+    }
+
+    .rapor-yazilmamis {
+        font-weight: 800;
+        text-align: center;
+        color: #991b1b;
+        background: #fee2e2;
+        min-width: 100px;
+    }
+
+    .rapor-yazilmamis.zero {
+        color: #166534;
+        background: #dcfce7;
+    }
+
     .ratio-bar-track {
         width: 120px;
         height: 12px;
@@ -239,9 +260,10 @@
 
 <div class="tabs rontgen-tabs" data-target="#rontgenTabs">
     <button class="tab-btn active" data-t="👨‍⚕️ Hekim Analizi">👨‍⚕️ Hekim Analizi</button>
-    <button class="tab-btn" data-t="🏥 Branş Analizi">🏥 Branş Analizi</button>
+    <button class="tab-btn" data-t="📋 Rapor Analizi">📋 Rapor Analizi</button>
     <button class="tab-btn" data-t="🔥 Yoğunluk Haritası">🔥 Yoğunluk Haritası</button>
     <button class="tab-btn" data-t="📊 Verimlilik & Anomali">📊 Verimlilik & Anomali</button>
+    <button class="tab-btn" data-t="🏥 Branş Analizi">🏥 Branş Analizi</button>
 </div>
 
 <div id="rontgenTabs">
@@ -278,21 +300,67 @@
         </div>
     </div>
 
-    <!-- Branş Analizi -->
+    <!-- Rapor Analizi -->
     <div class="tab-content">
-        <div class="chart-row">
-            <div class="chart-container">
-                <div class="chart-title" data-t="Branş Bazlı Dağılım">Branş Bazlı Dağılım</div>
-                {{ charts.branch_pie | safe }}
+        <div class="chart-container">
+            <div class="chart-title" data-t="Hekim Bazlı Rapor Yazılan Film Analizi">Hekim Bazlı Rapor Yazılan Film Analizi</div>
+            {% if rapor_rows %}
+            <div class="table-wrapper">
+                <table class="data-table table-compact heatmap-table">
+                    <thead>
+                        <tr>
+                            <th rowspan="2" data-t="Hekim">Hekim</th>
+                            {% for col in rapor_columns %}
+                            <th colspan="2" style="text-align:center; border-left: 3px solid rgba(100,116,139,0.4);" data-t="{{ col }}">{{ col }}</th>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            {% for col in rapor_columns %}
+                            <th style="background:#dcfce7;color:#166534;text-align:center;font-size:0.72rem; border-left: 3px solid rgba(100,116,139,0.4);" data-t="Raporlu">Raporlu</th>
+                            <th style="background:#fee2e2;color:#991b1b;text-align:center;font-size:0.72rem;" data-t="Raporsuz">Raporsuz</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rapor_rows %}
+                        <tr>
+                            <td style="font-weight: 600;">{{ row.hekim }}</td>
+                            {% for cell in row.cells %}
+                            {# Raporlu hücresi - yeşil tonları #}
+                            {% if cell.raporlu > 0 %}
+                                {% set hue = 140 - (cell.int_raporlu * 0.4) %}
+                                {% set lightness = 98 - (cell.int_raporlu * 0.45) %}
+                                {% set text_color = '#000000' if lightness > 55 else '#ffffff' %}
+                                <td class="heatmap-cell"
+                                    style="background: hsl({{ hue }}, 80%, {{ lightness }}%); color: {{ text_color }}; border-left: 3px solid rgba(100,116,139,0.4);"
+                                    title="{{ cell.label }} Raporlu: {{ cell.raporlu }}">
+                                    {{ cell.raporlu|turkish_number(0) }}
+                                </td>
+                            {% else %}
+                                <td class="heatmap-cell" style="background: rgba(0,0,0,0.02); color: rgba(0,0,0,0.15); font-weight: 400; border-left: 3px solid rgba(100,116,139,0.4);">0</td>
+                            {% endif %}
+                            {# Raporsuz hücresi - kırmızı tonları #}
+                            {% if cell.raporsuz > 0 %}
+                                {% set hue_r = 10 - (cell.int_raporsuz * 0.08) %}
+                                {% set lightness_r = 96 - (cell.int_raporsuz * 0.4) %}
+                                {% set text_color_r = '#000000' if lightness_r > 55 else '#ffffff' %}
+                                <td class="heatmap-cell"
+                                    style="background: hsl({{ hue_r }}, 85%, {{ lightness_r }}%); color: {{ text_color_r }};"
+                                    title="{{ cell.label }} Raporsuz: {{ cell.raporsuz }}">
+                                    {{ cell.raporsuz|turkish_number(0) }}
+                                </td>
+                            {% else %}
+                                <td class="heatmap-cell" style="background: rgba(34,197,94,0.08); color: #166534; font-weight: 600;">0</td>
+                            {% endif %}
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
-            <div class="chart-container">
-                <div class="chart-title" data-t="Tetkik Türü Dağılımı">Tetkik Türü Dağılımı</div>
-                {{ charts.type_pie | safe }}
-            </div>
-        </div>
-        <div class="chart-container" style="margin-top:16px;">
-            <div class="chart-title" data-t="Branş Bazlı Toplam Tetkik Hacmi">Branş Bazlı Toplam Tetkik Hacmi</div>
-            {{ charts.branch_bar | safe }}
+            {% else %}
+            <div class="alert alert-warning">Rapor analizi için veri bulunamadı.</div>
+            {% endif %}
         </div>
     </div>
 
@@ -394,6 +462,24 @@
             {% else %}
             <div class="alert alert-warning">Tercih dengesi tablosu için veri bulunamadı.</div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Branş Analizi -->
+    <div class="tab-content">
+        <div class="chart-row">
+            <div class="chart-container">
+                <div class="chart-title" data-t="Branş Bazlı Dağılım">Branş Bazlı Dağılım</div>
+                {{ charts.fig_brans_pie | safe }}
+            </div>
+            <div class="chart-container">
+                <div class="chart-title" data-t="Tetkik Türü Dağılımı">Tetkik Türü Dağılımı</div>
+                {{ charts.fig_tetkik_pie | safe }}
+            </div>
+        </div>
+        <div class="chart-container" style="margin-top:16px;">
+            <div class="chart-title" data-t="Branş Bazlı Toplam Tetkik Hacmi">Branş Bazlı Toplam Tetkik Hacmi</div>
+            {{ charts.fig_brans_bar | safe }}
         </div>
     </div>
 </div>

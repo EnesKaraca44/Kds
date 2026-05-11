@@ -5,6 +5,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from database.baglanti import baglanti_olustur, baglanti_olustur_menu_db
 from crypto_system_functions import encrypt_string_v2, string_to_sha256
+from .cache_helper import ttl_cache
 
 def find_username_from_tc(tc: str) -> str:
     """TC Kimlik no ile kullanıcı adını bulur."""
@@ -21,21 +22,20 @@ def find_username_from_tc(tc: str) -> str:
             
         cursor = conn.cursor()
         
-        sql = """
-        SELECT TOP 1 k.KULLANICI_AD 
-        FROM KULLANICI as k WITH(NOLOCK) 
-        INNER JOIN KIMLIK as km WITH(NOLOCK) ON km.KIMLIK_ID = k.KIMLIK_ID 
-        WHERE 1=1 
-        AND (ISNULL(k.PSF_ID, 0) = 0) 
-        AND km.KIMLIK_TC_NO = ?
-        """
-        
         try:
             tc_param = int(tc.strip())
         except ValueError:
             print(f"HATA: TC Kimlik No sayısal değil! Gelen değer: {tc}")
             return ""
             
+        sql = """
+        SELECT TOP 1 k.KULLANICI_AD
+        FROM KULLANICI as k WITH(NOLOCK)
+        INNER JOIN KIMLIK as km WITH(NOLOCK) ON km.KIMLIK_ID = k.KIMLIK_ID
+        WHERE 1=1
+            AND (ISNULL(k.PSF_ID, 0) = 0)
+            AND km.KIMLIK_TC_NO = ?
+        """
         cursor.execute(sql, (tc_param,))
         row = cursor.fetchone()
         
@@ -191,6 +191,7 @@ def get_user_menu_links(kullanici_id: int, kimlik_id: int) -> set[int]:
             conn.close()
 
 
+@ttl_cache(maxsize=100, ttl=3600)
 def get_user_menu_labels(kullanici_id: int) -> dict[str, str | None]:
     """
     KULLANICI_KDS + KULLANICI_KDS_LINK join ile
