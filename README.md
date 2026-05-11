@@ -1,93 +1,93 @@
-# Kds Project
+# Karar Destek Sistemi (KDS)
 
+Hastaneler ve sağlık kuruluşları için geliştirilmiş, kapsamlı veri analizi ve raporlama sunan web tabanlı bir Karar Destek Sistemi.
 
+## 🚀 Proje Hakkında
 
-## Getting started
+Bu uygulama, sağlık yöneticilerinin ve hekimlerin operasyonel verileri anlamlandırmasına, performans takibi yapmasına ve stratejik kararlar almasına yardımcı olmak amacıyla tasarlanmıştır. Flask tabanlı modern bir mimari üzerine inşa edilmiştir ve hastane bilgi yönetim sistemleri (HBYS) ile entegre çalışacak şekilde yapılandırılmıştır.
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## 🛠️ Temel Modüller
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+Uygulama aşağıdaki ana analiz ve raporlama modüllerini içermektedir:
 
-## Add your files
+- **🏠 Ana Sayfa (Dashboard):** Kurumun genel durumunu gösteren özet grafikler ve göstergeler.
+- **👤 Personel Sorgulama:** Personel bazlı detaylı veri ve performans analizi.
+- **🏵️ Hekim Hizmet Puan Analizi:** Hekimlerin sunduğu hizmetlerin puan bazlı takibi.
+- **👥 Poliklinik & Hasta Analizi:** Poliklinik yoğunluğu ve hasta trafiği raporları.
+- **🩺 Tedavi Grupları Analizi:** Yapılan tedavilerin gruplandırılmış maliyet ve sayı analizi.
+- **📦 Kurum Malzeme Tüketim:** Stok ve malzeme kullanım verimliliği takibi.
+- **🌐 Yabancı Hasta Analizi:** Uluslararası hasta trafiği ve gelir raporlaması.
+- **📅 Randevu & Sadakat Analizi:** Randevu doluluk oranları ve hasta devamlılık verileri.
+- **💰 Kurum Gelir Analizi:** Finansal durum ve gelir kaynaklarının detaylı dökümü.
+- **💉 Sterilizasyon Maliyet Analizi:** Sterilizasyon birimi operasyonel maliyet takibi.
+- **📤 Hekim Sevk Sayıları:** Kurum içi ve dışı sevk trafiği.
+- **⚗️ Tıbbi Atık Analizi:** Atık yönetimi ve çevresel veri takibi.
+- **🦷 Protez Takibi & Analizi:** Diş protez süreçlerinin uçtan uca yönetimi ve analizi.
+- **🩻 Röntgen Analizi:** Görüntüleme birimi işlem hacmi ve raporlaması.
 
-* [Create](https://docs.gitlab.com/user/project/repository/web_editor/#create-a-file) or [upload](https://docs.gitlab.com/user/project/repository/web_editor/#upload-a-file) files
-* [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## 💻 Teknoloji Yığını
 
+- **Backend:** Python / Flask
+- **Veritabanı Erişimi:** pyodbc (MS SQL Server entegrasyonu)
+- **Frontend:** HTML5, CSS3, JavaScript
+- **Veri İşleme:** Pandas
+- **Görselleştirme:** Plotly / Chart.js
+- **Güvenlik:** AES-256 (Şifreli veri saklama), SHA-256 (Şifreleme)
+
+## ⚙️ Kurulum
+
+Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleyebilirsiniz:
+
+1.  **Depoyu Klonlayın:**
+    ```bash
+    git clone https://github.com/EnesKaraca44/Kds.git
+    cd Kds
+    ```
+
+2.  **Sanal Ortam Oluşturun ve Aktifleştirin:**
+    ```bash
+    python -m venv venv
+    # Windows için:
+    venv\Scripts\activate
+    # macOS/Linux için:
+    source venv/bin/activate
+    ```
+
+3.  **Bağımlılıkları Yükleyin:**
+    ```bash
+    pip install flask pyodbc pandas plotly pycryptodome
+    ```
+
+4.  **Veritabanı Ayarları:**
+    `KDS/flask_app/ayarlar.py` dosyasındaki veritabanı bağlantı bilgilerini kendi sisteminize göre güncelleyin.
+
+5.  **Uygulamayı Başlatın:**
+    ```bash
+    python KDS/flask_app/app.py
+    ```
+
+## 📂 Proje Yapısı
+
+```text
+KDS/
+├── flask_app/
+│   ├── database/       # SQL sorguları ve veri erişim katmanı (DAO)
+│   ├── routes/         # Flask Blueprint'leri ve sayfa yönlendirmeleri
+│   ├── static/         # CSS, JavaScript ve Görsel varlıklar
+│   ├── templates/      # Jinja2 HTML şablonları
+│   ├── app.py          # Uygulama giriş noktası ve konfigürasyon
+│   ├── ayarlar.py      # Veritabanı ve uygulama ayarları
+│   └── utils.py        # Yardımcı fonksiyonlar
+└── tools/              # Yardımcı araçlar ve ek modüller
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/cihanbaristurgut_ms/kds_project.git
-git branch -M main
-git push -uf origin main
-```
 
-## Integrate with your tools
+## 🤝 Katkıda Bulunma
 
-* [Set up project integrations](https://gitlab.com/cihanbaristurgut_ms/kds_project/-/settings/integrations)
+1. Bu depoyu çatallayın (Fork).
+2. Yeni bir özellik dalı (Branch) oluşturun (`git checkout -b feature/yeniozellik`).
+3. Değişikliklerinizi kaydedin (Commit) (`git commit -m 'Yeni özellik eklendi'`).
+4. Dalınıza gönderin (Push) (`git push origin feature/yeniozellik`).
+5. Bir Çekme İsteği (Pull Request) oluşturun.
 
-## Collaborate with your team
-
-* [Invite team members and collaborators](https://docs.gitlab.com/user/project/members/)
-* [Create a new merge request](https://docs.gitlab.com/user/project/merge_requests/creating_merge_requests/)
-* [Automatically close issues from merge requests](https://docs.gitlab.com/user/project/issues/managing_issues/#closing-issues-automatically)
-* [Enable merge request approvals](https://docs.gitlab.com/user/project/merge_requests/approvals/)
-* [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
-
-## Test and Deploy
-
-Use the built-in continuous integration in GitLab.
-
-* [Get started with GitLab CI/CD](https://docs.gitlab.com/ci/quick_start/)
-* [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/user/application_security/sast/)
-* [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/topics/autodevops/requirements/)
-* [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/user/clusters/agent/)
-* [Set up protected environments](https://docs.gitlab.com/ci/environments/protected_environments/)
-
-***
-
-# Editing this README
-
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
-
-## Suggestions for a good README
-
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
-
-## Name
-Choose a self-explaining name for your project.
-
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
-
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
-
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+---
+**Enes Karaca** tarafından geliştirilmiştir.
