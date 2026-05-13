@@ -1,8 +1,30 @@
 {
   "personel.get_personel_calisma_durumu_ozet": [
-    "PERSONEL_CALISMA_OZET",
-    "PERSONEL.CALISMA_DURUMU_OZET",
-    "personel.get_personel_calisma_durumu_ozet"
+    "PERSONEL_CALISMA_DURUM"
+  ],
+  "personel.get_personel_calisma_durumu_detay": [
+    "CALISMA_TUR_FILTER"
+  ],
+  "personel.get_personel_kadro_unvan_ozet": [
+    "KadroUnvanCount"
+  ],
+  "personel.get_personel_kadro_unvan_detay": [
+    "KadroUnvan"
+  ],
+  "personel.get_personel_tur_ozet": [
+    "PersonelTurCount"
+  ],
+  "personel.get_personel_hizmet_sinif_ozet": [
+    "HizmetSinifiCount"
+  ],
+  "personel.get_personel_tur_detay": [
+    "PersonelTur"
+  ],
+  "personel.get_personel_hizmet_sinif_detay": [
+    "HizmetSinifi"
+  ],
+  "personel.get_personel_tam_liste": [
+    "PERSONEL_TAM_LISTE"
   ],
   "hekim_puan.hekim_puan_verisi_yukle": [
     "HEKIM_PUAN_TAB1"
@@ -51,5 +73,11 @@
   ],
   "rontgen.rontgen_brans_verisi": [
     "RONTGEN_BRANS_VERISI"
+  ],
+  "dinamik_gelir.son_fatura_metrikleri_getir": [
+    "SON_FATURA_METRIK"
+  ],
+  "dinamik_gelir.dinamik_dashboard_metrikleri_getir": [
+    "FINANSAL_PERFORMANS_OZETI"
   ]
 }

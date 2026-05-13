@@ -88,13 +88,7 @@ def personel_sorgulama():
     df_hizmet_ozet = get_personel_hizmet_sinif_ozet(sd_str, ed_str)
     hizmet_sinifi = df_hizmet_ozet.rename(columns={'data1': 'tur', 'data2': 'toplam'}).to_dict(orient='records')
 
-    # 5. Master Personel Listesi
-    # API'den gelen kolon isimleri sorgu koduna gore degisebiliyor.
-    # PersonelBilgi icin:
-    # - ad: data2
-    # - gorev kurumu: data8
-    # - durum: data25
-    # - gorev unvani: data6
+    # 5. Master Personel Listesi (PERSONEL_TAM_LISTE: data1, data3, data4, calisma_durumu, ...)
     df_personel_listesi = get_personel_tam_liste(sd_str, ed_str)
 
     def _pick_series(df, candidates, default_value=''):
@@ -115,9 +109,9 @@ def personel_sorgulama():
 
     if not df_personel_listesi.empty:
         df_personel_listesi = df_personel_listesi.copy()
-        df_personel_listesi['ad'] = _pick_series(df_personel_listesi, ['ad', 'data2', 'data1'])
-        df_personel_listesi['kurum'] = _pick_series(df_personel_listesi, ['kurum', 'data8', 'data3'])
-        df_personel_listesi['unvan'] = _pick_series(df_personel_listesi, ['unvan', 'data6', 'data4'])
+        df_personel_listesi['ad'] = _pick_series(df_personel_listesi, ['ad', 'data1', 'data2'])
+        df_personel_listesi['kurum'] = _pick_series(df_personel_listesi, ['kurum', 'data3', 'data8'])
+        df_personel_listesi['unvan'] = _pick_series(df_personel_listesi, ['unvan', 'data4', 'data6'])
         raw_status = _pick_series(df_personel_listesi, ['calisma_durumu', 'data25'])
         bitis_tarih = _pick_series(df_personel_listesi, ['data21'])
         df_personel_listesi['calisma_durumu'] = [

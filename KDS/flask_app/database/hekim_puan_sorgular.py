@@ -4,6 +4,22 @@ from .cache_helper import ttl_cache
 from .sql_api_client import get_remote_sql
 
 
+def _fix_known_group_by_mismatch(sql: str) -> str:
+    """
+    HEKIM_PUAN_TAB1 bazı ortamlarda şu uyumsuzlukla geliyor:
+    - SELECT: shh.PERFORMANS_TRH as islemTrh
+    - GROUP BY: shh.ISLEM_TRH
+    Bu durumda SQL Server 8120 hatası üretir.
+    """
+    if not isinstance(sql, str) or not sql:
+        return sql
+
+    if "shh.PERFORMANS_TRH as islemTrh" in sql and "shh.ISLEM_TRH" in sql:
+        return sql.replace("shh.ISLEM_TRH", "shh.PERFORMANS_TRH")
+
+    return sql
+
+
 def _read_sql_with_optional_params(conn, sql, start_date, end_date):
     """
     API'den gelen SQL {start_date}/{end_date} veya @...@ ile dolu olabilir;
@@ -33,6 +49,8 @@ def hekim_puan_verisi_yukle(start_date, end_date):
         )
         if not sql:
             return None
+
+        sql = _fix_known_group_by_mismatch(sql)
         
         # Daha güvenli bir değişim için Regex (Büyük/Küçük harf duyarsız) kullanıyoruz
         import re
