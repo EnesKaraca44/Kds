@@ -55,7 +55,7 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleye
 
 3.  **Bağımlılıkları Yükleyin:**
     ```bash
-    pip install flask pyodbc pandas plotly pycryptodome
+    pip install flask pyodbc pandas plotly pycryptodome waitress
     ```
 
 4.  **Veritabanı Ayarları:**
@@ -64,6 +64,26 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleye
 5.  **Uygulamayı Başlatın:**
     ```bash
     python KDS/flask_app/app.py
+    ```
+
+## Windows Servis Olarak Çalıştırma
+
+Bu proje Windows üzerinde arka planda servis olarak çalıştırılabilir.
+
+1.  Yönetici yetkili PowerShell açın.
+2.  Proje kökünde sanal ortamın kurulu olduğundan emin olun (`venv`).
+3.  Servisi kurup başlatın:
+    ```powershell
+    powershell -ExecutionPolicy Bypass -File KDS/flask_app/install_windows_service.ps1
+    ```
+4.  Durum kontrolü:
+    ```powershell
+    Get-Service -Name KDSFlaskService
+    ```
+5.  Servisi durdurma / başlatma:
+    ```powershell
+    Stop-Service -Name KDSFlaskService
+    Start-Service -Name KDSFlaskService
     ```
 
 ## 📂 Proje Yapısı

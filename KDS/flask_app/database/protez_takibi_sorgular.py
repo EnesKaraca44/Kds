@@ -4,6 +4,31 @@ from .cache_helper import ttl_cache
 from .sql_api_client import get_remote_sql
 
 
+def _normalize_broken_null_literals(sql: str) -> str:
+    """
+    Bazi Rapor API SQL'lerinde bos parametreler 'NULL' (string) olarak geliyor.
+    Bu durum ozellikle CAST('NULL' AS DATE) gibi ifadelerde sorguyu bozuyor.
+    """
+    if not isinstance(sql, str) or not sql:
+        return sql
+
+    normalized = sql.replace("'NULL'", "NULL")
+    normalized = normalized.replace("'null'", "NULL")
+    return normalized
+
+
+def _read_sql_with_optional_params(conn, sql, qmark_value=""):
+    """
+    API'den gelen sorgularda bazen ODBC '?' parametreleri kalabiliyor.
+    - '?' yoksa direkt calistir.
+    - Varsa, tum '?' icin ayni degeri gonder.
+    """
+    qmarks = sql.count("?")
+    if qmarks == 0:
+        return pd.read_sql(sql, conn)
+    return pd.read_sql(sql, conn, params=tuple([qmark_value] * qmarks))
+
+
 @ttl_cache(maxsize=32, ttl=600)
 def asama_girilmemis_hasta_listesi_yukle(hizmet_sut_kodu=None, islem_tarihi=None, birim_id=None):
     """
@@ -27,7 +52,8 @@ def asama_girilmemis_hasta_listesi_yukle(hizmet_sut_kodu=None, islem_tarihi=None
         )
         if not sql:
             return pd.DataFrame()
-        return pd.read_sql(sql, conn)
+        sql = _normalize_broken_null_literals(sql)
+        return _read_sql_with_optional_params(conn, sql, hizmet_sut_kodu or "")
     except Exception as e:
         print(f"❌ Asama girilmemis hasta listesi hatasi: {e}")
         return pd.DataFrame()
@@ -52,7 +78,8 @@ def protez_suresi_gecen_hasta_birim_yukle(birim_id_csv=None):
         )
         if not sql:
             return pd.DataFrame()
-        return pd.read_sql(sql, conn)
+        sql = _normalize_broken_null_literals(sql)
+        return _read_sql_with_optional_params(conn, sql, "")
     except Exception as e:
         print(f"❌ Protez suresi gecen hasta/birim hatasi: {e}")
         return pd.DataFrame()
