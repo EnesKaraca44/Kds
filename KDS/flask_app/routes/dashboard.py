@@ -11,6 +11,8 @@ from database.baglanti import baglanti_olustur
 
 dashboard_bp = Blueprint('dashboard', __name__)
 
+PAGE_SQL_KODLARI = ["dinamik_gelir.dinamik_dashboard_metrikleri_getir"]
+
 
 def get_date_range():
     """URL parametrelerinden veya varsayılandan tarih aralığını alır."""
@@ -117,4 +119,5 @@ def dashboard():
         db_status=db_status,
         current_time=datetime.datetime.now().strftime("%H:%M:%S"),
         quick_choice=request.args.get('quick', 'bu-ay'),
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

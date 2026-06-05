@@ -3,7 +3,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from database.baglanti import baglanti_olustur, baglanti_olustur_menu_db
+from database.baglanti import baglanti_olustur
 from crypto_system_functions import encrypt_string_v2, string_to_sha256
 from .cache_helper import ttl_cache
 
@@ -81,6 +81,7 @@ def find_user_with_username_and_password(username: str, password_hash: str) -> d
         INNER JOIN KIMLIK as km WITH(NOLOCK) ON km.KIMLIK_ID = k.KIMLIK_ID 
         WHERE 1=1 
             AND (ISNULL(k.PSF_ID,0)=0) 
+            AND (ISNULL(k.KULLANICI_KDS,0)<>0) 
             AND k.KULLANICI_SIFRE = ? 
             AND ( 
                 LTRIM(RTRIM(k.KULLANICI_AD)) = ? 
@@ -156,13 +157,13 @@ def authenticate(username: str, password_raw: str) -> dict | None:
 
 
 def get_user_menu_links(kullanici_id: int, kimlik_id: int) -> set[int]:
-    """Menu DB'den kullanıcıya ait KDS_LINK_ID listesini getirir."""
+    """Ana DB'den kullanıcıya ait KDS_LINK_ID listesini getirir."""
     if not kullanici_id or not kimlik_id:
         return set()
 
     conn = None
     try:
-        conn = baglanti_olustur_menu_db()
+        conn = baglanti_olustur()
         if not conn:
             return set()
 
@@ -203,7 +204,7 @@ def get_user_menu_labels(kullanici_id: int) -> dict[str, str | None]:
 
     conn = None
     try:
-        conn = baglanti_olustur_menu_db()
+        conn = baglanti_olustur()
         if not conn:
             return {}
 

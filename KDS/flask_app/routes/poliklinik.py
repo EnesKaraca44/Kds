@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request
+from flask import Blueprint, render_template, request, jsonify
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
@@ -7,10 +7,106 @@ import sys, os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
-from database.poliklinik_sorgular import poliklinik_performans_verisi_yukle
+from database.poliklinik_sorgular import (
+    poliklinik_performans_verisi_yukle,
+    basvuru_sayilari_yukle,
+    basvuru_satir_aylik_serisi,
+)
 from routes.dashboard import get_date_range
 
 poliklinik_bp = Blueprint('poliklinik', __name__)
+
+PAGE_SQL_KODLARI = [
+    "poliklinik.poliklinik_performans_verisi_yukle",
+    "poliklinik.basvuru_klinik_dagilim",
+    "poliklinik.basvuru_hekim_dagilim",
+    "poliklinik.basvuru_sevk_turu_dagilim",
+    "poliklinik.basvuru_brans_dagilim",
+    "poliklinik.basvuru_serisi",
+]
+
+_PERF_CHART_LIMIT = 15
+
+
+def _tr_int(v):
+    """Tam sayıları binlik ayırıcı ile göster (tr-TR)."""
+    if v is None or pd.isna(v):
+        return "0"
+    return f"{int(round(float(v))):,}".replace(",", ".")
+
+
+def _perf_axis_title(sort_by):
+    if sort_by == "Benzersiz_Hasta_Sayisi":
+        return "Benzersiz hasta sayısı"
+    return "Kayıt sayısı"
+
+
+def _perf_bar_labels(series):
+    return [_tr_int(x) for x in series]
+
+
+def _build_perf_bar_charts(doc_perf, sort_by, limit=_PERF_CHART_LIMIT):
+    """En yüksek / en düşük hekimler — çubuk üzerinde gerçek metrik değeri."""
+    metric = sort_by
+    axis_title = _perf_axis_title(metric)
+    top_df = doc_perf.nlargest(limit, metric).sort_values(metric, ascending=True)
+    top_fig = px.bar(
+        top_df,
+        x=metric,
+        y="DOKTOR_ADI",
+        orientation="h",
+        text=top_df[metric],
+    )
+    top_fig.update_traces(
+        marker_color="#3b82f6",
+        marker_line=dict(color="#1d4ed8", width=1),
+        text=_perf_bar_labels(top_df[metric]),
+        texttemplate="%{text}",
+        textposition="inside",
+        insidetextanchor="end",
+        textfont=dict(color="white", size=12),
+    )
+    top_fig.update_layout(
+        template="plotly_white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showgrid=False, zeroline=False, title=axis_title),
+        yaxis=dict(showgrid=False, zeroline=False, title=""),
+        showlegend=False,
+        margin=dict(l=20, r=20, t=40, b=20),
+    )
+
+    top_names = set(top_df["DOKTOR_ADI"])
+    bot_pool = doc_perf[(doc_perf[metric] > 0) & (~doc_perf["DOKTOR_ADI"].isin(top_names))]
+    if bot_pool.empty:
+        bot_pool = doc_perf[doc_perf[metric] > 0]
+    bot_df = bot_pool.nsmallest(limit, metric).sort_values(metric, ascending=True)
+    bot_fig = px.bar(
+        bot_df,
+        x=metric,
+        y="DOKTOR_ADI",
+        orientation="h",
+        text=bot_df[metric],
+    )
+    bot_fig.update_traces(
+        marker_color="#fca5a5",
+        marker_line=dict(color="#f87171", width=1),
+        text=_perf_bar_labels(bot_df[metric]),
+        texttemplate="%{text}",
+        textposition="inside",
+        insidetextanchor="end",
+        textfont=dict(color="#7f1d1d", size=12),
+    )
+    bot_fig.update_layout(
+        template="plotly_white",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        xaxis=dict(showgrid=False, zeroline=False, title=axis_title),
+        yaxis=dict(showgrid=False, zeroline=False, title=""),
+        showlegend=False,
+        margin=dict(l=20, r=20, t=40, b=20),
+    )
+    return top_fig, bot_fig
 
 
 def _extract_hour(value):
@@ -31,6 +127,50 @@ def _extract_hour(value):
     return None
 
 
+_BASVURU_CATEGORY_TITLES = {
+    "ozet_klinik": "BAŞVURU SAYILARI",
+    "brans": "BRANŞLARA GÖRE DAĞILIM",
+    "sevk_tur": "SEVK TÜRLERİNE GÖRE DAĞILIM",
+    "hekim": "HEKİMLERE GÖRE BAŞVURU SAYILARI",
+}
+
+
+@poliklinik_bp.route('/poliklinik/basvuru-serisi')
+@login_required
+def basvuru_serisi():
+    """Basvuru tablosu satir tiklamasi: son 6 ay aylik adet serisi."""
+    sd, ed = get_date_range()
+    category = (request.args.get("category") or "").strip()
+    ad = (request.args.get("ad") or "").strip()
+    months = request.args.get("months", type=int) or 1
+    months = max(1, min(months, 6))
+
+    if category not in _BASVURU_CATEGORY_TITLES or not ad:
+        return jsonify({"labels": [], "values": [], "period_total": 0, "months": months})
+
+    try:
+        labels, values = basvuru_satir_aylik_serisi(
+            category,
+            ad,
+            ed.strftime("%Y-%m-%d"),
+            6,
+        )
+        slice_count = min(months, len(values))
+        period_total = sum(int(v or 0) for v in values[-slice_count:]) if slice_count else 0
+        payload = {
+            "labels": [str(x) for x in labels],
+            "values": [int(v or 0) for v in values],
+            "period_total": int(period_total),
+            "months": months,
+            "category_title": _BASVURU_CATEGORY_TITLES.get(category, ""),
+        }
+    except Exception as exc:
+        print(f"Basvuru serisi hatasi: {exc}")
+        payload = {"labels": [], "values": [], "period_total": 0, "months": months}
+
+    return jsonify(payload)
+
+
 @poliklinik_bp.route('/poliklinik')
 @login_required
 def poliklinik():
@@ -38,7 +178,7 @@ def poliklinik():
     df_raw = poliklinik_performans_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
-        return render_template('poliklinik.html', start_date=sd, end_date=ed, no_data=True)
+        return render_template('poliklinik.html', start_date=sd, end_date=ed, no_data=True, page_sql_kodlari=PAGE_SQL_KODLARI)
 
     # Toplam metrikler için ham veriyi kullanıyoruz (BELİRTİLMEMİŞ dahil)
     df = df_raw.copy()
@@ -55,58 +195,17 @@ def poliklinik():
         Benzersiz_Hasta_Sayisi=('HstKod', 'nunique')
     ).reset_index()
 
-    # Sıralama için sorgu parametreleri
-    sort_by = request.args.get('sort', 'Kayit_Sayisi')
+    # Sıralama için sorgu parametreleri (varsayılan: benzersiz hasta)
+    sort_by = request.args.get('sort', 'Benzersiz_Hasta_Sayisi')
     if sort_by not in ['Kayit_Sayisi', 'Benzersiz_Hasta_Sayisi', 'Hekim_Bazli_Hasta_Sayilari']:
-        sort_by = 'Kayit_Sayisi'
+        sort_by = 'Benzersiz_Hasta_Sayisi'
 
     # Tab 1: Performans Sıralaması (Top / Bottom 15)
     hekim_hasta_table = []
     hekim_hasta_toplam = 0
 
     if not doc_perf.empty and sort_by != 'Hekim_Bazli_Hasta_Sayilari':
-        #Veri setindeki en yüksek değere sahip ilk 15 doktoru seçer.
-        top_data = doc_perf.nlargest(15, sort_by).sort_values(sort_by, ascending=True)
-        fig_top = px.bar(
-            top_data,
-            x=sort_by,
-            y='DOKTOR_ADI',
-            orientation='h',
-            color=sort_by,
-            color_continuous_scale='Blues',
-            text_auto='.0f',
-            # title="En Çok Hasta Bakan Hekimler"
-        )
-        fig_top.update_layout(
-            template='plotly_white',
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
-            yaxis=dict(showgrid=False, zeroline=False, title=""),
-            coloraxis_showscale=False,
-            margin=dict(l=20, r=20, t=40, b=20),
-        )
-        #En Düşük 15 Doktor
-        bot_data = doc_perf[doc_perf[sort_by] > 0].nsmallest(15, sort_by).sort_values(sort_by, ascending=False)
-        fig_bot = px.bar(
-            bot_data,
-            x=sort_by,
-            y='DOKTOR_ADI',
-            orientation='h',
-            color=sort_by,
-            color_continuous_scale='Reds',
-            text_auto='.0f',
-            # title="En Düşük Hasta Bakan Hekimler", # Handled by HTML
-        )
-        fig_bot.update_layout(
-            template='plotly_white',
-            paper_bgcolor='rgba(0,0,0,0)',
-            plot_bgcolor='rgba(0,0,0,0)',
-            xaxis=dict(showgrid=False, zeroline=False, showticklabels=True),
-            yaxis=dict(showgrid=False, zeroline=False, title=""),
-            coloraxis_showscale=False,
-            margin=dict(l=20, r=20, t=40, b=20),
-        )
+        fig_top, fig_bot = _build_perf_bar_charts(doc_perf, sort_by)
 
         #Eğer kullanıcı grafik değil de "Ben tüm listeyi tablo olarak görmek istiyorum" dediyse burası çalışır.
     elif sort_by == 'Hekim_Bazli_Hasta_Sayilari':
@@ -399,8 +498,10 @@ def poliklinik():
             top_data_sorted = doc_perf.sort_values(sort_by, ascending=False)
             top_doc_name = top_data_sorted.iloc[0]['DOKTOR_ADI']
             top_doc_val = int(top_data_sorted.iloc[0][sort_by])
-            metric_label = "Kayıt Sayısı" if sort_by == 'Kayit_Sayisi' else "Benzersiz Hasta Sayısı"
+            metric_label = "kayıt" if sort_by == 'Kayit_Sayisi' else "benzersiz hasta"
             insight_text = f"INSIGHT_TOP_PERF|{top_doc_val}|{metric_label}|{top_doc_name}"
+
+    basvuru = basvuru_sayilari_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
 #Tüm hesaplamalar biter ve her şey poliklinik.html isimli tasarım dosyasına gönderilir.
     return render_template('poliklinik.html',
@@ -410,5 +511,7 @@ def poliklinik():
         charts=charts, current_sort=sort_by, insight_text=insight_text,
         hekim_list=hekim_list, selected_hekim=selected_hekim, 
         hekim_toplam_kayit=hekim_toplam_kayit, hekim_brans_sayisi=hekim_brans_sayisi,
-        hekim_hasta_table=hekim_hasta_table, hekim_hasta_toplam=hekim_hasta_toplam
+        hekim_hasta_table=hekim_hasta_table, hekim_hasta_toplam=hekim_hasta_toplam,
+        basvuru=basvuru,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

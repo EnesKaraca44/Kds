@@ -16,6 +16,14 @@ from database.personel_sorgular import (
 
 personel_sorgulama_bp = Blueprint('personel_sorgulama', __name__)
 
+PAGE_SQL_KODLARI = [
+    "personel.get_personel_calisma_durumu_ozet",
+    "personel.get_personel_kadro_unvan_ozet",
+    "personel.get_personel_tur_ozet",
+    "personel.get_personel_hizmet_sinif_ozet",
+    "personel.get_personel_tam_liste",
+]
+
 
 def _bar_chart(data, title, colors=None):
     """Verilen veri listesinden Plotly bar grafiği üretir."""
@@ -172,5 +180,6 @@ def personel_sorgulama():
         chart_kadro=chart_kadro,
         chart_personel_tur=chart_personel_tur,
         chart_hizmet=chart_hizmet,
-        personel_listesi=personel_listesi
+        personel_listesi=personel_listesi,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

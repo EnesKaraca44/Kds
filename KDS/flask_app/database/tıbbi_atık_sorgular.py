@@ -3,7 +3,7 @@ from .baglanti import baglanti_olustur
 from .cache_helper import ttl_cache
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def tibbi_atik_verisi_yukle(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:
@@ -15,7 +15,7 @@ def tibbi_atik_verisi_yukle(start_date_str, end_date_str):
         df = pd.read_sql_query(sql_query, conn)
         return df
     except Exception as e:
-        print(f"❌ Tıbbi atık verisi yüklenirken hata: {e}")
+        print(f"Tibbi atik verisi yuklenirken hata: {e}")
         return pd.DataFrame()
     finally:
         conn.close()

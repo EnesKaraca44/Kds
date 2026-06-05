@@ -142,13 +142,25 @@
             {% block content %}{% endblock %}
         </div>
 
+        {% set _sql_api_satirlari = page_sql_api_satirlari(page_sql_kodlari) %}
+        {% if _sql_api_satirlari %}
+        <aside class="page-sql-hint" role="note" aria-label="Bu sayfada kullanılan rapor SQL kodları">
+            <div class="page-sql-hint__title">Bu sayfa — rapor / SQL kodları</div>
+            <ul class="page-sql-hint__list">
+                {% for line in _sql_api_satirlari %}
+                <li>{{ line }}</li>
+                {% endfor %}
+            </ul>
+        </aside>
+        {% endif %}
+
         <!-- Footer -->
         <footer class="footer" data-t="Kurum Karar Destek Sistemi v2.0 | © 2026 | MetaSoft">
             Kurum Karar Destek Sistemi v2.0 | © 2026 | MetaSoft
         </footer>
     </main>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" charset="UTF-8"></script>
 
     <!-- Make all existing Plotly charts responsive after page load -->
     <script>

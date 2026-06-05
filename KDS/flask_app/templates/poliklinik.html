@@ -42,6 +42,494 @@
   .radio-pill input[type="radio"]:checked:hover + span {
     background: linear-gradient(135deg, #2563EB, #1E40AF);
   }
+
+  /* Başvuru Sayıları panel düzeni */
+  .basvuru-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .basvuru-top-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
+  .basvuru-bottom-row {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .basvuru-panel {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    flex-direction: column;
+    min-height: 280px;
+  }
+
+  .basvuru-panel-header {
+    color: #fff;
+    padding: 10px 14px;
+    font-weight: 700;
+    font-size: 0.82rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    letter-spacing: 0.02em;
+    transition: background 0.25s ease, box-shadow 0.2s ease;
+  }
+
+  /* KPI kartlari ile ayni renkler (style.css metric-card) */
+  .basvuru-panel[data-basvuru-panel="ozet_klinik"] {
+    --bv-accent: #2563eb;
+    --bv-accent-dark: #1e40af;
+    --bv-soft: rgba(37, 99, 235, 0.1);
+    --bv-border: rgba(37, 99, 235, 0.42);
+    --bv-ring: rgba(37, 99, 235, 0.22);
+  }
+  .basvuru-panel[data-basvuru-panel="ozet_klinik"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+  }
+
+  .basvuru-panel[data-basvuru-panel="brans"] {
+    --bv-accent: #8b5cf6;
+    --bv-accent-dark: #5b21b6;
+    --bv-soft: rgba(139, 92, 246, 0.1);
+    --bv-border: rgba(139, 92, 246, 0.45);
+    --bv-ring: rgba(139, 92, 246, 0.24);
+  }
+  .basvuru-panel[data-basvuru-panel="brans"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+  }
+
+  .basvuru-panel[data-basvuru-panel="sevk_tur"] {
+    --bv-accent: #10b981;
+    --bv-accent-dark: #065f46;
+    --bv-soft: rgba(16, 185, 129, 0.1);
+    --bv-border: rgba(16, 185, 129, 0.45);
+    --bv-ring: rgba(16, 185, 129, 0.24);
+  }
+  .basvuru-panel[data-basvuru-panel="sevk_tur"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #10b981, #065f46);
+  }
+
+  .basvuru-panel[data-basvuru-panel="hekim"] {
+    --bv-accent: #ea580c;
+    --bv-accent-dark: #9a3412;
+    --bv-soft: rgba(234, 88, 12, 0.1);
+    --bv-border: rgba(234, 88, 12, 0.48);
+    --bv-ring: rgba(234, 88, 12, 0.26);
+  }
+  .basvuru-panel[data-basvuru-panel="hekim"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #ea580c, #9a3412);
+  }
+
+  .basvuru-panel[data-basvuru-panel] {
+    cursor: pointer;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .basvuru-panel[data-basvuru-panel]:hover {
+    border-color: var(--bv-border);
+  }
+
+  .basvuru-panel[data-basvuru-panel]:focus-visible {
+    outline: 2px solid var(--bv-accent);
+    outline-offset: 2px;
+  }
+
+  .basvuru-panel.is-chart-source {
+    border-color: var(--bv-border);
+    box-shadow: 0 0 0 2px var(--bv-ring);
+  }
+
+  .basvuru-panel.is-chart-source .basvuru-panel-header {
+    box-shadow: inset 0 -3px 0 rgba(255, 255, 255, 0.45);
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table th {
+    background: color-mix(in srgb, var(--bv-soft) 55%, #f1f5f9);
+    border-bottom-color: color-mix(in srgb, var(--bv-accent) 18%, transparent);
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table tbody tr:nth-child(even) {
+    background: var(--bv-soft);
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table tbody tr.basvuru-data-row {
+    cursor: pointer;
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table tbody tr.basvuru-data-row:hover {
+    background: color-mix(in srgb, var(--bv-soft) 70%, rgba(255, 255, 255, 0.5));
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table tbody tr.basvuru-data-row:focus-visible {
+    outline: 2px solid var(--bv-accent);
+    outline-offset: -2px;
+  }
+
+  .basvuru-panel[data-basvuru-panel] .data-table td.basvuru-num,
+  .basvuru-panel[data-basvuru-panel] .data-table th.num-col {
+    color: var(--bv-accent-dark);
+  }
+
+  .basvuru-panel[data-basvuru-panel] tfoot td {
+    border-top-color: color-mix(in srgb, var(--bv-accent) 22%, var(--border-color));
+  }
+
+  /* Grafik paneli — secili tablonun KPI rengi */
+  .basvuru-chart-panel[data-active-theme="ozet_klinik"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+  }
+  .basvuru-chart-panel[data-active-theme="brans"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #8b5cf6, #5b21b6);
+  }
+  .basvuru-chart-panel[data-active-theme="sevk_tur"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #10b981, #065f46);
+  }
+  .basvuru-chart-panel[data-active-theme="hekim"] .basvuru-panel-header {
+    background: linear-gradient(135deg, #ea580c, #9a3412);
+  }
+
+  .basvuru-chart-panel .basvuru-panel-header {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+  }
+
+  .basvuru-header-hint {
+    font-size: 0.68rem;
+    font-weight: 500;
+    opacity: 0.85;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+
+  .basvuru-chart-panel .basvuru-panel-header {
+    cursor: default;
+  }
+
+  .basvuru-panel .table-wrapper {
+    flex: 1;
+    overflow: auto;
+    max-height: 340px;
+  }
+
+  .basvuru-panel .data-table {
+    width: 100%;
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .basvuru-panel .data-table th {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: #475569;
+    padding: 8px 12px;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+  }
+
+  .basvuru-panel .data-table td {
+    padding: 7px 12px;
+    font-size: 0.8rem;
+    border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+  }
+
+  .basvuru-panel .data-table td.basvuru-num,
+  .basvuru-panel .data-table th.num-col {
+    text-align: right;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    width: 72px;
+  }
+
+  .basvuru-panel .data-table td.name-col,
+  .basvuru-panel .data-table th.ad-col {
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .basvuru-panel .data-table th.sira-col,
+  .basvuru-panel .data-table td.sira-col {
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    text-align: left;
+    padding-left: 12px;
+    padding-right: 6px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .basvuru-hekim-table col.col-sira {
+    width: 44px;
+  }
+
+  .basvuru-hekim-table col.col-num {
+    width: 88px;
+  }
+
+  .basvuru-hekim-panel .data-table th.num-col,
+  .basvuru-hekim-panel .data-table td.basvuru-num {
+    width: 88px;
+    min-width: 88px;
+  }
+
+  .basvuru-hekim-table tfoot td.name-col {
+    font-weight: 700;
+    color: #334155;
+  }
+
+  .basvuru-panel tfoot td {
+    background: #f8fafc;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #334155;
+    padding: 8px 12px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .basvuru-chart-panel {
+    overflow: visible;
+  }
+
+  .basvuru-chart-body {
+    flex: 1;
+    padding: 12px 10px 16px;
+    min-height: 380px;
+    overflow: visible;
+  }
+
+  #basvuruDynamicChart {
+    width: 100%;
+    height: 420px;
+    min-height: 420px;
+    max-height: 420px;
+  }
+
+  #basvuruDynamicChart .js-plotly-plot,
+  #basvuruDynamicChart .plotly {
+    overflow: visible !important;
+  }
+
+  .basvuru-hekim-panel .table-wrapper {
+    max-height: 420px;
+  }
+
+  .theme-dark .basvuru-panel[data-basvuru-panel] .data-table th {
+    background: color-mix(in srgb, var(--bv-soft) 45%, #111827);
+    color: #94a3b8;
+  }
+
+  .theme-dark .basvuru-panel tfoot td {
+    background: #0f172a;
+    color: #e2e8f0;
+  }
+
+  .theme-dark .basvuru-panel[data-basvuru-panel] .data-table tbody tr:nth-child(even) {
+    background: color-mix(in srgb, var(--bv-soft) 65%, rgba(255, 255, 255, 0.02));
+  }
+
+  .theme-dark .basvuru-panel[data-basvuru-panel] .data-table td.basvuru-num,
+  .theme-dark .basvuru-panel[data-basvuru-panel] .data-table th.num-col {
+    color: var(--bv-accent);
+  }
+
+  @media (max-width: 1200px) {
+    .basvuru-top-row {
+      grid-template-columns: 1fr;
+    }
+    .basvuru-bottom-row {
+        grid-template-columns: 1fr;
+    }
+  }
+
+  .basvuru-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  .basvuru-modal-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .basvuru-modal {
+    width: min(920px, 100%);
+    max-height: min(92vh, 860px);
+    overflow: auto;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    box-shadow: 0 24px 48px rgba(15, 23, 42, 0.22);
+  }
+
+  .theme-dark .basvuru-modal {
+    background: rgba(13, 27, 62, 0.98);
+    border-color: rgba(45, 74, 138, 0.55);
+  }
+
+  .basvuru-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .basvuru-modal-title {
+    font-size: 1rem;
+    font-weight: 900;
+    color: var(--text-primary);
+  }
+
+  .basvuru-modal-close {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .basvuru-modal-close:hover {
+    border-color: var(--accent-danger);
+    color: var(--accent-danger);
+  }
+
+  .basvuru-modal-body {
+    display: grid;
+    grid-template-columns: minmax(240px, 0.72fr) minmax(420px, 1.28fr);
+    gap: 18px;
+    padding: 18px;
+  }
+
+  @media (max-width: 860px) {
+    .basvuru-modal-body {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .basvuru-selected-card {
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    padding: 18px;
+    border-top: 5px solid var(--basvuru-modal-accent, #2563eb);
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .basvuru-selected-kicker {
+    font-size: 0.76rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .basvuru-selected-name {
+    font-size: 1.2rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 14px;
+    line-height: 1.35;
+  }
+
+  .basvuru-selected-stat-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .basvuru-selected-stat-value {
+    font-size: 1.45rem;
+    font-weight: 900;
+    color: var(--text-primary);
+  }
+
+  .basvuru-period-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .basvuru-period-title {
+    font-size: 0.88rem;
+    font-weight: 800;
+    color: var(--text-secondary);
+  }
+
+  .basvuru-period-buttons {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .basvuru-period-btn {
+    border: 1px solid var(--border-color);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    background: var(--bg-input);
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .basvuru-period-btn.active {
+    background: var(--basvuru-modal-accent, #2563eb);
+    border-color: transparent;
+    color: #fff;
+  }
+
+  #basvuruModalChart {
+    width: 100%;
+    min-height: 340px;
+  }
+
+  .basvuru-chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 280px;
+    color: var(--text-muted);
+    font-weight: 600;
+  }
 </style>
 {% endblock %}
 
@@ -93,6 +581,7 @@
     <button class="tab-btn" data-t="📈 Kurum & Trend">📈 Kurum & Trend</button>
     <button class="tab-btn" data-t="🔥 Yoğunluk Analizi">🔥 Yoğunluk Analizi</button>
     <button class="tab-btn" data-t="🔍 Hekim Detay">🔍 Hekim Detay</button>
+    <button class="tab-btn" data-t="📋 Başvuru Sayıları">📋 Başvuru Sayıları</button>
 </div>
 <div id="polTabs">
     <div class="tab-content active">
@@ -111,12 +600,12 @@
                         Kriteri:</label>
                     <div style="display: flex; gap: 12px; flex-wrap: wrap;">
                         <label class="radio-pill" style="cursor: pointer;">
-                            <input type="radio" name="sort" value="Kayit_Sayisi" onchange="this.form.submit()" {% if current_sort=='Kayit_Sayisi' %}checked{% endif %}>
-                            <span data-t="📋 Kayıt Sayısı">📋 Kayıt Sayısı</span>
-                        </label>
-                        <label class="radio-pill" style="cursor: pointer;">
                             <input type="radio" name="sort" value="Benzersiz_Hasta_Sayisi" onchange="this.form.submit()" {% if current_sort=='Benzersiz_Hasta_Sayisi' %}checked{% endif %}>
                             <span data-t="👥 Benzersiz Hasta Sayısı">👥 Benzersiz Hasta Sayısı</span>
+                        </label>
+                        <label class="radio-pill" style="cursor: pointer;">
+                            <input type="radio" name="sort" value="Kayit_Sayisi" onchange="this.form.submit()" {% if current_sort=='Kayit_Sayisi' %}checked{% endif %}>
+                            <span data-t="📋 Kayıt Sayısı">📋 Kayıt Sayısı</span>
                         </label>
                         <label class="radio-pill" style="cursor: pointer;">
                             <input type="radio" name="sort" value="Hekim_Bazli_Hasta_Sayilari" onchange="this.form.submit()" {% if current_sort=='Hekim_Bazli_Hasta_Sayilari' %}checked{% endif %}>
@@ -218,7 +707,7 @@
                 <input type="hidden" name="quick" value="{{ request.args.get('quick', '') }}">
                 <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
                 <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
-                <input type="hidden" name="sort" value="{{ request.args.get('sort', 'Kayit_Sayisi') }}">
+                <input type="hidden" name="sort" value="{{ request.args.get('sort', 'Benzersiz_Hasta_Sayisi') }}">
                 <input type="hidden" name="tab" value="3">
 
                 <label
@@ -265,6 +754,197 @@
         <div class="alert alert-info" data-t="Detaylarını görmek için lütfen yukarıdan bir hekim seçin.">Detaylarını görmek için lütfen yukarıdan bir hekim seçin.</div>
         {% endif %}
     </div>
+
+    <!-- Başvuru Sayıları -->
+    <div class="tab-content">
+        <div class="basvuru-dashboard">
+            <div class="basvuru-top-row">
+                <div class="basvuru-panel" data-basvuru-panel="ozet_klinik" role="button" tabindex="0"
+                     title="Grafiği bu tabloya göre güncelle" aria-label="Başvuru sayıları tablosu — grafiğe aktar">
+                    <div class="basvuru-panel-header">
+                        <span data-t="BAŞVURU SAYILARI">BAŞVURU SAYILARI</span>
+                        <span class="basvuru-header-hint" data-t="(Grafiğe aktar)">(Grafiğe aktar)</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="ad-col" data-t="Ad">Ad</th>
+                                    <th class="num-col" data-t="Adet">Adet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in basvuru.ozet_klinik %}
+                                <tr class="basvuru-data-row" tabindex="0" role="button"
+                                    data-basvuru-category="ozet_klinik" data-basvuru-ad="{{ r.ad }}"
+                                    aria-label="{{ r.ad }} aylık detay">
+                                    <td class="name-col" title="{{ r.ad }}">{{ r.ad }}</td>
+                                    <td class="basvuru-num">{{ r.adet|turkish_number(0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td data-t="Toplam :">Toplam :</td>
+                                    <td class="basvuru-num">{{ basvuru.ozet_toplam|turkish_number(0) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="basvuru-panel" data-basvuru-panel="brans" role="button" tabindex="0"
+                     title="Grafiği bu tabloya göre güncelle" aria-label="Branş dağılımı tablosu — grafiğe aktar">
+                    <div class="basvuru-panel-header">
+                        <span data-t="BRANŞLARA GÖRE DAĞILIM">BRANŞLARA GÖRE DAĞILIM</span>
+                        <span class="basvuru-header-hint" data-t="(Grafiğe aktar)">(Grafiğe aktar)</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="ad-col" data-t="Ad">Ad</th>
+                                    <th class="num-col" data-t="Adet">Adet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in basvuru.brans %}
+                                <tr class="basvuru-data-row" tabindex="0" role="button"
+                                    data-basvuru-category="brans" data-basvuru-ad="{{ r.ad }}"
+                                    aria-label="{{ r.ad }} aylık detay">
+                                    <td class="name-col" title="{{ r.ad }}">{{ r.ad }}</td>
+                                    <td class="basvuru-num">{{ r.adet|turkish_number(0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td data-t="Toplam :">Toplam :</td>
+                                    <td class="basvuru-num">{{ basvuru.brans_toplam|turkish_number(0) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="basvuru-panel" data-basvuru-panel="sevk_tur" role="button" tabindex="0"
+                     title="Grafiği bu tabloya göre güncelle" aria-label="Sevk türleri tablosu — grafiğe aktar">
+                    <div class="basvuru-panel-header">
+                        <span data-t="SEVK TÜRLERİNE GÖRE DAĞILIM">SEVK TÜRLERİNE GÖRE DAĞILIM</span>
+                        <span class="basvuru-header-hint" data-t="(Grafiğe aktar)">(Grafiğe aktar)</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="ad-col" data-t="Ad">Ad</th>
+                                    <th class="num-col" data-t="Adet">Adet</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in basvuru.sevk_tur %}
+                                <tr class="basvuru-data-row" tabindex="0" role="button"
+                                    data-basvuru-category="sevk_tur" data-basvuru-ad="{{ r.ad }}"
+                                    aria-label="{{ r.ad }} aylık detay">
+                                    <td class="name-col" title="{{ r.ad }}">{{ r.ad }}</td>
+                                    <td class="basvuru-num">{{ r.adet|turkish_number(0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td data-t="Toplam :">Toplam :</td>
+                                    <td class="basvuru-num">{{ basvuru.sevk_toplam|turkish_number(0) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="basvuru-bottom-row">
+                <div class="basvuru-panel basvuru-hekim-panel" data-basvuru-panel="hekim" role="button" tabindex="0"
+                     title="Grafiği hekim bazlı tabloya göre güncelle" aria-label="Hekim bazlı başvuru tablosu — grafiğe aktar">
+                    <div class="basvuru-panel-header">
+                        <span data-t="HEKİMLERE GÖRE BAŞVURU SAYILARI">HEKİMLERE GÖRE BAŞVURU SAYILARI</span>
+                        <span class="basvuru-header-hint" data-t="(Grafiğe aktar)">(Grafiğe aktar)</span>
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="data-table basvuru-hekim-table">
+                            <colgroup>
+                                <col class="col-sira">
+                                <col class="col-ad">
+                                <col class="col-num">
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th class="sira-col">#</th>
+                                    <th class="ad-col" data-t="Hekim">Hekim</th>
+                                    <th class="num-col" data-t="Başvuru Adedi">Başvuru Adedi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for r in basvuru.hekim %}
+                                <tr class="basvuru-data-row" tabindex="0" role="button"
+                                    data-basvuru-category="hekim" data-basvuru-ad="{{ r.ad }}"
+                                    aria-label="{{ r.ad }} aylık detay">
+                                    <td class="sira-col">{{ r.sira }}</td>
+                                    <td class="name-col" title="{{ r.ad }}">{{ r.ad }}</td>
+                                    <td class="basvuru-num">{{ r.adet|turkish_number(0) }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td class="sira-col"></td>
+                                    <td class="name-col" data-t="Toplam :">Toplam :</td>
+                                    <td class="basvuru-num">{{ basvuru.hekim_toplam|turkish_number(0) }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="basvuru-panel basvuru-chart-panel" data-active-theme="ozet_klinik">
+                    <div class="basvuru-panel-header">
+                        <span id="basvuruChartTitle" data-t="BAŞVURU SAYILARI">BAŞVURU SAYILARI</span>
+                    </div>
+                    <div class="basvuru-chart-body">
+                        <div id="basvuruDynamicChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="basvuru-modal-overlay" id="basvuruModalOverlay" aria-hidden="true">
+            <div class="basvuru-modal" role="dialog" aria-modal="true" aria-labelledby="basvuruModalTitle">
+                <div class="basvuru-modal-head">
+                    <div class="basvuru-modal-title" id="basvuruModalTitle" data-t="Başvuru Aylık Detay">Başvuru Aylık Detay</div>
+                    <button type="button" class="basvuru-modal-close" id="basvuruModalClose" aria-label="Kapat">&times;</button>
+                </div>
+                <div class="basvuru-modal-body">
+                    <div class="basvuru-selected-card" id="basvuruSelectedCard">
+                        <div class="basvuru-selected-kicker" id="basvuruSelectedKicker" data-t="Seçilen kalem">Seçilen kalem</div>
+                        <div class="basvuru-selected-name" id="basvuruSelectedName"></div>
+                        <div class="basvuru-selected-stat-label" data-t="Seçili dönem toplamı">Seçili dönem toplamı</div>
+                        <div class="basvuru-selected-stat-value" id="basvuruSelectedTotal">0</div>
+                    </div>
+                    <div>
+                        <div class="basvuru-period-toolbar">
+                            <div class="basvuru-period-title" data-t="Aylık başvuru trendi">Aylık başvuru trendi</div>
+                            <div class="basvuru-period-buttons" id="basvuruPeriodButtons" aria-label="Grafik ay aralığı">
+                                <button type="button" class="basvuru-period-btn active" data-months="1">1 Ay</button>
+                                <button type="button" class="basvuru-period-btn" data-months="2">2 Ay</button>
+                                <button type="button" class="basvuru-period-btn" data-months="3">3 Ay</button>
+                                <button type="button" class="basvuru-period-btn" data-months="6">6 Ay</button>
+                            </div>
+                        </div>
+                        <div id="basvuruModalChart"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 {% endif %}
 {% endblock %}
@@ -291,5 +971,507 @@
         }
     }
 })();
+
+{% if not no_data %}
+(function() {
+    const chartHost = document.getElementById('basvuruDynamicChart');
+    if (!chartHost || typeof Plotly === 'undefined') return;
+
+    const basvuruDatasets = {
+        ozet_klinik: {
+            title: 'BAŞVURU SAYILARI',
+            labels: {{ basvuru.ozet_klinik | map(attribute='ad') | list | tojson }},
+            values: {{ basvuru.ozet_klinik | map(attribute='adet') | list | tojson }}
+        },
+        brans: {
+            title: 'BRANŞLARA GÖRE DAĞILIM',
+            labels: {{ basvuru.brans | map(attribute='ad') | list | tojson }},
+            values: {{ basvuru.brans | map(attribute='adet') | list | tojson }}
+        },
+        sevk_tur: {
+            title: 'SEVK TÜRLERİNE GÖRE DAĞILIM',
+            labels: {{ basvuru.sevk_tur | map(attribute='ad') | list | tojson }},
+            values: {{ basvuru.sevk_tur | map(attribute='adet') | list | tojson }}
+        },
+        hekim: {
+            title: 'HEKİMLERE GÖRE BAŞVURU SAYILARI',
+            labels: {{ basvuru.hekim | map(attribute='ad') | list | tojson }},
+            values: {{ basvuru.hekim | map(attribute='adet') | list | tojson }}
+        }
+    };
+
+    let currentCategory = 'ozet_klinik';
+
+    /* KPI kartlari: card-blue, card-purple, card-warm-green, card-orange */
+    const basvuruThemes = {
+        ozet_klinik: { bar: '#2563eb', line: '#1e40af', textLight: '#1e40af', textDark: '#93c5fd' },
+        brans:       { bar: '#8b5cf6', line: '#5b21b6', textLight: '#5b21b6', textDark: '#c4b5fd' },
+        sevk_tur:    { bar: '#10b981', line: '#065f46', textLight: '#065f46', textDark: '#6ee7b7' },
+        hekim:       { bar: '#ea580c', line: '#9a3412', textLight: '#9a3412', textDark: '#fdba74' }
+    };
+
+    function getBasvuruTheme(cat) {
+        return basvuruThemes[cat] || basvuruThemes.ozet_klinik;
+    }
+
+    function trInt(n) {
+        const v = Math.round(Number(n) || 0);
+        return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    const BASVURU_CHART_HEIGHT = 420;
+
+    const basvuruChartProfiles = {
+        ozet_klinik: { verticalLabels: true, angle: -90, bargap: 0.32, tickFontSize: 8 },
+        brans:       { verticalLabels: true, angle: -90, bargap: 0.30, tickFontSize: 8 },
+        sevk_tur:    { bottom: 88, angle: 0, bargap: 0.38, wrapAt: 18 },
+        hekim:       { bottom: 128, angle: -90, bargap: 0.18, tickFontSize: 7, verticalLabels: true }
+    };
+
+    function cleanChartName(label) {
+        return String(label || '').trim().replace(/\s+A\.D\.?$/i, '').trim();
+    }
+
+    /** Uzun etiketleri 2 satira bol; tam ad hover'da kalir. */
+    function chartTickLabel(label, wrapAt) {
+        const s = cleanChartName(label);
+        const limit = wrapAt || 16;
+        if (s.length <= limit) return s;
+        const mid = Math.ceil(s.length / 2);
+        let splitAt = s.lastIndexOf(' ', mid);
+        if (splitAt < 1) splitAt = s.indexOf(' ', mid);
+        if (splitAt < 1) return s.slice(0, limit - 1) + '…';
+        let line1 = s.slice(0, splitAt).trim();
+        let line2 = s.slice(splitAt).trim();
+        if (line1.length > limit) line1 = line1.slice(0, limit - 1) + '…';
+        if (line2.length > limit) line2 = line2.slice(0, limit - 1) + '…';
+        return line1 + '\n' + line2;
+    }
+
+    function uniqueTickLabels(labels) {
+        const seen = {};
+        return labels.map(function(lbl, i) {
+            const key = lbl.replace(/\n/g, ' ');
+            if (!seen[key]) {
+                seen[key] = 1;
+                return lbl;
+            }
+            return lbl + ' (' + (i + 1) + ')';
+        });
+    }
+
+    /** Dikey etiketler icin alt bosluk — en uzun ada gore */
+    function verticalChartBottomMargin(labels, tickFontSize) {
+        const fs = tickFontSize || 8;
+        const maxLen = Math.max.apply(null, labels.map(function(lbl) {
+            return cleanChartName(lbl).length;
+        }).concat([8]));
+        return Math.min(240, Math.max(155, 48 + maxLen * (fs * 0.72)));
+    }
+
+    function buildTickLabels(sortedLabels, profile) {
+        return uniqueTickLabels(sortedLabels.map(function(lbl) {
+            if (profile.verticalLabels) return cleanChartName(lbl);
+            return chartTickLabel(lbl, profile.wrapAt);
+        }));
+    }
+
+    function chartTitleText(cat) {
+        const d = basvuruDatasets[cat];
+        if (!d) return '';
+        return window.KDS_i18n ? window.KDS_i18n.get(d.title) : d.title;
+    }
+
+    function setActivePanel(cat) {
+        document.querySelectorAll('[data-basvuru-panel]').forEach(function(panel) {
+            panel.classList.toggle('is-chart-source', panel.getAttribute('data-basvuru-panel') === cat);
+        });
+        const chartPanel = document.querySelector('.basvuru-chart-panel');
+        if (chartPanel) {
+            chartPanel.setAttribute('data-active-theme', cat);
+        }
+    }
+
+    function renderBasvuruChart(cat) {
+        const d = basvuruDatasets[cat];
+        if (!d || !d.labels.length) return;
+
+        currentCategory = cat;
+        setActivePanel(cat);
+
+        const titleEl = document.getElementById('basvuruChartTitle');
+        if (titleEl) {
+            titleEl.textContent = chartTitleText(cat);
+            titleEl.setAttribute('data-t', d.title);
+        }
+
+        const isDark = document.body.classList.contains('theme-dark');
+        const combined = d.labels.map(function(lbl, i) {
+            return { l: lbl, v: Number(d.values[i]) || 0 };
+        });
+        combined.sort(function(a, b) { return b.v - a.v; });
+        const sortedLabels = combined.map(function(x) { return x.l; });
+        const sortedValues = combined.map(function(x) { return x.v; });
+        const profile = basvuruChartProfiles[cat] || basvuruChartProfiles.ozet_klinik;
+        const tickLabels = buildTickLabels(sortedLabels, profile);
+        const isVertical = !!profile.verticalLabels;
+        const tickFontSize = profile.tickFontSize || 9;
+        const bottomMargin = isVertical
+            ? verticalChartBottomMargin(sortedLabels, tickFontSize)
+            : profile.bottom;
+        const n = tickLabels.length;
+        const yMax = Math.max.apply(null, sortedValues.concat([1]));
+        const yTop = Math.ceil(yMax * 1.18 + (yMax < 10 ? 2 : 0));
+        const adetTitle = window.KDS_i18n ? window.KDS_i18n.get('Adet') : 'Adet';
+        const chartEl = document.getElementById('basvuruDynamicChart');
+        const tickColor = isDark ? '#94a3b8' : '#64748b';
+        const theme = getBasvuruTheme(cat);
+
+        const trace = {
+            x: tickLabels,
+            y: sortedValues,
+            customdata: sortedLabels,
+            type: 'bar',
+            cliponaxis: false,
+            marker: {
+                color: theme.bar,
+                line: { color: theme.line, width: 1 }
+            },
+            text: sortedValues.map(trInt),
+            textposition: 'outside',
+            textfont: {
+                family: 'Inter, sans-serif',
+                size: 11,
+                color: isDark ? theme.textDark : theme.textLight
+            },
+            hovertemplate: '<b>%{customdata}</b><br>' + adetTitle + ': %{y}<extra></extra>'
+        };
+
+        let xaxis;
+        if (isVertical) {
+            xaxis = {
+                type: 'category',
+                categoryorder: 'array',
+                categoryarray: tickLabels,
+                tickangle: -90,
+                tickfont: { size: tickFontSize, color: tickColor },
+                automargin: false,
+                fixedrange: true,
+                showgrid: false,
+                linecolor: isDark ? 'rgba(148,163,184,0.25)' : 'rgba(100,116,139,0.35)',
+                linewidth: 1,
+                side: 'bottom',
+                ticklabelposition: 'outside'
+            };
+        } else {
+            const xIdx = tickLabels.map(function(_, i) { return i; });
+            trace.x = xIdx;
+            trace.width = Math.min(0.72, 0.82 - n * 0.02);
+            xaxis = {
+                type: 'linear',
+                tickmode: 'array',
+                tickvals: xIdx,
+                ticktext: tickLabels,
+                tickangle: profile.angle,
+                range: [-0.65, Math.max(n - 0.35, 0.5)],
+                automargin: false,
+                fixedrange: true,
+                tickfont: { size: tickFontSize, color: tickColor },
+                showgrid: false,
+                linecolor: isDark ? 'rgba(148,163,184,0.25)' : 'rgba(100,116,139,0.35)',
+                linewidth: 1
+            };
+        }
+
+        const layout = {
+            autosize: true,
+            paper_bgcolor: 'rgba(0,0,0,0)',
+            plot_bgcolor: 'rgba(0,0,0,0)',
+            font: { family: 'Inter, sans-serif', color: isDark ? '#94a3b8' : '#475569', size: 10 },
+            xaxis: xaxis,
+            yaxis: {
+                title: { text: adetTitle, font: { size: 10 }, standoff: 12 },
+                range: [0, yTop],
+                automargin: false,
+                fixedrange: true,
+                tickfont: { size: 10, color: tickColor },
+                gridcolor: isDark ? 'rgba(255,255,255,0.06)' : 'rgba(15,23,42,0.08)',
+                zeroline: false,
+                dtick: yTop <= 50 ? 10 : (yTop <= 120 ? 20 : undefined)
+            },
+            margin: { t: 52, r: 20, b: bottomMargin, l: 58 },
+            height: BASVURU_CHART_HEIGHT,
+            bargap: profile.bargap,
+            showlegend: false
+        };
+
+        const plotConfig = { responsive: true, displayModeBar: false };
+        Plotly.purge(chartEl);
+        Plotly.newPlot(chartEl, [trace], layout, plotConfig);
+    }
+
+    function activateCategory(cat) {
+        if (!basvuruDatasets[cat]) return;
+        renderBasvuruChart(cat);
+    }
+
+    document.querySelectorAll('.basvuru-panel[data-basvuru-panel]').forEach(function(panel) {
+        function onActivate() {
+            activateCategory(panel.getAttribute('data-basvuru-panel'));
+        }
+        panel.addEventListener('click', function(e) {
+            if (e.target.closest('.basvuru-data-row')) return;
+            onActivate();
+        });
+        panel.addEventListener('keydown', function(e) {
+            if (e.target.closest('.basvuru-data-row')) return;
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                onActivate();
+            }
+        });
+    });
+
+    const basvuruSerisiUrl = {{ url_for('poliklinik.basvuru_serisi')|tojson }};
+    const basvuruModalOverlay = document.getElementById('basvuruModalOverlay');
+    const basvuruModalClose = document.getElementById('basvuruModalClose');
+    const basvuruModalChart = document.getElementById('basvuruModalChart');
+    const basvuruSelectedCard = document.getElementById('basvuruSelectedCard');
+    const basvuruSelectedName = document.getElementById('basvuruSelectedName');
+    const basvuruSelectedKicker = document.getElementById('basvuruSelectedKicker');
+    const basvuruSelectedTotal = document.getElementById('basvuruSelectedTotal');
+    let basvuruModalCategory = 'ozet_klinik';
+    let basvuruModalAd = '';
+    let basvuruModalMonths = 1;
+    let basvuruSeriesCache = null;
+    let basvuruSeriesToken = 0;
+
+    function buildBasvuruMonthlySlice(labels, values, months) {
+        const n = Math.max(1, Math.min(months || 1, (labels || []).length));
+        const start = Math.max(0, (labels || []).length - n);
+        return {
+            labels: (labels || []).slice(start),
+            values: (values || []).slice(start).map(function(v) {
+                return Math.max(0, Math.round(Number(v) || 0));
+            })
+        };
+    }
+
+    function showBasvuruChartLoading() {
+        if (!basvuruModalChart) return;
+        const msg = window.KDS_i18n ? window.KDS_i18n.get('Yükleniyor...') : 'Yükleniyor...';
+        basvuruModalChart.innerHTML = '<div class="basvuru-chart-loading">' + msg + '</div>';
+    }
+
+    function fetchBasvuruSeries(category, ad, months) {
+        const token = ++basvuruSeriesToken;
+        const params = new URLSearchParams({
+            category: category,
+            ad: ad,
+            months: String(months || 1)
+        });
+        return fetch(basvuruSerisiUrl + '?' + params.toString(), {
+            credentials: 'same-origin',
+            headers: { 'Accept': 'application/json' }
+        }).then(function(res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.json();
+        }).then(function(data) {
+            if (token !== basvuruSeriesToken) return null;
+            return data;
+        }).catch(function() {
+            if (token !== basvuruSeriesToken) return null;
+            return { labels: [], values: [], period_total: 0 };
+        });
+    }
+
+    function renderBasvuruModalChart(series) {
+        if (!basvuruModalChart || typeof Plotly === 'undefined') return;
+        const sliced = buildBasvuruMonthlySlice(series.labels, series.values, basvuruModalMonths);
+        if (!sliced.labels.length) {
+            const empty = window.KDS_i18n ? window.KDS_i18n.get('Veri bulunamadı') : 'Veri bulunamadı';
+            basvuruModalChart.innerHTML = '<div class="basvuru-chart-loading">' + empty + '</div>';
+            return;
+        }
+        const theme = getBasvuruTheme(basvuruModalCategory);
+        const isDark = document.body.classList.contains('theme-dark');
+        const adetTitle = window.KDS_i18n ? window.KDS_i18n.get('Adet') : 'Adet';
+        basvuruModalChart.innerHTML = '';
+        Plotly.newPlot(basvuruModalChart, [{
+            type: 'bar',
+            x: sliced.labels,
+            y: sliced.values,
+            text: sliced.values.map(trInt),
+            textposition: 'outside',
+            marker: {
+                color: theme.bar,
+                line: { color: theme.line, width: 1 }
+            },
+            hovertemplate: '<b>%{x}</b><br>' + adetTitle + ': %{y}<extra></extra>'
+        }], {
+            height: 340,
+            margin: { t: 20, r: 18, b: 48, l: 54 },
+            paper_bgcolor: isDark ? '#0b1a3a' : '#ffffff',
+            plot_bgcolor: isDark ? '#0b1a3a' : '#ffffff',
+            font: { color: isDark ? '#e8f0fe' : '#0f172a', family: 'Inter, sans-serif' },
+            xaxis: {
+                gridcolor: isDark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(100, 116, 139, 0.15)',
+                zeroline: false
+            },
+            yaxis: {
+                title: adetTitle,
+                rangemode: 'tozero',
+                gridcolor: isDark ? 'rgba(148, 163, 184, 0.22)' : 'rgba(100, 116, 139, 0.18)',
+                zeroline: false
+            },
+            showlegend: false,
+            bargap: 0.36
+        }, { displayModeBar: false, responsive: true });
+    }
+
+    function updateBasvuruModalDetail(data) {
+        const catTitle = data && data.category_title
+            ? (window.KDS_i18n ? window.KDS_i18n.get(data.category_title) : data.category_title)
+            : chartTitleText(basvuruModalCategory);
+        if (basvuruSelectedKicker) basvuruSelectedKicker.textContent = catTitle;
+        if (basvuruSelectedName) basvuruSelectedName.textContent = basvuruModalAd;
+        if (basvuruSelectedTotal) {
+            const total = data && data.period_total != null
+                ? data.period_total
+                : buildBasvuruMonthlySlice(
+                    (basvuruSeriesCache || {}).labels,
+                    (basvuruSeriesCache || {}).values,
+                    basvuruModalMonths
+                ).values.reduce(function(a, b) { return a + b; }, 0);
+            basvuruSelectedTotal.textContent = trInt(total);
+        }
+        if (basvuruSelectedCard) {
+            basvuruSelectedCard.style.setProperty(
+                '--basvuru-modal-accent',
+                getBasvuruTheme(basvuruModalCategory).bar
+            );
+        }
+    }
+
+    function applyBasvuruModalFromCache() {
+        if (!basvuruSeriesCache) return;
+        const sliced = buildBasvuruMonthlySlice(
+            basvuruSeriesCache.labels,
+            basvuruSeriesCache.values,
+            basvuruModalMonths
+        );
+        updateBasvuruModalDetail({
+            category_title: basvuruDatasets[basvuruModalCategory]
+                ? basvuruDatasets[basvuruModalCategory].title
+                : '',
+            period_total: sliced.values.reduce(function(a, b) { return a + b; }, 0)
+        });
+        renderBasvuruModalChart(basvuruSeriesCache);
+    }
+
+    function refreshBasvuruModal() {
+        showBasvuruChartLoading();
+        fetchBasvuruSeries(basvuruModalCategory, basvuruModalAd, 6).then(function(data) {
+            if (!data) return;
+            basvuruSeriesCache = { labels: data.labels || [], values: data.values || [] };
+            applyBasvuruModalFromCache();
+        });
+    }
+
+    function openBasvuruModal(category, ad) {
+        if (!basvuruModalOverlay || !ad) return;
+        basvuruModalCategory = category || 'ozet_klinik';
+        basvuruModalAd = ad;
+        basvuruModalMonths = 1;
+        basvuruSeriesCache = null;
+        document.querySelectorAll('.basvuru-period-btn').forEach(function(btn) {
+            btn.classList.toggle('active', (parseInt(btn.dataset.months, 10) || 1) === 1);
+        });
+        basvuruModalOverlay.classList.add('open');
+        basvuruModalOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+        refreshBasvuruModal();
+        setTimeout(function() {
+            if (basvuruModalChart && basvuruModalChart.querySelector('.js-plotly-plot')) {
+                Plotly.Plots.resize(basvuruModalChart);
+            }
+        }, 120);
+    }
+
+    function closeBasvuruModal() {
+        if (!basvuruModalOverlay) return;
+        basvuruModalOverlay.classList.remove('open');
+        basvuruModalOverlay.setAttribute('aria-hidden', 'true');
+        document.body.style.overflow = '';
+        basvuruSeriesToken++;
+    }
+
+    document.querySelectorAll('.basvuru-data-row').forEach(function(row) {
+        function onRowOpen(e) {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            const cat = row.getAttribute('data-basvuru-category');
+            const ad = row.getAttribute('data-basvuru-ad');
+            openBasvuruModal(cat, ad);
+        }
+        row.addEventListener('click', onRowOpen);
+        row.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') onRowOpen(e);
+        });
+    });
+
+    document.querySelectorAll('.basvuru-period-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            basvuruModalMonths = parseInt(this.dataset.months, 10) || 1;
+            document.querySelectorAll('.basvuru-period-btn').forEach(function(b) {
+                b.classList.remove('active');
+            });
+            this.classList.add('active');
+            if (basvuruSeriesCache) {
+                applyBasvuruModalFromCache();
+            } else {
+                refreshBasvuruModal();
+            }
+        });
+    });
+
+    if (basvuruModalClose) {
+        basvuruModalClose.addEventListener('click', closeBasvuruModal);
+    }
+    if (basvuruModalOverlay) {
+        basvuruModalOverlay.addEventListener('click', function(e) {
+            if (e.target === basvuruModalOverlay) closeBasvuruModal();
+        });
+    }
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && basvuruModalOverlay && basvuruModalOverlay.classList.contains('open')) {
+            closeBasvuruModal();
+        }
+    });
+
+    window.addEventListener('load', function() {
+        renderBasvuruChart('ozet_klinik');
+    });
+
+    window.addEventListener('resize', function() {
+        const plot = document.getElementById('basvuruDynamicChart');
+        if (plot && plot.querySelector('.js-plotly-plot')) {
+            Plotly.Plots.resize(plot);
+        }
+    });
+
+    document.querySelectorAll('.tabs[data-target="#polTabs"] .tab-btn').forEach(function(btn, index) {
+        btn.addEventListener('click', function() {
+            if (index === 4) {
+                setTimeout(function() {
+                    renderBasvuruChart(currentCategory);
+                }, 80);
+            }
+        });
+    });
+})();
+{% endif %}
 </script>
 {% endblock %}

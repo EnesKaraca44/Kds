@@ -10,12 +10,76 @@ from routes.dashboard import get_date_range
 
 yabanci_hasta_bp = Blueprint('yabanci_hasta', __name__)
 
+PAGE_SQL_KODLARI = ["yabanci_hasta.yabanci_hasta_verisi_yukle"]
+
 
 def _safe_float(value):
     try:
         return float(value)
     except (TypeError, ValueError):
         return 0.0
+
+
+def _tr_number(value, decimals=2):
+    """Binlik ayırıcı nokta, ondalık virgül (tr-TR)."""
+    try:
+        value = float(value)
+    except (TypeError, ValueError):
+        return "0"
+    fmt = f"{{:,.{int(decimals)}f}}"
+    s = fmt.format(value)
+    return s.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def _tr_money(value, decimals=0):
+    return f"₺ {_tr_number(value, decimals)}"
+
+
+def _money_label_decimals(max_value):
+    """Kucuk tutarlarda grafik etiketinde kurus goster."""
+    if max_value < 1000:
+        return 2
+    return 0
+
+
+
+
+def _find_column(df, candidates):
+    normalized = {str(col).strip().lower(): col for col in df.columns}
+    for candidate in candidates:
+        key = str(candidate).strip().lower()
+        if key in normalized:
+            return normalized[key]
+    return None
+
+
+def _prepare_yabanci_hasta_df(df_raw):
+    """API/ODBC sutun adi farkliliklarini normalize et; gelir sutununu sec."""
+    df = df_raw.copy()
+    ulke_col = _find_column(df, ('Ulke', 'ULKE', 'ULKE_AD', 'ulke_ad', 'Country'))
+    hasta_col = _find_column(
+        df,
+        ('HastaAdi', 'HASTAADI', 'hastaAdSoyad', 'HASTA_ADI', 'Hasta_Adi'),
+    )
+    gelir_col = _find_column(
+        df,
+        (
+            'Fiyat', 'FIYAT', 'tutar', 'TUTAR', 'Toplam_Gelir', 'TOPLAM_GELIR',
+            'TUTAR_DVZ', 'Gelir', 'GELIR', 'HST_TUTAR',
+        ),
+    )
+
+    if not ulke_col or not hasta_col:
+        return df
+
+    df['Ulke'] = df[ulke_col].fillna('').astype(str).str.strip()
+    df['HastaAdi'] = df[hasta_col].fillna('').astype(str).str.strip()
+    if gelir_col:
+        df['Fiyat'] = pd.to_numeric(df[gelir_col], errors='coerce').fillna(0.0)
+    else:
+        df['Fiyat'] = 0.0
+
+    return df[df['Ulke'].astype(bool) & df['HastaAdi'].astype(bool)].copy()
 
 
 @yabanci_hasta_bp.route('/yabanci-hasta')
@@ -25,19 +89,20 @@ def yabanci_hasta():
     df_raw = yabanci_hasta_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
-        return render_template('yabanci_hasta.html', start_date=sd, end_date=ed, no_data=True)
+        return render_template('yabanci_hasta.html', start_date=sd, end_date=ed, no_data=True, page_sql_kodlari=PAGE_SQL_KODLARI)
 
-    df = df_raw.copy()
-    df['Fiyat'] = pd.to_numeric(df['Fiyat'], errors='coerce').fillna(0)
+    df = _prepare_yabanci_hasta_df(df_raw)
 
-    # YAS sütununu Plotly uyumlu float'a çevir
-    if 'YAS' in df.columns:
-        df['YAS'] = pd.to_numeric(df['YAS'], errors='coerce')
-        df = df[df['YAS'].notna() & (df['YAS'] >= 0) & (df['YAS'] <= 120)].copy()
+    # YAS sütununu Plotly uyumlu float'a çevir (demografi icin ham veri)
+    demo_df_source = df_raw.copy()
+    if 'YAS' in demo_df_source.columns:
+        demo_df_source['YAS'] = pd.to_numeric(demo_df_source['YAS'], errors='coerce')
+        demo_df_source = demo_df_source[
+            demo_df_source['YAS'].notna() & (demo_df_source['YAS'] >= 0) & (demo_df_source['YAS'] <= 120)
+        ].copy()
 
-    # Cinsiyet temizliği
-    if 'Cinsiyet' in df.columns:
-        df['Cinsiyet'] = df['Cinsiyet'].fillna('Bilinmiyor').astype(str)
+    if 'Cinsiyet' in demo_df_source.columns:
+        demo_df_source['Cinsiyet'] = demo_df_source['Cinsiyet'].fillna('Bilinmiyor').astype(str)
 
     import sys
     print(f"[YH] satir={len(df)} sutunlar={list(df.columns)}", flush=True, file=sys.stderr)
@@ -85,28 +150,63 @@ def yabanci_hasta():
             'yorum': yorum,
         })
 
-    # Coğrafi dağılım
-    top_geo_rev = country_summary.nlargest(10, 'Toplam_Gelir').sort_values('Toplam_Gelir')
+    # Coğrafi dağılım — gercek gelir tutari (₺), hasta sayisi degil
+    top_geo_rev = (
+        country_summary.nlargest(10, 'Toplam_Gelir')
+        .sort_values('Toplam_Gelir')
+        .copy()
+    )
+    max_geo_gelir = float(top_geo_rev['Toplam_Gelir'].max()) if not top_geo_rev.empty else 0.0
+    label_decimals = _money_label_decimals(max_geo_gelir)
+    top_geo_rev['Gelir_Label'] = top_geo_rev['Toplam_Gelir'].apply(
+        lambda v: _tr_money(v, decimals=label_decimals)
+    )
     fig_geo_bar = px.bar(
         top_geo_rev,
         x='Toplam_Gelir',
         y='Ulke',
         orientation='h',
-        color='Toplam_Gelir',
-        color_continuous_scale='Plasma',
+        text='Gelir_Label',
+        color_discrete_sequence=['#2563eb'],
     )
-    fig_geo_bar.update_traces(texttemplate='%{x:.3s}', textposition='outside', cliponaxis=False)
+    fig_geo_bar.update_traces(
+        texttemplate='%{text}',
+        textposition='outside',
+        cliponaxis=False,
+        hovertemplate=(
+            '<b>%{y}</b><br>'
+            'Toplam gelir: ₺%{x:,.2f}<br>'
+            '<extra></extra>'
+        ),
+    )
     fig_geo_bar.update_layout(
         template='plotly_dark',
         height=420,
-        margin=dict(l=10, r=60, t=10, b=10),
+        margin=dict(l=10, r=130, t=10, b=48),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False, tickformat='.3s', title=''),
-        yaxis=dict(title='', tickfont=dict(size=10)),
-        coloraxis_colorbar=dict(title='Gelir', tickformat='.2s'),
+        xaxis=dict(
+            showgrid=True,
+            gridcolor='rgba(148, 163, 184, 0.18)',
+            zeroline=False,
+            showline=True,
+            linewidth=1,
+            linecolor='rgba(148, 163, 184, 0.5)',
+            title=dict(text='Gelir (₺)', font=dict(size=12)),
+            tickfont=dict(size=10),
+            tickformat=',.0f',
+        ),
+        yaxis=dict(
+            title='',
+            tickfont=dict(size=11),
+            automargin=True,
+            showgrid=False,
+            zeroline=False,
+            showline=False,
+        ),
         showlegend=False,
     )
+    fig_geo_bar.update_yaxes(showgrid=False, zeroline=False, showline=False)
 
     top_geo_pat = country_summary.nlargest(10, 'Hasta_Sayisi')
     fig_geo_pie = px.pie(
@@ -147,14 +247,21 @@ def yabanci_hasta():
             hover_name='Ulke',
             labels={'Hasta_Sayisi': 'Hasta Sayısı', 'Toplam_Gelir': 'Toplam Gelir'},
         )
+    fig_eff.update_traces(
+        hovertemplate=(
+            '<b>%{hovertext}</b><br>'
+            'Hasta sayısı: %{x:,.0f}<br>'
+            'Toplam gelir: ₺%{y:,.2f}<extra></extra>'
+        ),
+    )
     fig_eff.update_layout(
         template='plotly_dark',
         height=420,
         margin=dict(l=10, r=10, t=30, b=30),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(tickformat='.3s', title='Hasta Sayısı'),
-        yaxis=dict(tickformat='.3s', title='Toplam Gelir'),
+        xaxis=dict(tickformat=',.0f', title='Hasta Sayısı'),
+        yaxis=dict(tickformat=',.0f', title='Toplam Gelir (₺)'),
         legend=dict(
             x=1.01,
             y=1,
@@ -166,12 +273,12 @@ def yabanci_hasta():
     )
 
     # Demografi
-    has_yas = 'YAS' in df.columns and df['YAS'].notna().sum() > 0
-    has_cinsiyet = 'Cinsiyet' in df.columns and df['Cinsiyet'].notna().sum() > 0
+    has_yas = 'YAS' in demo_df_source.columns and demo_df_source['YAS'].notna().sum() > 0
+    has_cinsiyet = 'Cinsiyet' in demo_df_source.columns and demo_df_source['Cinsiyet'].notna().sum() > 0
     print(f"[YH] has_yas={has_yas} has_cinsiyet={has_cinsiyet}", flush=True, file=sys.stderr)
 
     if has_yas:
-        demo_df = df[df['YAS'].notna()].copy()
+        demo_df = demo_df_source[demo_df_source['YAS'].notna()].copy()
         demo_df['YAS'] = demo_df['YAS'].astype(float)
         fig_demo_hist = px.histogram(
             demo_df,
@@ -195,7 +302,7 @@ def yabanci_hasta():
     )
 
     if has_cinsiyet:
-        gender_counts = df['Cinsiyet'].value_counts().reset_index()
+        gender_counts = demo_df_source['Cinsiyet'].value_counts().reset_index()
         gender_counts.columns = ['Cinsiyet', 'Sayi']
         gender_counts['Sayi'] = gender_counts['Sayi'].astype(float)
         fig_demo_pie = px.pie(
@@ -217,7 +324,7 @@ def yabanci_hasta():
     )
     demo_table = []
     if has_yas:
-        demo_source = df.copy()
+        demo_source = demo_df_source.copy()
         if 'Cinsiyet' not in demo_source.columns:
             demo_source['Cinsiyet'] = 'Bilinmiyor'
         demo_source['YAS_GRUBU'] = pd.cut(
@@ -253,7 +360,11 @@ def yabanci_hasta():
                 })
 
     charts = {
-        'fig_geo_bar': fig_geo_bar.to_html(full_html=False, include_plotlyjs=False),
+        'fig_geo_bar': fig_geo_bar.to_html(
+            full_html=False,
+            include_plotlyjs=False,
+            config={'displayModeBar': False, 'responsive': True},
+        ),
         'fig_geo_pie': fig_geo_pie.to_html(full_html=False, include_plotlyjs=False),
         'fig_eff': fig_eff.to_html(full_html=False, include_plotlyjs=False),
         'fig_demo_hist': fig_demo_hist.to_html(full_html=False, include_plotlyjs=False),
@@ -284,4 +395,5 @@ def yabanci_hasta():
         eff_table=eff_table,
         demo_table=demo_table,
         insights=insights,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

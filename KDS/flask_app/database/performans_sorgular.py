@@ -4,7 +4,7 @@ from .baglanti import baglanti_olustur
 from .cache_helper import ttl_cache
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def performans_gelir_verisi_yukle(start_date_str, end_date_str, test_type_filter_clause=""):
     conn = baglanti_olustur()
     if not conn:

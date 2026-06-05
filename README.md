@@ -57,6 +57,11 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleye
     ```bash
     pip install flask pyodbc pandas plotly pycryptodome waitress
     ```
+    
+    veya tek komut script ile:
+    ```powershell
+    powershell -ExecutionPolicy Bypass -File install_dependencies.ps1
+    ```
 
 4.  **Veritabanı Ayarları:**
     `KDS/flask_app/ayarlar.py` dosyasındaki veritabanı bağlantı bilgilerini kendi sisteminize göre güncelleyin.

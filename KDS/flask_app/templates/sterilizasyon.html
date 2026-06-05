@@ -1,36 +1,535 @@
 {% extends "base.html" %}
-{% block title %}Sterilizasyon{% endblock %}
-{% block page_title %}<span data-t="💉 Sterilizasyon Maliyet Analizi">💉 Sterilizasyon Maliyet Analizi</span>{% endblock %}
+{% block title %}Sterilizasyon Maliyet{% endblock %}
+{% block page_title %}<span data-t="Sterilizasyon Maliyet">💉 Sterilizasyon Maliyet</span>{% endblock %}
+
+{% block head %}
+<style>
+  .steril-wrap {
+    --steril-tab-red: #dc2626;
+    --steril-card: var(--bg-card);
+    --steril-border: var(--border-color);
+    --steril-muted: var(--text-muted);
+    font-family: var(--font-family);
+  }
+  .steril-wrap .steril-note {
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    background: var(--bg-secondary);
+    border: 1px dashed var(--border-accent);
+    border-radius: var(--radius-md);
+  }
+  .steril-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 20px;
+    border-bottom: 1px solid var(--steril-border);
+    margin-bottom: 20px;
+  }
+  .steril-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 4px 14px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--steril-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .steril-tab svg { flex-shrink: 0; opacity: 0.75; }
+  .steril-tab:hover { color: var(--text-secondary); }
+  .steril-tab.active {
+    color: var(--steril-tab-red);
+    border-bottom-color: var(--steril-tab-red);
+  }
+  .steril-tab.active svg { opacity: 1; }
+  .steril-panel { display: none; }
+  .steril-panel.active { display: block; }
+  .steril-section-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 14px;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  .steril-section-head .icon { font-size: 1.2rem; line-height: 1; }
+  .steril-card-panel {
+    background: var(--steril-card);
+    border: 1px solid var(--steril-border);
+    border-radius: var(--radius-lg);
+    padding: 16px 18px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow-sm);
+  }
+  .steril-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+  @media (max-width: 1100px) {
+    .steril-grid-2 { grid-template-columns: 1fr; }
+  }
+  .steril-chart-box {
+    min-height: 320px;
+    width: 100%;
+  }
+  .steril-chart-box.tall { min-height: 380px; }
+  .steril-slider-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+  }
+  .steril-slider-row label {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    white-space: nowrap;
+  }
+  .steril-slider-row input[type="range"] {
+    flex: 1;
+    min-width: 120px;
+    max-width: 280px;
+    accent-color: var(--accent-primary);
+  }
+  .steril-malzeme-layout {
+    display: grid;
+    grid-template-columns: 1fr minmax(72px, 90px) minmax(260px, 320px);
+    gap: 12px 16px;
+    align-items: start;
+  }
+  @media (max-width: 1200px) {
+    .steril-malzeme-layout {
+      grid-template-columns: 1fr;
+    }
+    .steril-malzeme-layout .steril-legend-bar-wrap { display: none; }
+  }
+  .steril-legend-bar-wrap {
+    padding: 8px 0;
+  }
+  .steril-legend-bar {
+    width: 28px;
+    height: 220px;
+    margin: 0 auto;
+    border-radius: 6px;
+    background: linear-gradient(to top, #440154, #21918c, #fde725);
+    border: 1px solid var(--steril-border);
+  }
+  .steril-legend-label {
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    text-align: center;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--text-muted);
+    margin-top: 8px;
+    letter-spacing: 0.04em;
+  }
+  .steril-table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--steril-border);
+    border-radius: var(--radius-md);
+    background: var(--steril-card);
+  }
+  .steril-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+  .steril-table th {
+    text-align: left;
+    padding: 10px 12px;
+    font-weight: 600;
+    color: var(--steril-muted);
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--steril-border);
+    white-space: nowrap;
+  }
+  .steril-table th.num, .steril-table td.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .steril-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--steril-border);
+    color: var(--text-secondary);
+  }
+  .steril-table tr:last-child td { border-bottom: none; }
+  .steril-heat-0 { background: #fff7ed; color: #1c1917; }
+  .steril-heat-1 { background: #ffedd5; color: #1c1917; }
+  .steril-heat-2 { background: #fb923c; color: #fff; }
+  .steril-heat-3 { background: #ef4444; color: #fff; }
+  .steril-heat-4 { background: #7f1d1d; color: #fff; }
+  .theme-dark .steril-heat-0 { background: rgba(251, 146, 60, 0.15); color: var(--text-primary); }
+  .theme-dark .steril-heat-1 { background: rgba(251, 146, 60, 0.28); color: var(--text-primary); }
+  .theme-dark .steril-heat-2 { background: rgba(234, 88, 12, 0.55); color: #fff; }
+  .theme-dark .steril-heat-3 { background: rgba(220, 38, 38, 0.75); color: #fff; }
+  .theme-dark .steril-heat-4 { background: rgba(127, 29, 29, 0.95); color: #fff; }
+  .steril-subhead {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    margin: 0 0 10px;
+    color: var(--text-primary);
+  }
+</style>
+{% endblock %}
 
 {% block content %}
-{% if no_data %}
-<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
-{% else %}
-<div class="metrics-grid cols-3">
-    <div class="metric-card">
-        <div class="metric-icon">💰</div>
-        <div class="metric-body">
-            <div class="metric-value">{{ t_maliye|turkish_number }}</div>
-            <div class="metric-label" data-t="Toplam Maliyet">Toplam Maliyet</div>
-        </div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-icon">📦</div>
-        <div class="metric-body">
-            <div class="metric-value">{{ t_paket|turkish_number(0) }}</div>
-            <div class="metric-label" data-t="Toplam Paket">Toplam Paket</div>
-        </div>
-    </div>
-    <div class="metric-card">
-        <div class="metric-icon">👥</div>
-        <div class="metric-body">
-            <div class="metric-value">{{ t_hasta|turkish_number(0) }}</div>
-            <div class="metric-label" data-t="Toplam Hasta">Toplam Hasta</div>
-        </div>
-    </div>
-</div>
+<div class="steril-wrap">
+  <p class="steril-note" data-t="Bu sayfa şu an örnek veri ile gösterilmektedir. Grafik ve tablolar backend bağlandığında canlı veriye dönecektir.">
+    Bu sayfa şu an örnek veri ile gösterilmektedir. Grafik ve tablolar backend bağlandığında canlı veriye dönecektir.
+  </p>
 
-<div class="chart-container">{{ charts.fig_bar | safe }}</div>
-<div class="chart-container">{{ charts.fig_smart | safe }}</div>
-{% endif %}
+  <nav class="steril-tabs" role="tablist" aria-label="Sterilizasyon görünümleri">
+    <button type="button" class="steril-tab active" role="tab" aria-selected="true" data-steril-tab="trend" id="tab-trend">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 16l4-4 4 4 6-7"/></svg>
+      <span data-t="Genel Trend ve Dağılım">Genel Trend ve Dağılım</span>
+    </button>
+    <button type="button" class="steril-tab" role="tab" aria-selected="false" data-steril-tab="malzeme" id="tab-malzeme">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9c1.5 0 2.91.37 4.15 1.02"/><path d="M12 3v9l4 2"/></svg>
+      <span data-t="Malzeme Analizi">Malzeme Analizi</span>
+    </button>
+    <button type="button" class="steril-tab" role="tab" aria-selected="false" data-steril-tab="detay" id="tab-detay">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg>
+      <span data-t="Veri Detayı">Veri Detayı</span>
+    </button>
+  </nav>
+
+  <!-- Tab 1: Genel Trend -->
+  <div class="steril-panel active" role="tabpanel" id="panel-trend" aria-labelledby="tab-trend" aria-hidden="false">
+    <div class="steril-card-panel">
+      <div class="steril-section-head"><span class="icon">📈</span><span data-t="Oda bazlı paket, malzeme çeşidi ve hasta">Oda bazlı paket, malzeme çeşidi ve hasta</span></div>
+      <div id="plot-trend-line" class="steril-chart-box tall"></div>
+    </div>
+    <div class="steril-grid-2">
+      <div class="steril-card-panel">
+        <div class="steril-section-head"><span class="icon">📊</span><span data-t="Servis Bazlı Yoğunluk">Servis Bazlı Yoğunluk</span></div>
+        <div id="plot-servis-bar" class="steril-chart-box"></div>
+      </div>
+      <div class="steril-card-panel">
+        <div class="steril-section-head"><span class="icon">🛏️</span><span data-t="Oda Maliyet Dağılımı">Oda Maliyet Dağılımı</span></div>
+        <div class="steril-slider-row">
+          <label for="sterilOdaSlider" data-t="Gösterilecek oda sayısı">Gösterilecek oda sayısı</label>
+          <input type="range" id="sterilOdaSlider" min="3" max="10" value="6" />
+          <span id="sterilOdaSliderVal" style="font-weight:700;min-width:1.5rem;">6</span>
+        </div>
+        <div id="plot-oda-donut" class="steril-chart-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 2: Malzeme -->
+  <div class="steril-panel" role="tabpanel" id="panel-malzeme" aria-labelledby="tab-malzeme" aria-hidden="true">
+    <div class="steril-card-panel">
+      <div class="steril-section-head"><span class="icon">📦</span><span data-t="En Çok Kullanılan Malzemeler">En Çok Kullanılan Malzemeler</span></div>
+      <div class="steril-malzeme-layout">
+        <div id="plot-malzeme-bar" class="steril-chart-box tall" style="min-height:400px;"></div>
+        <div class="steril-legend-bar-wrap" aria-hidden="true">
+          <div class="steril-legend-bar"></div>
+          <div class="steril-legend-label">ToplamMaliyet</div>
+        </div>
+        <div>
+          <div class="steril-subhead"><span>👤</span><span data-t="Malzeme Maliyet Etkisi">Malzeme Maliyet Etkisi</span></div>
+          <div class="steril-table-wrap">
+            <table class="steril-table">
+              <thead>
+                <tr>
+                  <th data-t="Malzeme">Malzeme</th>
+                  <th class="num" data-t="Toplamİşlem">Toplamİşlem</th>
+                  <th class="num" data-t="ToplamMaliyet">ToplamMaliyet</th>
+                </tr>
+              </thead>
+              <tbody id="steril-malzeme-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab 3: Veri detayı -->
+  <div class="steril-panel" role="tabpanel" id="panel-detay" aria-labelledby="tab-detay" aria-hidden="true">
+    <div class="steril-card-panel">
+      <div class="steril-section-head"><span class="icon">🛏️</span><span data-t="Oda Bazlı Operasyonel Özet">Oda Bazlı Operasyonel Özet</span></div>
+      <div class="steril-table-wrap">
+        <table class="steril-table">
+          <thead>
+            <tr>
+              <th data-t="Servis">Servis</th>
+              <th data-t="Oda">Oda</th>
+              <th class="num" data-t="Mlz_Çeşidi">Mlz_Çeşidi</th>
+              <th class="num" data-t="Top_Paket">Top_Paket</th>
+              <th class="num" data-t="Top_Hasta">Top_Hasta</th>
+              <th class="num" data-t="Top_Maliyet">Top_Maliyet</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>ENDODONTİ DİŞ HEKİMLİĞİ</td>
+              <td>Zemin Kat - Oda 12 (ENDO)</td>
+              <td class="num">7</td>
+              <td class="num">12</td>
+              <td class="num">11</td>
+              <td class="num steril-heat-4">50,520000</td>
+            </tr>
+            <tr>
+              <td>ÇOCUK DİŞ HEKİMLİĞİ</td>
+              <td>1. Kat - Çocuk Oda3</td>
+              <td class="num">8</td>
+              <td class="num">11</td>
+              <td class="num">10</td>
+              <td class="num steril-heat-3">44,180000</td>
+            </tr>
+            <tr>
+              <td>GENEL DİŞ HEKİMLİĞİ</td>
+              <td>2. Kat - Oda 32 (Genel Diş)</td>
+              <td class="num">7</td>
+              <td class="num">11</td>
+              <td class="num">11</td>
+              <td class="num steril-heat-3">41,200000</td>
+            </tr>
+            <tr>
+              <td>PERİODONTOLoji</td>
+              <td>1. Kat - Perio Oda 2</td>
+              <td class="num">6</td>
+              <td class="num">9</td>
+              <td class="num">9</td>
+              <td class="num steril-heat-2">35,650000</td>
+            </tr>
+            <tr>
+              <td>CERRAHİ DİŞ HEKİMLİĞİ</td>
+              <td>Zemin Kat - Cerrahi 1</td>
+              <td class="num">5</td>
+              <td class="num">8</td>
+              <td class="num">8</td>
+              <td class="num steril-heat-1">28,900000</td>
+            </tr>
+            <tr>
+              <td>ORTODONTİ</td>
+              <td>3. Kat - Orto Oda 5</td>
+              <td class="num">4</td>
+              <td class="num">6</td>
+              <td class="num">7</td>
+              <td class="num steril-heat-0">19,420000</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var rooms = [
+    'Zemin Kat - Oda 12 (ENDO)',
+    '1. Kat - Çocuk Oda3',
+    '2. Kat - Oda 32 (Genel Diş)',
+    '1. Kat - Perio Oda 2',
+    'Zemin Kat - Cerrahi 1',
+    '3. Kat - Orto Oda 5',
+    '1. Kat - Çocuk Oda1',
+    '2. Kat - Endo Oda 8'
+  ];
+  var servisler = ['GENEL DİŞ HEKİMLİĞİ', 'ÇOCUK DİŞ HEKİMLİĞİ', 'ENDODONTİ DİŞ HEKİMLİĞİ', 'PERİODONTOLoji', 'CERRAHİ DİŞ HEKİMLİĞİ', 'ORTODONTİ'];
+  var servisIslem = [58, 52, 48, 41, 36, 28];
+  var donutRooms = [
+    { label: 'Zemin Kat - Oda 12 (ENDO)', value: 20.4 },
+    { label: '1. Kat - Çocuk Oda1', value: 11.8 },
+    { label: '2. Kat - Oda 32 (Genel Diş)', value: 10.2 },
+    { label: '1. Kat - Çocuk Oda3', value: 9.5 },
+    { label: 'Zemin Kat - Cerrahi 1', value: 8.1 },
+    { label: '1. Kat - Perio Oda 2', value: 7.53 },
+    { label: '2. Kat - Endo Oda 8', value: 6.45 },
+    { label: '3. Kat - Orto Oda 5', value: 5.2 },
+    { label: '1. Kat - Protez 4', value: 4.8 },
+    { label: 'Diğer odalar', value: 6.02 }
+  ];
+  var malzemeler = [
+    { ad: 'AYNA SOND SETİ', islem: 42, maliyet: 148.5 },
+    { ad: 'Tedavi Seti', islem: 38, maliyet: 132.0 },
+    { ad: 'AİRATÖR BAŞLIĞI', islem: 35, maliyet: 118.2 },
+    { ad: 'MİKRO MOTOR', islem: 31, maliyet: 95.0 },
+    { ad: 'EKSTRAKSİYON SETİ', islem: 28, maliyet: 82.4 },
+    { ad: 'KOMPozİT SET', islem: 24, maliyet: 71.0 },
+    { ad: 'IMPLANT SETİ', islem: 19, maliyet: 58.3 },
+    { ad: 'FİRÇE SETİ', islem: 15, maliyet: 42.0 },
+    { ad: 'ÖLÇÜ KAŞIĞI', islem: 12, maliyet: 28.5 },
+    { ad: 'STERİL POŞET (L)', islem: 9, maliyet: 15.2 }
+  ];
+
+  var layoutBase = {
+    paper_bgcolor: 'rgba(0,0,0,0)',
+    plot_bgcolor: 'rgba(0,0,0,0)',
+    font: { family: 'Inter, sans-serif', color: '#64748b', size: 11 },
+    margin: { t: 36, r: 24, b: 88, l: 48 },
+    xaxis: { gridcolor: 'rgba(148,163,184,0.25)', zeroline: false },
+    yaxis: { gridcolor: 'rgba(148,163,184,0.25)', zeroline: false }
+  };
+
+  var inited = { trend: false, malzeme: false };
+  var donutInited = false;
+
+  function plotTrend() {
+    if (typeof Plotly === 'undefined' || inited.trend) return;
+    inited.trend = true;
+    var paket = [18, 16, 14, 13, 11, 9, 8, 7];
+    var cesit = [12, 11, 10, 9, 8, 7, 6, 5];
+    var hasta = [17, 15, 14, 12, 10, 9, 8, 7];
+    Plotly.newPlot('plot-trend-line', [
+      { x: rooms, y: paket, name: 'Paket Sayısı', mode: 'lines+markers', line: { color: '#dc2626', width: 2 } },
+      { x: rooms, y: cesit, name: 'Malzeme Çeşidi', mode: 'lines+markers', line: { color: '#2563eb', width: 2, dash: 'dot' } },
+      { x: rooms, y: hasta, name: 'Hasta Sayısı', mode: 'lines+markers', line: { color: '#16a34a', width: 2 } }
+    ], Object.assign({}, layoutBase, {
+      showlegend: true,
+      legend: { orientation: 'h', yanchor: 'bottom', y: 1.02, xanchor: 'right', x: 1 },
+      yaxis: Object.assign({}, layoutBase.yaxis, { title: 'Adet', range: [0, 20] }),
+      xaxis: Object.assign({}, layoutBase.xaxis, { tickangle: -35, title: 'Oda' })
+    }), { responsive: true, displayModeBar: true, displaylogo: false });
+
+    Plotly.newPlot('plot-servis-bar', [{
+      type: 'bar',
+      orientation: 'h',
+      y: servisler,
+      x: servisIslem,
+      marker: {
+        color: servisIslem,
+        colorscale: [[0, '#bae6fd'], [1, '#0c4a6e']],
+        showscale: true,
+        colorbar: { title: 'İşlem', len: 0.85 }
+      }
+    }], Object.assign({}, layoutBase, {
+      margin: { t: 20, r: 80, b: 40, l: 140 },
+      xaxis: { title: 'Toplam İşlem', gridcolor: 'rgba(148,163,184,0.25)' },
+      yaxis: { automargin: true }
+    }), { responsive: true, displayModeBar: false });
+    updateDonut();
+  }
+
+  function updateDonut() {
+    if (typeof Plotly === 'undefined') return;
+    var n = parseInt(document.getElementById('sterilOdaSlider').value, 10);
+    var slice = donutRooms.slice(0, n);
+    var rest = donutRooms.slice(n);
+    var labels = slice.map(function (r) { return r.label; });
+    var values = slice.map(function (r) { return r.value; });
+    if (rest.length) {
+      var sumRest = rest.reduce(function (a, b) { return a + b.value; }, 0);
+      labels.push('Diğer');
+      values.push(Math.round(sumRest * 10) / 10);
+    }
+    var data = [{
+      type: 'pie',
+      labels: labels,
+      values: values,
+      hole: 0.52,
+      textinfo: 'percent',
+      textposition: 'inside',
+      insidetextorientation: 'horizontal',
+      marker: { colors: ['#1e3a5f', '#dc2626', '#2563eb', '#16a34a', '#ea580c', '#8b5cf6', '#0d9488', '#ca8a04', '#64748b', '#be123c'].slice(0, labels.length) }
+    }];
+    var donutLayout = Object.assign({}, layoutBase, {
+      showlegend: true,
+      legend: { orientation: 'v', x: 1.02, y: 0.98 },
+      margin: { t: 10, r: 160, b: 10, l: 10 }
+    });
+    var donutCfg = { responsive: true, displayModeBar: false };
+    if (donutInited) {
+      Plotly.react('plot-oda-donut', data, donutLayout, donutCfg);
+    } else {
+      donutInited = true;
+      Plotly.newPlot('plot-oda-donut', data, donutLayout, donutCfg);
+    }
+  }
+
+  function fillMalzemeTable() {
+    var tb = document.getElementById('steril-malzeme-tbody');
+    if (!tb) return;
+    tb.innerHTML = malzemeler.map(function (m) {
+      return '<tr><td>' + m.ad + '</td><td class="num">' + m.islem + '</td><td class="num">' + m.maliyet.toFixed(2).replace('.', ',') + '</td></tr>';
+    }).join('');
+  }
+
+  function plotMalzeme() {
+    if (typeof Plotly === 'undefined' || inited.malzeme) return;
+    inited.malzeme = true;
+    fillMalzemeTable();
+    var y = malzemeler.map(function (m) { return m.ad; }).reverse();
+    var x = malzemeler.map(function (m) { return m.islem; }).reverse();
+    var c = malzemeler.map(function (m) { return m.maliyet; }).reverse();
+    Plotly.newPlot('plot-malzeme-bar', [{
+      type: 'bar',
+      orientation: 'h',
+      y: y,
+      x: x,
+      marker: {
+        color: c,
+        colorscale: 'Viridis',
+        showscale: true,
+        colorbar: { title: 'Maliyet', len: 0.9 }
+      }
+    }], Object.assign({}, layoutBase, {
+      margin: { t: 16, r: 100, b: 48, l: 160 },
+      xaxis: { title: 'Toplamİşlem', gridcolor: 'rgba(148,163,184,0.25)' },
+      yaxis: { automargin: true, title: '' }
+    }), { responsive: true, displaylogo: false });
+  }
+
+  function resizePlotsIn(el) {
+    if (typeof Plotly === 'undefined') return;
+    el.querySelectorAll('.js-plotly-plot').forEach(function (node) {
+      try { Plotly.Plots.resize(node); } catch (e) {}
+    });
+  }
+
+  function setTab(name) {
+    document.querySelectorAll('.steril-tab').forEach(function (b) {
+      var on = b.getAttribute('data-steril-tab') === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    document.querySelectorAll('.steril-panel').forEach(function (p) {
+      var on = p.id === 'panel-' + name;
+      p.classList.toggle('active', on);
+      p.setAttribute('aria-hidden', on ? 'false' : 'true');
+    });
+    if (name === 'trend') plotTrend();
+    if (name === 'malzeme') plotMalzeme();
+    setTimeout(function () {
+      var panel = document.getElementById('panel-' + name);
+      if (panel) resizePlotsIn(panel);
+    }, 80);
+  }
+
+  document.querySelectorAll('.steril-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setTab(btn.getAttribute('data-steril-tab'));
+    });
+  });
+
+  var slider = document.getElementById('sterilOdaSlider');
+  var sliderVal = document.getElementById('sterilOdaSliderVal');
+  if (slider && sliderVal) {
+    slider.addEventListener('input', function () {
+      sliderVal.textContent = slider.value;
+      if (inited.trend) updateDonut();
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    plotTrend();
+  });
+})();
+</script>
 {% endblock %}

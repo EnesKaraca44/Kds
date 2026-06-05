@@ -3,7 +3,7 @@ from .baglanti import baglanti_olustur
 from .cache_helper import ttl_cache
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def sterilizasyon_verisi_yukle(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:
@@ -76,7 +76,7 @@ def sterilizasyon_verisi_yukle(start_date_str, end_date_str):
             df['KytZmn'] = pd.to_datetime(df['KytZmn'])
         return df
     except Exception as e:
-        print(f"❌ Sterilizasyon verisi yüklenirken hata: {e}")
+        print(f"Sterilizasyon verisi yuklenirken hata: {e}")
         return pd.DataFrame()
     finally:
         conn.close()

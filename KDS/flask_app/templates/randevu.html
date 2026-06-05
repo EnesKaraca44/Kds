@@ -216,7 +216,7 @@
             {% for item in insights %}
             <div class="insight-card {{ item.type }}">
                 <span class="insight-icon">{{ item.icon }}</span>
-                <span data-t="{{ item.text }}">{{ item.text | safe }}</span>
+                <span data-t="{{ item.data_t }}">{{ item.text | safe }}</span>
             </div>
             {% endfor %}
         </div>

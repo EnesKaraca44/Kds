@@ -33,6 +33,10 @@
     }
 
     .pt-section-title {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
         font-size: 1.1rem;
         font-weight: 700;
         color: var(--text-primary);
@@ -128,6 +132,32 @@
         margin-bottom: 10px;
     }
 
+    .pt-hint {
+        margin: 0 0 12px;
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .pt-section-badge {
+        font-size: 0.8rem;
+        font-weight: 600;
+        padding: 4px 10px;
+        border-radius: 999px;
+        background: rgba(234, 179, 8, 0.2);
+        color: #fbbf24;
+        border: 1px solid rgba(234, 179, 8, 0.35);
+    }
+
+    .theme-light .pt-section-badge {
+        background: #fef3c7;
+        color: #92400e;
+        border-color: #fcd34d;
+    }
+
+    .pt-table-wrap--tall {
+        max-height: 520px;
+    }
+
     .pt-list-search {
         width: 100%;
         max-width: 420px;
@@ -136,6 +166,50 @@
         border-radius: 8px;
         background: var(--bg-card);
         color: var(--text-primary);
+    }
+
+    /* Detay listesi — sure (0–3) trafik durumu rozetleri (Protez Analiz ile uyumlu) */
+    .pt-durum {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.75rem;
+        font-weight: 800;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .pt-durum-0 {
+        background: rgba(100, 116, 139, 0.35);
+        color: #e2e8f0;
+        border-color: rgba(148, 163, 184, 0.45);
+    }
+
+    .pt-durum-1 {
+        background: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(5, 46, 22, 0.95));
+        color: #ecfdf5;
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .pt-durum-2 {
+        background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(161, 98, 7, 0.95));
+        color: #1c1917;
+        border-color: rgba(250, 204, 21, 0.6);
+    }
+
+    .pt-durum-3 {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(127, 29, 29, 0.98));
+        color: #fef2f2;
+        border-color: rgba(248, 113, 113, 0.55);
+    }
+
+    .theme-light .pt-durum-0 {
+        background: #e2e8f0;
+        color: #0f172a;
+        border-color: #cbd5e1;
     }
 
     @media (max-width: 1200px) {
@@ -207,6 +281,7 @@
     <button class="tab-btn active" data-t="📊 Genel Durum">📊 Genel Durum</button>
     <button class="tab-btn" data-t="📉 RPT Performans">📉 RPT Performans</button>
     <button class="tab-btn" data-t="🚨 Kritik Takipler">🚨 Kritik Takipler</button>
+    <button class="tab-btn" data-t="⚠️ Aşama Girilmemiş">⚠️ Aşama Girilmemiş</button>
     <button class="tab-btn" data-t="🧩 İşlem Dağılımı">🧩 İşlem Dağılımı</button>
     <button class="tab-btn" data-t="📋 İşlem Listesi">📋 İşlem Listesi</button>
 </div>
@@ -249,62 +324,94 @@
     <div class="tab-content">
         <div class="pt-panel">
             <div class="pt-section-title" data-t="Operasyonel Darboğazlar">Operasyonel Darboğazlar</div>
-            <div class="pt-two-col">
-                <div class="pt-placeholder">
-                    <h4 data-t="⏳ 30 Günden Fazla Süren İşler">⏳ 30 Günden Fazla Süren İşler</h4>
-                    {% if kritik_30gun_rows %}
-                    <div class="pt-table-wrap">
-                        <table class="pt-table">
-                            <thead>
-                                <tr>
-                                    {% for k in kritik_30gun_rows[0].keys() %}
-                                    <th>{{ k }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in kritik_30gun_rows %}
-                                <tr>
-                                    {% for v in row.values() %}
-                                    <td>{{ v }}</td>
-                                    {% endfor %}
-                                </tr>
+            <div class="pt-placeholder">
+                <h4 data-t="⏳ 30 Günden Fazla Süren İşler">⏳ 30 Günden Fazla Süren İşler</h4>
+                {% if kritik_30gun_rows %}
+                <div class="pt-table-wrap pt-table-wrap--tall">
+                    <table class="pt-table">
+                        <thead>
+                            <tr>
+                                {% for k in kritik_30gun_columns %}
+                                <th><span data-t="{{ pt_kolon_etiketleri.get(k, k) }}">{{ pt_kolon_etiketleri.get(k, k) }}</span></th>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="pt-no-data" data-t="30 günden fazla süren iş bulunamadı.">30 günden fazla süren iş bulunamadı.</div>
-                    {% endif %}
-                </div>
-                <div class="pt-placeholder">
-                    <h4 data-t="💰 Vezne Onayı Bekleyen Teslimler">💰 Vezne Onayı Bekleyen Teslimler</h4>
-                    {% if vezne_bekleyen_rows %}
-                    <div class="pt-table-wrap">
-                        <table class="pt-table">
-                            <thead>
-                                <tr>
-                                    {% for k in vezne_bekleyen_rows[0].keys() %}
-                                    <th>{{ k }}</th>
-                                    {% endfor %}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for row in vezne_bekleyen_rows %}
-                                <tr>
-                                    {% for v in row.values() %}
-                                    <td>{{ v }}</td>
-                                    {% endfor %}
-                                </tr>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in kritik_30gun_rows %}
+                            <tr>
+                                {% for k in kritik_30gun_columns %}
+                                <td>
+                                    {% if k == 'tarihFark' %}
+                                    {{ row[k]|turkish_number(0) }} <span data-t="Gün">Gün</span>
+                                    {% else %}
+                                    {{ row[k] }}
+                                    {% endif %}
+                                </td>
                                 {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                    {% else %}
-                    <div class="pt-no-data" data-t="Vezne onayı bekleyen teslim bulunamadı.">Vezne onayı bekleyen teslim bulunamadı.</div>
-                    {% endif %}
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+                {% else %}
+                <div class="pt-no-data" data-t="30 günden fazla süren iş bulunamadı.">30 günden fazla süren iş bulunamadı.</div>
+                {% endif %}
             </div>
+        </div>
+    </div>
+
+    <div class="tab-content">
+        <div class="pt-panel">
+            <div class="pt-section-title">
+                <span data-t="Aşama Girilmemiş Hasta Listesi">Aşama Girilmemiş Hasta Listesi</span>
+                {% if asama_girilmemis_adet %}
+                <span class="pt-section-badge">{{ asama_girilmemis_adet|turkish_number(0) }} <span data-t="kayıt">kayıt</span></span>
+                {% endif %}
+            </div>
+            <p class="pt-hint" data-t="Protez sürecinde laboratuvar aşama bilgisi henüz girilmemiş hastalar.">
+                Protez sürecinde laboratuvar aşama bilgisi henüz girilmemiş hastalar.
+            </p>
+            {% if asama_girilmemis_rows %}
+            <div class="pt-list-toolbar">
+                <input
+                    id="ptAsamaSearch"
+                    class="pt-list-search"
+                    type="text"
+                    placeholder="Hasta, hekim, servis veya işlem ara..."
+                    data-t-placeholder="Hasta, hekim, servis veya işlem ara..."
+                >
+            </div>
+            <div class="pt-table-wrap pt-table-wrap--tall">
+                <table class="pt-table" id="ptAsamaListesiTable">
+                    <thead>
+                        <tr>
+                            {% for k in asama_girilmemis_columns %}
+                            <th><span data-t="{{ pt_kolon_etiketleri.get(k, k) }}">{{ pt_kolon_etiketleri.get(k, k) }}</span></th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in asama_girilmemis_rows %}
+                        <tr>
+                            {% for k in asama_girilmemis_columns %}
+                            <td>
+                                {% if k == 'tarihFark' %}
+                                {{ row[k]|turkish_number(0) }} <span data-t="Gün">Gün</span>
+                                {% else %}
+                                {{ row[k] }}
+                                {% endif %}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="pt-placeholder pt-list-placeholder" data-t="Aşama girilmemiş hasta kaydı bulunamadı. Rapor API veya filtreleri kontrol edin.">
+                Aşama girilmemiş hasta kaydı bulunamadı. Rapor API veya filtreleri kontrol edin.
+            </div>
+            {% endif %}
         </div>
     </div>
 
@@ -349,16 +456,28 @@
                 <table class="pt-table" id="ptIslemListesiTable">
                     <thead>
                         <tr>
-                            {% for k in islem_listesi_rows[0].keys() %}
-                            <th>{{ k }}</th>
+                            {% for k in islem_listesi_columns %}
+                            <th>
+                                {% if k == 'durumEtiketi' %}
+                                <span data-t="Durum">Durum</span>
+                                {% else %}
+                                {{ k }}
+                                {% endif %}
+                            </th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         {% for row in islem_listesi_rows %}
                         <tr>
-                            {% for v in row.values() %}
-                            <td>{{ v }}</td>
+                            {% for k in islem_listesi_columns %}
+                            <td>
+                                {% if k == 'durumEtiketi' %}
+                                <span class="pt-durum pt-durum-{{ (row.durumKodu|int) if row.durumKodu is not none else 0 }}">{{ row[k] }}</span>
+                                {% else %}
+                                {{ row[k] }}
+                                {% endif %}
+                            </td>
                             {% endfor %}
                         </tr>
                         {% endfor %}
@@ -378,18 +497,21 @@
 {% block scripts %}
 <script>
 (function() {
-    const input = document.getElementById('ptListSearch');
-    const table = document.getElementById('ptIslemListesiTable');
-    if (!input || !table) return;
-
-    const rows = Array.from(table.querySelectorAll('tbody tr'));
-    input.addEventListener('input', function() {
-        const q = this.value.toLocaleLowerCase('tr').trim();
-        rows.forEach(row => {
-            const txt = row.textContent.toLocaleLowerCase('tr');
-            row.style.display = (!q || txt.includes(q)) ? '' : 'none';
+    function wireTableSearch(inputId, tableId) {
+        const input = document.getElementById(inputId);
+        const table = document.getElementById(tableId);
+        if (!input || !table) return;
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        input.addEventListener('input', function() {
+            const q = this.value.toLocaleLowerCase('tr').trim();
+            rows.forEach(row => {
+                const txt = row.textContent.toLocaleLowerCase('tr');
+                row.style.display = (!q || txt.includes(q)) ? '' : 'none';
+            });
         });
-    });
+    }
+    wireTableSearch('ptListSearch', 'ptIslemListesiTable');
+    wireTableSearch('ptAsamaSearch', 'ptAsamaListesiTable');
 })();
 </script>
 {% endblock %}

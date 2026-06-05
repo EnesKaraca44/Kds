@@ -7,8 +7,16 @@
     color: #cdd9f5;
     font-size: 0.95rem;
     font-weight: 700;
-    margin: 0 0 10px;
+    margin: 0 0 4px;
     letter-spacing: 0.2px;
+  }
+
+  .chart-subtitle {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0 0 12px;
+    line-height: 1.45;
   }
 
   .download-btn {
@@ -133,7 +141,7 @@
     </div>
     <div class="metric-body">
       <div class="metric-label" data-t="Toplam Gelir">Toplam Gelir</div>
-      <div class="metric-value">{{ t_gelir_kdvli|turkish_number }}</div>
+      <div class="metric-value">{{ t_gelir|turkish_number }}</div>
     </div>
   </div>
   <div class="metric-card card-orange">
@@ -199,14 +207,15 @@
   <div class="tab-content">
     <div class="chart-container">
       <div class="chart-title" data-t="Günlük Fatura Gelir Trendi">Günlük Fatura Gelir Trendi</div>
+      <p class="chart-subtitle" data-t="Her nokta, o gün kesilen tüm faturaların net tutarının (KDV hariç) toplamıdır. Üstteki «Toplam Gelir» kartı ile aynı tutar türünü kullanır; vezne tahsilatı burada yer almaz. Turuncu kesik çizgi: 7 günlük hareketli ortalama; yatay noktalı çizgi: dönem günlük ortalaması.">Her nokta, o gün kesilen tüm faturaların net tutarının (KDV hariç) toplamıdır. Üstteki «Toplam Gelir» kartı ile aynı tutar türünü kullanır; vezne tahsilatı burada yer almaz. Turuncu kesik çizgi: 7 günlük hareketli ortalama; yatay noktalı çizgi: dönem günlük ortalaması.</p>
       {% if charts.fig_trend is defined %}
       {{ charts.fig_trend | safe }}
       {% else %}
       <div class="alert alert-info" data-t="Grafik için fatura verisi bulunamadı.">Grafik için fatura verisi bulunamadı.</div>
       {% endif %}
       <a class="download-btn"
-        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}" data-t="⬇️ Tüm Veriyi CSV Olarak İndir">
-        ⬇️ Tüm Veriyi CSV Olarak İndir
+        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}" data-t="⬇️ Fatura Kayıtlarını CSV Olarak İndir">
+        ⬇️ Fatura Kayıtlarını CSV Olarak İndir
       </a>
     </div>
   </div>
@@ -220,20 +229,20 @@
         <table class="data-table">
           <thead>
             <tr>
-              {% for col in table_cols %}
-              <th>{{ col }}</th>
+              {% for col in table_columns %}
+              <th data-t="{{ col.label }}">{{ col.label }}</th>
               {% endfor %}
             </tr>
           </thead>
           <tbody>
             {% for row in table_rows %}
             <tr>
-              {% for col in table_cols %}
-              {% set val = row[col] %}
+              {% for col in table_columns %}
+              {% set val = row[col.key] %}
               <td>
-                {% if col in ['FATURA_KDVLI_TOPLAM_TUTAR','FATURA_TOPLAM_TUTAR','FATURA_TOPLAM_KDV'] %}
+                {% if col.key in ['FATURA_KDVLI_TOPLAM_TUTAR','FATURA_TOPLAM_TUTAR','FATURA_TOPLAM_KDV'] %}
                 {{ val|turkish_number }}
-                {% elif col == 'FATURA_KISI_SAYISI' %}
+                {% elif col.key == 'FATURA_KISI_SAYISI' %}
                 {{ val|turkish_number(0) }}
                 {% else %}
                 {{ val }}
@@ -249,8 +258,9 @@
         {% endif %}
       </div>
       <a class="download-btn"
-        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}">
-        ⬇️ Tüm Veriyi CSV Olarak İndir
+        href="{{ url_for('gelir.gelir_csv', quick=request.args.get('quick'), start=request.args.get('start'), end=request.args.get('end')) }}"
+        data-t="⬇️ Fatura Kayıtlarını CSV Olarak İndir">
+        ⬇️ Fatura Kayıtlarını CSV Olarak İndir
       </a>
     </div>
   </div>

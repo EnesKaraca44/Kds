@@ -1,0 +1,531 @@
+{
+  "ui": {
+    "page_title": "Tedavi Kartları Analizi",
+    "hero_title": "Tedavi Grupları Dağılımı",
+    "hero_text": "Tüm işlem grupları kutu kart görünümünde toplu olarak sunulmuştur. Kart seçtiğinizde detay ve aylık çubuk grafik ekranda özel kutucuk olarak açılır.",
+    "islem_grubu": "işlem grubu",
+    "no_data": "Seçilen tarih aralığında veri bulunamadı.",
+    "modal_title": "İşlem Grubu Detayı",
+    "selected_kicker": "Seçili İşlem Grubu",
+    "total_islem": "Toplam İşlem",
+    "kategori": "Kategori",
+    "chart_title": "Aylık Sayısal Dağılım",
+    "chart_loading": "Grafik yükleniyor…",
+    "chart_empty": "Bu dönem için grafik verisi yok.",
+    "yaxis_title": "İşlem Sayısı",
+    "modal_close": "Kapat",
+    "breakdown_title_suffix": " Hizmet Adedi",
+    "breakdown_col_kod": "SUT Kodu",
+    "breakdown_col_tanim": "Hizmet Tanımı",
+    "breakdown_col_adet": "Adet",
+    "breakdown_col_pct": "Pay",
+    "breakdown_total": "Toplam",
+    "breakdown_loading": "Kırılım yükleniyor…",
+    "breakdown_empty": "Bu grup için SUT kırılımı bulunamadı."
+  },
+  "card_order": {
+    "Muayene Sayısı": 1,
+    "Panoramik Röntgen": 2,
+    "Konservatif Tedavi": 3,
+    "Diş Çekimi": 4,
+    "Endodontik Tedavi": 5,
+    "Cerrahi Müdahale": 6,
+    "Operasyon (Flep/Ging.)": 7,
+    "Periapikal Röntgen": 8,
+    "Sabit Protez (Üye)": 9,
+    "Hareketli (Total)": 10,
+    "Hareketli (Parsiyel)": 11,
+    "Detertraj (Diş Taşı)": 12,
+    "Küretaj İşlemi": 13,
+    "Yerel Flor Uygulaması": 14,
+    "Fissür Pit Sayısı": 15,
+    "Sefalometrik": 17,
+    "DentalTomogorafi": 18,
+    "Tüm Hizmetler": 19,
+    "Ortodonti": 20,
+    "İmplant Uygulama": 21,
+    "Extirpasyon Hizmetleri": 22,
+    "Diğer İşlemler": 99
+  },
+  "data_column_titles": {
+    "DATA1": "Muayene Sayısı",
+    "DATA2": "Panoramik Röntgen",
+    "DATA3": "Konservatif Tedavi",
+    "DATA4": "Diş Çekimi",
+    "DATA5": "Endodontik Tedavi",
+    "DATA6": "Cerrahi Müdahale",
+    "DATA7": "Operasyon (Flep/Ging.)",
+    "DATA8": "Periapikal Röntgen",
+    "DATA9": "Sabit Protez (Üye)",
+    "DATA10": "Hareketli (Total)",
+    "DATA11": "Hareketli (Parsiyel)",
+    "DATA12": "Detertraj (Diş Taşı)",
+    "DATA13": "Küretaj İşlemi",
+    "DATA14": "Yerel Flor Uygulaması",
+    "DATA15": "Fissür Pit Sayısı",
+    "DATA17": "Diğer İşlemler"
+  },
+  "card_title_recete_grup": {
+    "Muayene Sayısı": "47",
+    "Panoramik Röntgen": "4",
+    "Konservatif Tedavi": "7,10",
+    "Diş Çekimi": "2,33",
+    "Endodontik Tedavi": "1,11,23",
+    "Cerrahi Müdahale": "14,25",
+    "Operasyon (Flep/Ging.)": "32",
+    "Periapikal Röntgen": "3",
+    "Sabit Protez (Üye)": "9",
+    "Hareketli (Total)": "30",
+    "Hareketli (Parsiyel)": "31",
+    "Detertraj (Diş Taşı)": "8",
+    "Küretaj İşlemi": "29",
+    "Yerel Flor Uygulaması": "16",
+    "Fissür Pit Sayısı": "12",
+    "DentalTomogorafi": "6",
+    "Tüm Hizmetler": "13",
+    "Ortodonti": "27,39,40",
+    "İmplant Uygulama": "35",
+    "Extirpasyon Hizmetleri": "38"
+  },
+  "card_period_from_grafik": [
+    "İmplant Uygulama",
+    "Tüm Hizmetler",
+    "Extirpasyon Hizmetleri",
+    "Ortodonti"
+  ],
+  "recete_grup_card_defs": [
+    [
+      "Ortodonti",
+      "27,39,40",
+      "Ortodonti"
+    ],
+    [
+      "İmplant Uygulama",
+      "35",
+      "Tedavi"
+    ],
+    [
+      "Extirpasyon Hizmetleri",
+      "38",
+      "Cerrahi"
+    ]
+  ],
+  "card_meta": {
+    "MUAYENE": [
+      "Muayene",
+      "#2563eb",
+      "Seçilen dönemde yapılan toplam muayene hacmi."
+    ],
+    "PANORAMIK": [
+      "Görüntüleme",
+      "#0891b2",
+      "Panoramik görüntüleme işlem sayısı."
+    ],
+    "PERIAPIKAL": [
+      "Görüntüleme",
+      "#0ea5e9",
+      "Periapikal görüntüleme işlem sayısı."
+    ],
+    "KONSERVATIF": [
+      "Tedavi",
+      "#16a34a",
+      "Dolgu ve koruyucu tedavi grubundaki işlem hacmi."
+    ],
+    "ENDODONTIK": [
+      "Tedavi",
+      "#7c3aed",
+      "Kanal tedavisi ve endodontik işlem sayısı."
+    ],
+    "CEKIM": [
+      "Cerrahi",
+      "#dc2626",
+      "Diş çekimi işlemlerinin toplam adedi."
+    ],
+    "CERRAHI": [
+      "Cerrahi",
+      "#ea580c",
+      "Cerrahi işlem grubundaki toplam müdahale sayısı."
+    ],
+    "OPERASYON": [
+      "Cerrahi",
+      "#b91c1c",
+      "Operasyon grubundaki işlem hacmi."
+    ],
+    "FLEP": [
+      "Cerrahi",
+      "#b91c1c",
+      "Flep ve gingival operasyon işlem hacmi."
+    ],
+    "PROTEZ": [
+      "Protez",
+      "#4f46e5",
+      "Protez işlem grubundaki toplam üretim sayısı."
+    ],
+    "HAREKETLI": [
+      "Protez",
+      "#6366f1",
+      "Hareketli protez işlem adedi."
+    ],
+    "DETERTRAJ": [
+      "Periodonti",
+      "#db2777",
+      "Diş taşı temizliği işlem sayısı."
+    ],
+    "KURETAJ": [
+      "Periodonti",
+      "#be185d",
+      "Periodontal küretaj işlem adedi."
+    ],
+    "FLOR": [
+      "Pedodonti",
+      "#d97706",
+      "Çocuk hastalarda yerel flor uygulama sayısı."
+    ],
+    "FISSUR": [
+      "Pedodonti",
+      "#f59e0b",
+      "Fissür örtücü uygulama adedi."
+    ],
+    "ORTODONTI": [
+      "Ortodonti",
+      "#0d9488",
+      "Ortodonti, sabit ve hareketli alt gruplarının (27+39+40) toplam işlem sayısı."
+    ],
+    "IMPLANT": [
+      "Tedavi",
+      "#059669",
+      "İmplant uygulama işlem sayısı (reçete grubu 35)."
+    ],
+    "EXTIRPASYON": [
+      "Cerrahi",
+      "#9333ea",
+      "Extirpasyon hizmetleri işlem sayısı (reçete grubu 38)."
+    ]
+  },
+  "wide_column_map": {
+    "MUAYENE": [
+      "Muayene Sayısı",
+      "47"
+    ],
+    "PANORAMIKRONTGEN": [
+      "Panoramik Röntgen",
+      "4"
+    ],
+    "PANOROMIKRONTGEN": [
+      "Panoramik Röntgen",
+      "4"
+    ],
+    "PANORAMIK": [
+      "Panoramik Röntgen",
+      "4"
+    ],
+    "KONSERVATIFTEDAVI": [
+      "Konservatif Tedavi",
+      "7,10"
+    ],
+    "DISCEKIMI": [
+      "Diş Çekimi",
+      "2,33"
+    ],
+    "DISCEKIM": [
+      "Diş Çekimi",
+      "2,33"
+    ],
+    "ENDODONTIKTEDAVI": [
+      "Endodontik Tedavi",
+      "1,11,23"
+    ],
+    "CERRAHIHIZMET": [
+      "Cerrahi Müdahale",
+      "14,25"
+    ],
+    "CERRAHIHIZMETLER": [
+      "Cerrahi Müdahale",
+      "14,25"
+    ],
+    "OPERASYON": [
+      "Operasyon (Flep/Ging.)",
+      "32"
+    ],
+    "PERIAPIKAL": [
+      "Periapikal Röntgen",
+      "3"
+    ],
+    "SABITPROTEZ": [
+      "Sabit Protez (Üye)",
+      "9"
+    ],
+    "HAREKETLIPROTEZ": [
+      "Hareketli (Total)",
+      "30"
+    ],
+    "HAREKETLIPROTEZTOTAL": [
+      "Hareketli (Total)",
+      "30"
+    ],
+    "HAREKETLIPARSIYAL": [
+      "Hareketli (Parsiyel)",
+      "31"
+    ],
+    "HAREKETLIPARSIYEL": [
+      "Hareketli (Parsiyel)",
+      "31"
+    ],
+    "DETERTRAJ": [
+      "Detertraj (Diş Taşı)",
+      "8"
+    ],
+    "DETRATRAJ": [
+      "Detertraj (Diş Taşı)",
+      "8"
+    ],
+    "KURETAJ": [
+      "Küretaj İşlemi",
+      "29"
+    ],
+    "YERELFLOR": [
+      "Yerel Flor Uygulaması",
+      "16"
+    ],
+    "FISSURSEALANT": [
+      "Fissür Pit Sayısı",
+      "12"
+    ],
+    "FISSURSAYISI": [
+      "Fissür Pit Sayısı",
+      "12"
+    ],
+    "SEFALOMETRIK": [
+      "Sefalometrik",
+      "5"
+    ],
+    "DENTALTOMOGRAFI": [
+      "DentalTomogorafi",
+      "6"
+    ],
+    "DENTALTOMOGORAFI": [
+      "DentalTomogorafi",
+      "6"
+    ],
+    "TUMHIZMETLER": [
+      "Tüm Hizmetler",
+      "13"
+    ],
+    "TMHIZMETLER": [
+      "Tüm Hizmetler",
+      "13"
+    ],
+    "ORTODONTI": [
+      "Ortodonti",
+      "27,39,40"
+    ],
+    "ORTODONTISABIT": [
+      "Ortodonti",
+      "27,39,40"
+    ],
+    "ORTODONTIHAREKETLI": [
+      "Ortodonti",
+      "27,39,40"
+    ],
+    "PATOLOJI": [
+      "Patoloji",
+      "19"
+    ],
+    "ORALDIAGNOZ": [
+      "Oral Diagnoz",
+      "20"
+    ],
+    "IMPLANTUYGULAMA": [
+      "İmplant Uygulama",
+      "35"
+    ],
+    "IMPLANT": [
+      "İmplant Uygulama",
+      "35"
+    ],
+    "ANESTEZI": [
+      "Anestezi",
+      "36"
+    ],
+    "TAMIR": [
+      "Tamir",
+      "37"
+    ],
+    "EXTIRPASYON": [
+      "Extirpasyon Hizmetleri",
+      "38"
+    ],
+    "EXTIRPASYONHIZMETLERI": [
+      "Extirpasyon Hizmetleri",
+      "38"
+    ],
+    "DATA1": [
+      "Muayene Sayısı",
+      "47"
+    ],
+    "DATA2": [
+      "Panoramik Röntgen",
+      "4"
+    ],
+    "DATA3": [
+      "Konservatif Tedavi",
+      "7,10"
+    ],
+    "DATA4": [
+      "Diş Çekimi",
+      "2,33"
+    ],
+    "DATA5": [
+      "Endodontik Tedavi",
+      "1,11,23"
+    ],
+    "DATA6": [
+      "Cerrahi Müdahale",
+      "14,25"
+    ],
+    "DATA7": [
+      "Operasyon (Flep/Ging.)",
+      "32"
+    ],
+    "DATA8": [
+      "Periapikal Röntgen",
+      "3"
+    ],
+    "DATA9": [
+      "Sabit Protez (Üye)",
+      "9"
+    ],
+    "DATA10": [
+      "Hareketli (Total)",
+      "30"
+    ],
+    "DATA11": [
+      "Hareketli (Parsiyel)",
+      "31"
+    ],
+    "DATA12": [
+      "Detertraj (Diş Taşı)",
+      "8"
+    ],
+    "DATA13": [
+      "Küretaj İşlemi",
+      "29"
+    ],
+    "DATA14": [
+      "Yerel Flor Uygulaması",
+      "16"
+    ],
+    "DATA15": [
+      "Fissür Pit Sayısı",
+      "12"
+    ],
+    "BIYOKIMYA": [
+      "Biyokimya",
+      "42"
+    ],
+    "ELEKTROLIT": [
+      "Elektorilit",
+      "43"
+    ],
+    "ELEKTORILIT": [
+      "Elektorilit",
+      "43"
+    ],
+    "HORMON": [
+      "Hormon",
+      "44"
+    ],
+    "KOAGLASYON": [
+      "Koaglasyon",
+      "45"
+    ],
+    "IDRAR": [
+      "İdrar",
+      "46"
+    ]
+  },
+  "recete_grup_id_to_ad": {
+    "1": "Kanal",
+    "2": "Çekim",
+    "3": "Periapikal",
+    "4": "Panoramik",
+    "5": "Sefalometrik",
+    "6": "DentalTomogorafi",
+    "7": "Dolgu",
+    "8": "Detertraj",
+    "9": "SabitProtez",
+    "10": "Konservatif Tedavi",
+    "11": "Endodontik Tedavi",
+    "12": "Fissür Sealant",
+    "13": "Tüm Hizmetler",
+    "14": "Cerrahi Hizmetler",
+    "15": "Yer Tutucu",
+    "16": "Yerel Flor",
+    "17": "Radyoloji İstek",
+    "18": "Kalite Cerrahi",
+    "19": "Patoloji",
+    "20": "Oral Diagnoz",
+    "21": "Tedavi",
+    "22": "Pedodonti",
+    "23": "Endodonti",
+    "24": "Protez",
+    "25": "Cerrahi",
+    "26": "Periodontoloji",
+    "27": "Ortodonti",
+    "28": "Diğer",
+    "29": "Küretaj",
+    "30": "Hareketli Protez (total)",
+    "31": "Hareketli Protez (Parsiyel)",
+    "32": "Operasyon",
+    "33": "Diş Çekimi Sayısı(Rejnonal Anestezi İle)",
+    "34": "Yer Tutucu Hareketli",
+    "35": "İmplant Uygulama",
+    "36": "Anestezi",
+    "37": "Tamir",
+    "38": "Extirpasyon Hizmetleri",
+    "39": "Ortodonti Sabit",
+    "40": "Ortodonti Hareketli",
+    "41": "Dolgu Tekrarı",
+    "42": "Biyokimya",
+    "43": "Elektorilit",
+    "44": "Hormon",
+    "45": "Koaglasyon",
+    "46": "İdrar",
+    "47": "Muayene"
+  },
+  "bucket_titles": {
+    "panoramik": 2,
+    "periapikal": 8,
+    "muayene": 1,
+    "endodontik": 5,
+    "konservatif": 3,
+    "dis_cekim": 4,
+    "operasyon": 7,
+    "cerrahi": 6,
+    "sabit_protez": 9,
+    "hareketli_total": 10,
+    "hareketli_parsiyel": 11,
+    "detertraj": 12,
+    "kuretaj": 13,
+    "flor": 14,
+    "fissur": 15,
+    "ortodonti": 20,
+    "implant": 21,
+    "extirpasyon": 22,
+    "diger": 99
+  },
+  "month_names_tr": [
+    "Ocak",
+    "Şubat",
+    "Mart",
+    "Nisan",
+    "Mayıs",
+    "Haziran",
+    "Temmuz",
+    "Ağustos",
+    "Eylül",
+    "Ekim",
+    "Kasım",
+    "Aralık"
+  ]
+}

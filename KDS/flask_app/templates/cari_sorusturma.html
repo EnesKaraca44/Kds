@@ -1,0 +1,432 @@
+{% extends "base.html" %}
+{% block title %}Cari Soruşturma{% endblock %}
+{% block page_title %}<span data-t="Cari Soruşturma">Cari Soruşturma</span>{% endblock %}
+
+{% block head %}
+<style>
+    .cs-report {
+        margin-bottom: 0;
+    }
+
+    .cs-summary {
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .cs-summary-hero {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px 18px;
+        padding: 16px 20px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #0ea5e9 100%);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
+        color: #fff;
+    }
+
+    .theme-dark .cs-summary-hero {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0369a1 100%);
+        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    .cs-summary-icon {
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        font-size: 1.45rem;
+        background: rgba(255, 255, 255, 0.18);
+        backdrop-filter: blur(4px);
+        flex-shrink: 0;
+    }
+
+    .cs-summary-hero-text {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .cs-summary-hero-text h2 {
+        margin: 0 0 4px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .cs-summary-hero-text p {
+        margin: 0;
+        font-size: 0.8rem;
+        opacity: 0.92;
+        font-weight: 500;
+    }
+
+    .cs-record-badge {
+        flex-shrink: 0;
+        font-size: 0.78rem;
+        font-weight: 800;
+        padding: 8px 16px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.95);
+        color: #1d4ed8;
+        border: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        letter-spacing: 0.02em;
+    }
+
+    .cs-summary-grid {
+        display: grid;
+        grid-template-columns: minmax(140px, 0.55fr) minmax(220px, 1.45fr) minmax(200px, 0.75fr);
+        gap: 12px;
+    }
+
+    @media (max-width: 900px) {
+        .cs-summary-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .cs-info-card {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        padding: 14px 16px;
+        border-radius: 12px;
+        border: 1px solid transparent;
+        box-shadow: var(--shadow-sm);
+        min-height: 72px;
+    }
+
+    .cs-info-card .cs-info-label {
+        font-size: 0.68rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.85;
+    }
+
+    .cs-info-card .cs-info-value {
+        font-size: 0.88rem;
+        font-weight: 700;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .cs-info-card--kod {
+        background: linear-gradient(145deg, #eff6ff, #dbeafe);
+        border-color: #93c5fd;
+        color: #1e3a8a;
+    }
+
+    .cs-info-card--kod .cs-info-value {
+        font-size: 1rem;
+        font-variant-numeric: tabular-nums;
+        color: #1d4ed8;
+    }
+
+    .cs-info-card--unvan {
+        background: linear-gradient(145deg, #f5f3ff, #ede9fe);
+        border-color: #c4b5fd;
+        color: #4c1d95;
+    }
+
+    .cs-info-card--unvan .cs-info-value {
+        color: #5b21b6;
+        font-size: 0.82rem;
+    }
+
+    .cs-info-card--donem {
+        background: linear-gradient(145deg, #ecfdf5, #d1fae5);
+        border-color: #6ee7b7;
+        color: #065f46;
+    }
+
+    .cs-info-card--donem .cs-info-value {
+        font-size: 0.95rem;
+        color: #047857;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .theme-dark .cs-info-card--kod {
+        background: linear-gradient(145deg, rgba(30, 58, 138, 0.45), rgba(29, 78, 216, 0.25));
+        border-color: rgba(96, 165, 250, 0.35);
+        color: #bfdbfe;
+    }
+
+    .theme-dark .cs-info-card--kod .cs-info-value { color: #93c5fd; }
+
+    .theme-dark .cs-info-card--unvan {
+        background: linear-gradient(145deg, rgba(76, 29, 149, 0.4), rgba(91, 33, 182, 0.2));
+        border-color: rgba(167, 139, 250, 0.35);
+        color: #ddd6fe;
+    }
+
+    .theme-dark .cs-info-card--unvan .cs-info-value { color: #e9d5ff; }
+
+    .theme-dark .cs-info-card--donem {
+        background: linear-gradient(145deg, rgba(6, 95, 70, 0.4), rgba(4, 120, 87, 0.2));
+        border-color: rgba(52, 211, 153, 0.35);
+        color: #a7f3d0;
+    }
+
+    .theme-dark .cs-info-card--donem .cs-info-value { color: #6ee7b7; }
+
+    .cs-table-shell {
+        border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
+        border-radius: 14px;
+        overflow: auto;
+        max-height: calc(100vh - 280px);
+        -webkit-overflow-scrolling: touch;
+        background: var(--bg-card);
+        box-shadow: var(--shadow-sm);
+    }
+
+    table.data-table.cs-table {
+        width: max-content;
+        min-width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.82rem;
+    }
+
+    table.data-table.cs-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 2;
+        background: linear-gradient(
+            180deg,
+            color-mix(in srgb, var(--bg-card) 96%, transparent),
+            color-mix(in srgb, var(--bg-card) 88%, transparent)
+        );
+        backdrop-filter: blur(6px);
+        border-bottom: 2px solid var(--border-color);
+        font-size: 0.7rem;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        padding: 12px 14px;
+        white-space: nowrap;
+    }
+
+    table.data-table.cs-table td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+        white-space: nowrap;
+    }
+
+    table.data-table.cs-table tbody tr:nth-child(odd) {
+        background: color-mix(in srgb, var(--bg-body) 40%, transparent);
+    }
+
+    table.data-table.cs-table tbody tr:hover {
+        background: color-mix(in srgb, var(--accent-primary, #3b82f6) 8%, transparent);
+    }
+
+    table.data-table.cs-table .col-center {
+        text-align: center;
+    }
+
+    table.data-table.cs-table .col-num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        font-weight: 600;
+    }
+
+    table.data-table.cs-table .col-aciklama {
+        max-width: 280px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    table.data-table.cs-table .col-birim {
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .cs-modul {
+        display: inline-flex;
+        align-items: center;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.02em;
+    }
+
+    .cs-modul--satinalma {
+        background: rgba(139, 92, 246, 0.12);
+        color: #6d28d9;
+        border: 1px solid rgba(139, 92, 246, 0.25);
+    }
+
+    .cs-modul--banka {
+        background: rgba(16, 185, 129, 0.12);
+        color: #047857;
+        border: 1px solid rgba(16, 185, 129, 0.25);
+    }
+
+    .cs-modul--cari {
+        background: rgba(59, 130, 246, 0.12);
+        color: #1d4ed8;
+        border: 1px solid rgba(59, 130, 246, 0.25);
+    }
+
+    .theme-dark .cs-modul--satinalma { color: #c4b5fd; }
+    .theme-dark .cs-modul--banka { color: #6ee7b7; }
+    .theme-dark .cs-modul--cari { color: #93c5fd; }
+
+    .cs-ba {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 26px;
+        height: 26px;
+        border-radius: 6px;
+        font-size: 0.75rem;
+        font-weight: 800;
+    }
+
+    .cs-ba--a {
+        background: rgba(37, 99, 235, 0.12);
+        color: #1d4ed8;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+    }
+
+    .cs-ba--b {
+        background: rgba(220, 38, 38, 0.1);
+        color: #b91c1c;
+        border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .cs-tutar-a { color: #2563eb; }
+    .cs-tutar-b { color: #dc2626; }
+    .cs-bakiye-a { color: #2563eb; font-weight: 600; }
+
+    .cs-empty {
+        padding: 56px 24px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .cs-empty-icon {
+        font-size: 2rem;
+        margin-bottom: 10px;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .cs-table-shell {
+            max-height: calc(100vh - 320px);
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chart-container cs-report">
+    <div class="cs-summary">
+        <div class="cs-summary-hero">
+            <div class="cs-summary-icon" aria-hidden="true">📒</div>
+            <div class="cs-summary-hero-text">
+                <h2 data-t="Cari Soruşturma Listesi">Cari Soruşturma Listesi</h2>
+                <p data-t="Seçili cari hesabına ait hareket dökümü">Seçili cari hesabına ait hareket dökümü</p>
+            </div>
+            {% if hareketler %}
+            <span class="cs-record-badge">{{ hareketler|length }} <span data-t="kayıt">kayıt</span></span>
+            {% endif %}
+        </div>
+
+        <div class="cs-summary-grid">
+            <div class="cs-info-card cs-info-card--kod">
+                <span class="cs-info-label" data-t="Cari Kod">Cari Kod</span>
+                <span class="cs-info-value">{{ cari_kod }}</span>
+            </div>
+            <div class="cs-info-card cs-info-card--unvan">
+                <span class="cs-info-label" data-t="Cari Ünvan">Cari Ünvan</span>
+                <span class="cs-info-value">{{ cari_unvan }}</span>
+            </div>
+            <div class="cs-info-card cs-info-card--donem">
+                <span class="cs-info-label" data-t="Dönem">Dönem</span>
+                <span class="cs-info-value">
+                    {{ start_date.strftime('%d.%m.%Y') }} – {{ end_date.strftime('%d.%m.%Y') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="cs-table-shell">
+        {% if hareketler %}
+        <table class="data-table cs-table">
+            <thead>
+                <tr>
+                    <th class="col-center">No</th>
+                    <th class="col-center">***</th>
+                    <th data-t="Modül">Modül</th>
+                    <th data-t="Tarih">Tarih</th>
+                    <th data-t="Fatura No">Fatura No</th>
+                    <th data-t="Belge No">Belge No</th>
+                    <th data-t="Belge Tarihi">Belge Tarihi</th>
+                    <th data-t="Vade Tarihi">Vade Tarihi</th>
+                    <th data-t="Açıklama">Açıklama</th>
+                    <th data-t="İşlem Türü">İşlem Türü</th>
+                    <th class="col-center" data-t="B/A">B/A</th>
+                    <th class="col-num" data-t="Tutar">Tutar</th>
+                    <th class="col-num" data-t="Bakiye">Bakiye</th>
+                    <th class="col-num" data-t="Döviz Tutar">Döviz Tutar</th>
+                    <th class="col-center" data-t="Para Birim">Para Birim</th>
+                    <th data-t="Birim Adı">Birim Adı</th>
+                    <th data-t="Özel Kod">Özel Kod</th>
+                    <th data-t="Ödeme Türü">Ödeme Türü</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in hareketler %}
+                {% set modul_key = 'satinalma' if row.modul == 'Satınalma' else ('banka' if row.modul == 'Banka' else 'cari') %}
+                <tr>
+                    <td class="col-center">{{ loop.index }}</td>
+                    <td class="col-center" style="color:var(--text-muted); letter-spacing:1px;">***</td>
+                    <td>
+                        <span class="cs-modul cs-modul--{{ modul_key }}">{{ row.modul }}</span>
+                    </td>
+                    <td>{{ row.tarih }}</td>
+                    <td>{{ row.fatura_no or '—' }}</td>
+                    <td>{{ row.belge_no or '—' }}</td>
+                    <td>{{ row.belge_tarihi or '—' }}</td>
+                    <td>{{ row.vade_tarihi or '—' }}</td>
+                    <td class="col-aciklama" title="{{ row.aciklama }}">{{ row.aciklama }}</td>
+                    <td>{{ row.islem_turu }}</td>
+                    <td class="col-center">
+                        <span class="cs-ba cs-ba--{{ row.ba|lower }}">{{ row.ba }}</span>
+                    </td>
+                    <td class="col-num {% if row.ba == 'A' %}cs-tutar-a{% elif row.ba == 'B' %}cs-tutar-b{% endif %}">
+                        {{ row.tutar|turkish_number(2) }}
+                    </td>
+                    <td class="col-num {% if '(A)' in row.bakiye %}cs-bakiye-a{% endif %}">{{ row.bakiye }}</td>
+                    <td class="col-num">{{ row.doviz_tutar or '—' }}</td>
+                    <td class="col-center">{{ row.para_birim }}</td>
+                    <td class="col-birim" title="{{ row.birim_adi }}">{{ row.birim_adi }}</td>
+                    <td>{{ row.ozel_kod or '—' }}</td>
+                    <td>{{ row.odeme_turu or '—' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="cs-empty">
+            <div class="cs-empty-icon">📋</div>
+            <div data-t="Seçilen cari ve dönem için kayıt bulunamadı.">Seçilen cari ve dönem için kayıt bulunamadı.</div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

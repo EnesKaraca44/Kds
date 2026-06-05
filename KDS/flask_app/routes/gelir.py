@@ -16,6 +16,84 @@ from routes.dashboard import get_date_range
 
 gelir_bp = Blueprint('gelir', __name__)
 
+PAGE_SQL_KODLARI = [
+    "fatura.fatura_gelir_verisi_yukle",
+    "vezne.kasa_ozet_verisi_yukle",
+    "vezne.kasa_hareket_turu_verisi_yukle",
+    "vezne.kasa_aylik_verisi_yukle",
+]
+
+FATURA_COLUMN_LABELS = {
+    'FATURA_NO': 'Fatura No',
+    'FATURA_TARIHI': 'Fatura Tarihi',
+    'FATURA_ILGILI': 'Fatura İlgili',
+    'KURUM_TURU': 'Kurum Türü',
+    'FATURA_KDVLI_TOPLAM_TUTAR': 'KDV Dahil Tutar',
+    'FATURA_KISI_SAYISI': 'Kişi Sayısı',
+    'FATURA_ACIKLAMA': 'Açıklama',
+    'FATURA_TOPLAM_KDV': 'Toplam KDV',
+    'FATURA_TOPLAM_TUTAR': 'Net Tutar',
+}
+
+MONEY_TABLE_COLUMNS = frozenset({
+    'FATURA_KDVLI_TOPLAM_TUTAR',
+    'FATURA_TOPLAM_TUTAR',
+    'FATURA_TOPLAM_KDV',
+})
+
+INT_TABLE_COLUMNS = frozenset({'FATURA_KISI_SAYISI'})
+
+# Grafik ve KPI'larda kullanilan gelir tutari (KDV haric)
+GELIR_TUTAR_KOLONU = 'FATURA_TOPLAM_TUTAR'
+
+MONEY_DF_COLUMNS = (
+    GELIR_TUTAR_KOLONU,
+    'FATURA_KDVLI_TOPLAM_TUTAR',
+    'FATURA_TOPLAM_KDV',
+)
+
+
+def _coerce_invoice_money_columns(df):
+    """Tutar kolonlarini sayisal yap; grafik toplamlari dogru hesaplansin."""
+    for col in MONEY_DF_COLUMNS:
+        if col in df.columns:
+            df[col] = pd.to_numeric(df[col], errors='coerce').fillna(0.0)
+    return df
+
+
+def _fatura_column_label(column_key):
+    """FATURA_NO -> Fatura No; bilinmeyen kolonlar okunakli basliga cevrilir."""
+    key = str(column_key or '').upper().strip()
+    if key in FATURA_COLUMN_LABELS:
+        return FATURA_COLUMN_LABELS[key]
+    return ' '.join(part.capitalize() for part in key.split('_') if part)
+
+
+def _table_columns_meta(column_keys):
+    return [{'key': col, 'label': _fatura_column_label(col)} for col in column_keys]
+
+
+def _format_table_cell(column_key, value):
+    key = str(column_key or '').upper().strip()
+    if pd.isna(value) or value == '':
+        return ''
+    if key == 'FATURA_TARIHI':
+        try:
+            return pd.to_datetime(value).strftime('%d.%m.%Y')
+        except (TypeError, ValueError):
+            return value
+    if key in MONEY_TABLE_COLUMNS:
+        try:
+            return float(value)
+        except (TypeError, ValueError):
+            return value
+    if key in INT_TABLE_COLUMNS:
+        try:
+            return int(float(value))
+        except (TypeError, ValueError):
+            return value
+    return value
+
 
 def _load_invoice_df():
     """Seçili tarih aralığına göre fatura verisini döndürür."""
@@ -27,6 +105,7 @@ def _load_invoice_df():
     df = df.copy()
     df.columns = [c.upper().strip() for c in df.columns]
     df['FATURA_TARIHI'] = pd.to_datetime(df['FATURA_TARIHI'], errors='coerce')
+    df = _coerce_invoice_money_columns(df)
     return sd, ed, df
 
 
@@ -204,51 +283,58 @@ def gelir():
             legend=dict(orientation="h", yanchor="bottom", y=1.02, xanchor="left", x=0.0),
         )
 
-    t_gelir_kdvli = float(df['FATURA_KDVLI_TOPLAM_TUTAR'].sum()) if not df.empty else 0.0
-    t_gelir_net = float(df['FATURA_TOPLAM_TUTAR'].sum()) if not df.empty else 0.0
+    amount_col = GELIR_TUTAR_KOLONU
+    t_gelir = float(df[amount_col].sum()) if (not df.empty and amount_col in df.columns) else 0.0
     t_fatura = int(df['FATURA_NO'].nunique()) if not df.empty else 0
     t_kisi = int(df['FATURA_KISI_SAYISI'].sum()) if not df.empty else 0
 
     charts = {}
 
-    if not df.empty:
+    if not df.empty and amount_col in df.columns:
         # Kurum Performansı
         kurum_tur_df = (
-            df.groupby('KURUM_TURU')['FATURA_KDVLI_TOPLAM_TUTAR']
+            df.groupby('KURUM_TURU')[amount_col]
             .sum()
             .reset_index()
-            .sort_values('FATURA_KDVLI_TOPLAM_TUTAR', ascending=False)
+            .sort_values(amount_col, ascending=False)
         )
-        fig_pie = px.pie(
-            kurum_tur_df,
-            values='FATURA_KDVLI_TOPLAM_TUTAR',
-            names='KURUM_TURU',
+        kurum_tur_df['tutar_text'] = kurum_tur_df[amount_col].apply(format_tr_money)
+        fig_pie = go.Figure(data=[go.Pie(
+            labels=kurum_tur_df['KURUM_TURU'].tolist(),
+            values=kurum_tur_df[amount_col].tolist(),
             hole=0.6,
-        )
-        fig_pie.update_traces(textinfo='percent+label')
+            sort=False,
+            textinfo='none',
+            texttemplate='%{label}<br>%{customdata}',
+            textposition='outside',
+            customdata=kurum_tur_df['tutar_text'].tolist(),
+            hovertemplate='%{label}<br>Net tutar: %{customdata}<extra></extra>',
+        )])
         fig_pie.update_layout(
             template='plotly_dark',
-            height=420,
+            height=460,
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
             showlegend=False,
-            margin=dict(l=10, r=10, t=10, b=10),
+            margin=dict(l=50, r=50, t=40, b=40),
+            uniformtext_minsize=10,
+            uniformtext_mode='hide',
         )
 
         top_kurum = (
-            df.groupby('FATURA_ILGILI')['FATURA_KDVLI_TOPLAM_TUTAR']
+            df.groupby('FATURA_ILGILI')[amount_col]
             .sum()
             .nlargest(10)
             .reset_index()
         )
         fig_bar = px.bar(
-            top_kurum.sort_values('FATURA_KDVLI_TOPLAM_TUTAR'),
-            x='FATURA_KDVLI_TOPLAM_TUTAR',
+            top_kurum.sort_values(amount_col),
+            x=amount_col,
             y='FATURA_ILGILI',
             orientation='h',
-            color='FATURA_KDVLI_TOPLAM_TUTAR',
+            color=amount_col,
             color_continuous_scale='Blues',
-            labels={'FATURA_KDVLI_TOPLAM_TUTAR': '', 'FATURA_ILGILI': ''},
+            labels={amount_col: '', 'FATURA_ILGILI': ''},
         )
         fig_bar.update_traces(texttemplate='%{x:.3s}', textposition='outside', cliponaxis=False)
         fig_bar.update_layout(
@@ -263,29 +349,50 @@ def gelir():
             showlegend=False,
         )
 
-        # Gelir Trendi
+        # Gelir Trendi — seçilen aralıkta her günün net fatura toplamı (KDV hariç)
+        # Not: Eksik günleri 0 ile doldurmuyoruz; tek bir büyük fatura grafigi
+        # düz çizgi gibi göstermesin ve alan grafiği görsel olarak dolu kalsın.
         daily = (
-            df.groupby(df['FATURA_TARIHI'].dt.date)['FATURA_KDVLI_TOPLAM_TUTAR']
+            df.groupby(df['FATURA_TARIHI'].dt.date)[amount_col]
             .sum()
             .reset_index()
         )
         daily.columns = ['Tarih', 'Gelir']
+        daily['Gelir'] = daily['Gelir'].astype(float)
+        daily['gelir_text'] = daily['Gelir'].apply(format_tr_money)
+
         fig_trend = px.area(
             daily,
             x='Tarih',
             y='Gelir',
             markers=True,
+            custom_data=['gelir_text'],
         )
-        fig_trend.update_traces(line_color='#6366f1', fillcolor='rgba(99,102,241,0.25)')
+        fig_trend.update_traces(
+            line_color='#6366f1',
+            fillcolor='rgba(99,102,241,0.25)',
+            hovertemplate='Tarih: %{x|%d.%m.%Y}<br>Net gelir (KDV hariç): %{customdata[0]}<extra></extra>',
+        )
         fig_trend.update_layout(
             template='plotly_dark',
             height=460,
-            margin=dict(l=20, r=20, t=30, b=30),
+            margin=dict(l=70, r=20, t=30, b=50),
             paper_bgcolor='rgba(0,0,0,0)',
             plot_bgcolor='rgba(0,0,0,0)',
-            xaxis_title='',
-            yaxis_title='',
-            yaxis=dict(tickformat='.3s'),
+            hovermode='x unified',
+            xaxis=dict(
+                title='Fatura tarihi',
+                tickformat='%d.%m.%Y',
+                showgrid=True,
+                gridcolor='rgba(148,163,184,0.12)',
+            ),
+            yaxis=dict(
+                title='Net gelir (₺, KDV hariç)',
+                showgrid=True,
+                gridcolor='rgba(148,163,184,0.12)',
+                tickformat=',.0f',
+                separatethousands=True,
+            ),
         )
 
         # Fatura Listesi (son 500)
@@ -302,13 +409,18 @@ def gelir():
         ]
         existing_cols = [c for c in table_cols if c in df.columns]
         table_df = df.sort_values('FATURA_TARIHI', ascending=False)[existing_cols].head(500)
-        table_rows = table_df.to_dict(orient='records')
+        table_columns = _table_columns_meta(existing_cols)
+        table_rows = [
+            {col: _format_table_cell(col, row.get(col)) for col in existing_cols}
+            for row in table_df.to_dict(orient='records')
+        ]
 
         charts['fig_pie'] = fig_pie.to_html(full_html=False, include_plotlyjs=False)
         charts['fig_bar'] = fig_bar.to_html(full_html=False, include_plotlyjs=False)
         charts['fig_trend'] = fig_trend.to_html(full_html=False, include_plotlyjs=False)
     else:
         existing_cols = []
+        table_columns = []
         table_rows = []
     if fig_vezne_kasa is not None:
         charts["fig_vezne_kasa"] = fig_vezne_kasa.to_html(full_html=False, include_plotlyjs=False)
@@ -322,13 +434,13 @@ def gelir():
         start_date=sd,
         end_date=ed,
         no_data=(df.empty and vezne_kasa_df.empty),
-        t_gelir_kdvli=t_gelir_kdvli,
-        t_gelir_net=t_gelir_net,
+        t_gelir=t_gelir,
         t_fatura=t_fatura,
         t_kisi=t_kisi,
         charts=charts,
         table_rows=table_rows,
         table_cols=existing_cols,
+        table_columns=table_columns,
         t_vezne_gelir=t_vezne_gelir,
         vezne_kasa_rows=vezne_kasa_rows,
         vezne_kasa_totals=vezne_kasa_totals,
@@ -336,6 +448,7 @@ def gelir():
         vezne_hareket_totals=vezne_hareket_totals,
         vezne_aylik_rows=vezne_aylik_rows,
         selected_kasa_id=str(selected_kasa_id_int) if selected_kasa_id_int is not None else "",
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )
 
 

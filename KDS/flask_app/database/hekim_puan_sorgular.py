@@ -1,7 +1,13 @@
 import pandas as pd
+import os
+import re
 from .baglanti import baglanti_olustur
 from .cache_helper import ttl_cache
 from .sql_api_client import get_remote_sql
+
+
+_APP_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_DEBUG_LOG_FILE = os.path.join(_APP_ROOT, "debug_log.txt")
 
 
 def _fix_known_group_by_mismatch(sql: str) -> str:
@@ -20,6 +26,34 @@ def _fix_known_group_by_mismatch(sql: str) -> str:
     return sql
 
 
+def _fix_outer_where_one_day_filter(sql, start_date, end_date) -> str:
+    """
+    HEKIM_PUAN_TAB1 şablonunun dış WHERE klozu yanlış parametre kullanıyor:
+        AND (islemTrh >= '@BASLANGIC_TRH@') AND (islemTrh < DATEADD(day, 1, '@BASLANGIC_TRH@'))
+    İki sınır da başlangıç tarihiyle çalıştığı için sorgu seçilen aralıktan bağımsız
+    olarak hep tek günlük (yalnızca başlangıç gününe ait) sonuç döner.
+    Bu fonksiyon, substitution sonrası SQL'de bu kalıbı bulup üst sınırdaki tarihi
+    end_date ile düzeltir.
+    """
+    if not isinstance(sql, str) or not sql or not start_date or not end_date:
+        return sql
+
+    sd = str(start_date)
+    ed = str(end_date)
+    if sd == ed:
+        return sql
+
+    pattern = re.compile(
+        r"(\(\s*islemTrh\s*>=\s*'"
+        + re.escape(sd)
+        + r"'\s*\)\s*AND\s*\(\s*islemTrh\s*<\s*DATEADD\s*\(\s*day\s*,\s*1\s*,\s*')"
+        + re.escape(sd)
+        + r"('\s*\)\s*\))",
+        re.IGNORECASE,
+    )
+    return pattern.sub(lambda m: m.group(1) + ed + m.group(2), sql)
+
+
 def _read_sql_with_optional_params(conn, sql, start_date, end_date):
     """
     API'den gelen SQL {start_date}/{end_date} veya @...@ ile dolu olabilir;
@@ -35,7 +69,7 @@ def _read_sql_with_optional_params(conn, sql, start_date, end_date):
     return pd.read_sql(sql, conn)
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def hekim_puan_verisi_yukle(start_date, end_date):
     """Hekim hizmet puan detay verisi; SQL Rapor API'den (HEKIM_PUAN_TAB1) gelir."""
     conn = baglanti_olustur()
@@ -51,20 +85,11 @@ def hekim_puan_verisi_yukle(start_date, end_date):
             return None
 
         sql = _fix_known_group_by_mismatch(sql)
-        
-        # Daha güvenli bir değişim için Regex (Büyük/Küçük harf duyarsız) kullanıyoruz
-        import re
-        # 1. Tarih konusunu düzeltiyoruz: 
-        # Sorgudaki tüm tırnak içindeki tarihleri (YYYY-MM-DD, YYYY.MM.DD vb.) yakalıyoruz
-        found_dates = re.findall(r"'\d{1,4}[./-]\d{1,2}[./-]\d{1,4}(?:\s\d{2}:\d{2}:\d{2})?'", sql)
-        if len(found_dates) >= 2:
-            sql = sql.replace(found_dates[0], f"'{start_date}'")
-            for i in range(1, len(found_dates)):
-                sql = sql.replace(found_dates[i], f"'{end_date}'")
-        
+        sql = _fix_outer_where_one_day_filter(sql, start_date, end_date)
+
         df = _read_sql_with_optional_params(conn, sql, start_date, end_date)
         
-        with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\debug_log.txt", "w", encoding="utf-8") as f:
+        with open(_DEBUG_LOG_FILE, "w", encoding="utf-8") as f:
             f.write("SQL BASARILI\n")
             f.write(f"SQL Uzunlugu: {len(sql)}\n")
             f.write(f"Donen Satir: {len(df) if df is not None else 0}\n")
@@ -72,13 +97,13 @@ def hekim_puan_verisi_yukle(start_date, end_date):
 
         return df
     except Exception as e:
-        with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\debug_log.txt", "w", encoding="utf-8") as f:
+        with open(_DEBUG_LOG_FILE, "w", encoding="utf-8") as f:
             f.write(f"SQL HATASI: {str(e)}\n\n")
             import traceback
             f.write(traceback.format_exc())
             try:
                 f.write(f"\n\nSQL:\n{sql}\n")
-            except:
+            except Exception:
                 pass
         print(f"Hekim Puan Verisi Yükleme Hatasi: {e}")
         return None

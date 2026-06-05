@@ -16,6 +16,12 @@ from routes.dashboard import get_date_range
 
 malzeme_bp = Blueprint('malzeme', __name__)
 
+PAGE_SQL_KODLARI = [
+    "malzeme.malzeme_tuketim_verisi_yukle",
+    "malzeme.depo_birim_liste_yukle",
+    "malzeme.depo_mevcut_verisi_yukle",
+]
+
 
 @malzeme_bp.route('/malzeme')
 @login_required
@@ -484,4 +490,5 @@ def malzeme():
         miad_unique_seri_parti=miad_unique_seri_parti,
         depo_options=depo_options,
         selected_depo=selected_depo,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

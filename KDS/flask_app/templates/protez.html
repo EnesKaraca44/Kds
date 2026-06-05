@@ -36,33 +36,6 @@
         color: #e5e7eb;
     }
 
-    .section-title {
-        margin-top: 24px;
-        margin-bottom: 8px;
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #e5e7eb;
-    }
-
-    .analysis-box {
-        margin-top: 16px;
-        padding: 14px 16px;
-        border-radius: 10px;
-        background: linear-gradient(90deg, rgba(37, 99, 235, 0.12), rgba(8, 47, 73, 0.6));
-        border: 1px solid rgba(59, 130, 246, 0.5);
-        font-size: 0.85rem;
-        color: #e5e7eb;
-    }
-
-    .analysis-box ul {
-        margin: 6px 0 0 18px;
-        padding: 0;
-    }
-
-    .analysis-box li {
-        margin-bottom: 2px;
-    }
-
     /* Geciken hekim listesi - kritik vaka sayısı ısı haritası (sadece ilgili hücre) */
     .heat-strong {
         background: linear-gradient(90deg, #b91c1c 0%, #f97373 70%);
@@ -83,14 +56,23 @@
     .protez-kritik-table th,
     .protez-kritik-table td {
         font-size: 0.8rem;
-        padding-top: 6px;
-        padding-bottom: 6px;
+        padding: 8px 12px;
+        vertical-align: middle;
     }
 
-    .protez-kritik-table td:nth-child(2),
-    .protez-kritik-table td:nth-child(3),
-    .protez-kritik-table td:nth-child(4) {
-        text-align: right;
+    .protez-kritik-table th:first-child,
+    .protez-kritik-table td:first-child {
+        text-align: left;
+    }
+
+    .protez-kritik-table th:nth-child(n+2),
+    .protez-kritik-table td:nth-child(n+2) {
+        text-align: center;
+    }
+
+    .protez-kritik-table th:nth-child(n+2) {
+        line-height: 1.35;
+        white-space: normal;
     }
 
     .protez-detail-toolbar {
@@ -188,7 +170,216 @@
 
     .protez-settings input[type="range"] {
         width: 180px;
+        max-width: 100%;
         accent-color: #ef4444;
+    }
+
+    .protez-hekim-slider-heading {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+        max-width: 280px;
+    }
+
+    .protez-hekim-value {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2.25rem;
+        padding: 4px 12px;
+        border-radius: 10px;
+        font-size: 0.95rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        line-height: 1.2;
+    }
+
+    /* Detay tablosu — SQL SURE (0-3) trafik durumu */
+    .protez-durum {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        padding: 4px 10px;
+        border-radius: 999px;
+        font-size: 0.78rem;
+        font-weight: 800;
+        font-variant-numeric: tabular-nums;
+        border: 1px solid transparent;
+    }
+
+    .protez-durum-0 {
+        background: rgba(100, 116, 139, 0.35);
+        color: #e2e8f0;
+        border-color: rgba(148, 163, 184, 0.45);
+    }
+
+    .protez-durum-1 {
+        background: linear-gradient(135deg, rgba(22, 163, 74, 0.85), rgba(5, 46, 22, 0.95));
+        color: #ecfdf5;
+        border-color: rgba(34, 197, 94, 0.5);
+    }
+
+    .protez-durum-2 {
+        background: linear-gradient(135deg, rgba(234, 179, 8, 0.95), rgba(161, 98, 7, 0.95));
+        color: #1c1917;
+        border-color: rgba(250, 204, 21, 0.6);
+    }
+
+    .protez-durum-3 {
+        background: linear-gradient(135deg, rgba(220, 38, 38, 0.95), rgba(127, 29, 29, 0.98));
+        color: #fef2f2;
+        border-color: rgba(248, 113, 113, 0.55);
+    }
+
+    .protez-durum-legend {
+        margin-top: 14px;
+        padding: 10px 14px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #e2e8f0;
+        line-height: 1.55;
+        background: rgba(30, 41, 59, 0.55);
+        border: 1px solid #334155;
+        border-radius: 10px;
+    }
+
+    .protez-durum-legend-intro {
+        display: block;
+        margin-bottom: 10px;
+        font-size: 0.85rem;
+        color: #cbd5e1;
+    }
+
+    .protez-durum-legend-scale {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .protez-durum-legend-scale .protez-durum {
+        font-size: 0.78rem;
+    }
+
+    .protez-kritik-table tbody tr.protez-hekim-row {
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .protez-kritik-table tbody tr.protez-hekim-row:hover {
+        background: rgba(59, 130, 246, 0.12);
+    }
+
+    .protez-kritik-table tbody tr.protez-hekim-row:focus-visible {
+        outline: 2px solid #60a5fa;
+        outline-offset: -2px;
+    }
+
+    .protez-hekim-name {
+        color: inherit;
+        font-weight: inherit;
+    }
+
+    .protez-hekim-hint {
+        margin-bottom: 10px;
+        font-size: 0.8rem;
+        color: #94a3b8;
+    }
+
+    .protez-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1500;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 22px;
+        background: rgba(15, 23, 42, 0.62);
+        backdrop-filter: blur(5px);
+    }
+
+    .protez-modal-overlay.open {
+        display: flex;
+    }
+
+    .protez-modal {
+        width: min(1100px, 96vw);
+        max-height: 92vh;
+        display: flex;
+        flex-direction: column;
+        border-radius: 16px;
+        border: 1px solid #1e293b;
+        background: #0f172a;
+        box-shadow: 0 28px 80px rgba(15, 23, 42, 0.45);
+        animation: protezModalIn 0.22s ease;
+    }
+
+    @keyframes protezModalIn {
+        from { opacity: 0; transform: translateY(12px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .protez-modal-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-bottom: 1px solid #1e293b;
+        flex-shrink: 0;
+    }
+
+    .protez-modal-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: #e5e7eb;
+    }
+
+    .protez-modal-close {
+        width: 36px;
+        height: 36px;
+        border: 1px solid #334155;
+        border-radius: 10px;
+        background: #020617;
+        color: #e5e7eb;
+        cursor: pointer;
+        font-size: 1.2rem;
+        line-height: 1;
+    }
+
+    .protez-modal-close:hover {
+        border-color: #ef4444;
+        color: #fca5a5;
+    }
+
+    .protez-modal-body {
+        padding: 14px 18px 18px;
+        overflow: auto;
+        flex: 1;
+    }
+
+    .protez-modal-toolbar {
+        margin-bottom: 12px;
+    }
+
+    .protez-modal-toolbar label {
+        font-size: 0.8rem;
+        color: #9ca3af;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        cursor: pointer;
+    }
+
+    .protez-modal-empty {
+        padding: 24px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: 0.9rem;
     }
 </style>
 {% endblock %}
@@ -198,37 +389,40 @@
 <div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
 {% else %}
 
-<div class="metrics-grid protez-metrics">
-    <div class="metric-card">
+<div class="metrics-grid cols-4 protez-metrics">
+    <div class="metric-card card-blue">
+        <div class="metric-icon">👥</div>
         <div class="metric-body">
-            <div class="metric-label" data-t="Filtrelenen Vaka">Filtrelenen Vaka</div>
             <div class="metric-value">{{ vaka_sayisi|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Filtrelenen Vaka">Filtrelenen Vaka</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-orange">
+        <div class="metric-icon">📊</div>
         <div class="metric-body">
-            <div class="metric-label" data-t="Gecikme Oranı">Gecikme Oranı</div>
             <div class="metric-value">%{{ gecikme_orani|round(1) }}</div>
+            <div class="metric-label" data-t="Gecikme Oranı">Gecikme Oranı</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-green">
+        <div class="metric-icon">⚠️</div>
         <div class="metric-body">
-            <div class="metric-label" data-t="Geciken Vaka">Geciken Vaka</div>
             <div class="metric-value">{{ geciken_vaka|turkish_number(0) }}</div>
+            <div class="metric-label" data-t="Geciken Vaka">Geciken Vaka</div>
         </div>
     </div>
-    <div class="metric-card">
+    <div class="metric-card card-purple">
+        <div class="metric-icon">📅</div>
         <div class="metric-body">
-            <div class="metric-label" data-t="Ort. Teslimat">Ort. Teslimat</div>
             <div class="metric-value">{{ ort_teslim|round(1) }} <span data-t="Gün">Gün</span></div>
+            <div class="metric-label" data-t="Ort. Teslimat">Ort. Teslimat</div>
         </div>
     </div>
 </div>
 
 <div class="tabs protez-tabs" data-target="#protezTabs">
     <button class="tab-btn active" data-t="📊 Genel Performans">📊 Genel Performans</button>
-    <button class="tab-btn" data-t="📍 Geciken Hekim Listesi">📍 Geciken Hekim Listesi</button>
-    <button class="tab-btn" data-t="🧾 Hasta Detayları">🧾 Hasta Detayları</button>
+    <button class="tab-btn" data-t="📍Aşama Giriş Durumu">📍Aşama Giriş Durumu</button>
     <button class="tab-btn" data-t="📈 Trend Analizi">📈 Trend Analizi</button>
 </div>
 
@@ -253,10 +447,17 @@
     </div>
 
     <div class="protez-settings-group">
-        <span data-t="Gösterilecek Hekim Sayısı">Gösterilecek Hekim Sayısı <strong id="hekimCountLabel">{{ kritik_hekim_sayisi }}</strong></span>
-        <input type="range" name="k_hekim" min="3" max="30" step="1"
+        <div class="protez-hekim-slider-heading">
+            <span id="protezHekimSliderLabel" data-t="Gösterilecek Hekim Sayısı">Gösterilecek Hekim Sayısı</span>
+            <span class="protez-hekim-value" id="hekimCountLabel" aria-live="polite">{{ kritik_hekim_sayisi }}</span>
+        </div>
+        <input type="range" name="k_hekim" min="3" max="50" step="1"
                value="{{ kritik_hekim_sayisi }}"
-               oninput="document.getElementById('hekimCountLabel').textContent=this.value"
+               aria-valuemin="3"
+               aria-valuemax="50"
+               aria-valuenow="{{ kritik_hekim_sayisi }}"
+               aria-labelledby="protezHekimSliderLabel"
+               oninput="var b=document.getElementById('hekimCountLabel'); if(b){b.textContent=this.value;} this.setAttribute('aria-valuenow', this.value);"
                onchange="this.form.submit()">
     </div>
 </form>
@@ -276,26 +477,36 @@
         </div>
     </div>
 
-    <!-- Geciken Hekim Listesi -->
+    <!-- Aşama Giriş Durumu -->
     <div class="tab-content">
         <div class="chart-container">
-            <div class="chart-title" data-t="⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar">⚠️ Kritik Sınırı (30 Gün) Aşan Vakalar</div>
+            <div class="chart-title" data-t="Hekim Bazlı Aşama Giriş Durumu">Hekim Bazlı Aşama Giriş Durumu</div>
+            <p class="protez-hekim-hint" data-t="Satıra tıklayarak hekimin vakalarını ve aşama giriş durumunu (0–3) görebilirsiniz.">
+                Satıra tıklayarak hekimin vakalarını ve aşama giriş durumunu (0–3) görebilirsiniz.
+            </p>
             <div class="table-wrapper">
                 <table class="data-table protez-kritik-table">
                     <thead>
                         <tr>
                             <th data-t="Hekim">Hekim</th>
-                            <th data-t="Kritik Vaka Sayısı">Kritik Vaka Sayısı</th>
-                            <th data-t="Ort. Teslim Süresi">Ort. Teslim Süresi</th>
+                            <th data-t="Toplam Vaka">Toplam Vaka</th>
+                            <th data-t="Geciken Vaka">Geciken Vaka</th>
+                            <th data-t="Kritik Vaka ({{ kritik_limit }} günü geçen vakalar)">Kritik Vaka ({{ kritik_limit }} günü geçen vakalar)</th>
+                            <th data-t="Ort. Gecikme">Ort. Gecikme</th>
                             <th data-t="Toplam Gecikme (Gün)">Toplam Gecikme (Gün)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for r in kritik_rows %}
-                        <tr>
-                            <td>{{ r[kritik_hekim_col] }}</td>
-                            <td class="{% if r.ort_gecikme >= 60 %}heat-strong{% elif r.ort_gecikme >= 45 %}heat-medium{% else %}heat-light{% endif %}">
-                                {{ r.vaka_sayisi|turkish_number(0) }}
+                        {% for r in hekim_rows %}
+                        <tr class="protez-hekim-row" data-hekim-idx="{{ loop.index0 }}"
+                            role="button" tabindex="0"
+                            title="Hasta detaylarını göster"
+                            aria-label="{{ r[kritik_hekim_col] }} — hasta detayları">
+                            <td><span class="protez-hekim-name">{{ r[kritik_hekim_col] }}</span></td>
+                            <td>{{ r.vaka_sayisi|turkish_number(0) }}</td>
+                            <td>{{ r.geciken_vaka|turkish_number(0) }}</td>
+                            <td class="{% if r.kritik_vaka >= 10 %}heat-strong{% elif r.kritik_vaka >= 5 %}heat-medium{% elif r.kritik_vaka > 0 %}heat-light{% endif %}">
+                                {{ r.kritik_vaka|turkish_number(0) }}
                             </td>
                             <td>{{ r.ort_gecikme|round(1) }} <span data-t="Gün">Gün</span></td>
                             <td>{{ r.toplam_gecikme|round(0)|int|turkish_number(0) }} <span data-t="Gün">Gün</span></td>
@@ -307,53 +518,192 @@
         </div>
     </div>
 
-    <!-- Hasta Detayları -->
-    <div class="tab-content">
-        <div class="chart-container">
-            <div class="chart-title" data-t="Hekim ve Hasta Bazlı Detay Sorgulama">Hekim ve Hasta Bazlı Detay Sorgulama</div>
-            <div class="protez-detail-toolbar">
-                <form method="GET" style="display:flex; align-items:center; gap:10px;">
-                    {% for key, value in request.args.items() %}
-                        {% if key not in ['hekim', 'only_delayed'] %}
-                            <input type="hidden" name="{{ key }}" value="{{ value }}">
-                        {% endif %}
-                    {% endfor %}
-                    <select name="hekim" onchange="this.form.submit()">
-                        {% for h in hekim_list %}
-                        <option value="{{ h }}" {% if h == selected_hekim %}selected{% endif %}>{{ h }}</option>
-                        {% endfor %}
-                    </select>
+    <div class="protez-modal-overlay" id="protezDetayModal" aria-hidden="true">
+        <div class="protez-modal" role="dialog" aria-modal="true" aria-labelledby="protezDetayModalTitle">
+            <div class="protez-modal-head">
+                <div class="protez-modal-title" id="protezDetayModalTitle" data-t="Hekim Bazlı Hasta Detay Durumu">Hekim Bazlı Hasta Detay Durumu</div>
+                <button type="button" class="protez-modal-close" id="protezDetayModalClose" aria-label="Kapat">×</button>
+            </div>
+            <div class="protez-modal-body">
+                <div class="protez-modal-toolbar">
                     <label>
-                        <input type="checkbox" name="only_delayed" {% if only_delayed %}checked{% endif %}
-                            onchange="this.form.submit()">
+                        <input type="checkbox" id="protezOnlyDelayed">
                         <span data-t="Sadece gecikenleri göster">Sadece gecikenleri göster</span>
                     </label>
-                </form>
-            </div>
-            <div class="table-wrapper">
-                <table class="data-table">
-                    <thead>
-                        {% if detay_table %}
-                        <tr>
-                            {% for k in detay_table[0].keys() %}
-                            <th>{{ k }}</th>
-                            {% endfor %}
-                        </tr>
-                        {% endif %}
-                    </thead>
-                    <tbody>
-                        {% for row in detay_table %}
-                        <tr>
-                            {% for v in row.values() %}
-                            <td>{{ v }}</td>
-                            {% endfor %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table protez-detay-table" id="protezDetayTable">
+                        <thead id="protezDetayThead"></thead>
+                        <tbody id="protezDetayTbody"></tbody>
+                    </table>
+                    <p class="protez-durum-legend" id="protezDetayLegend">
+                        <span class="protez-durum-legend-intro" data-t="Aşama giriş durumu: Protez işleminin hedef teslim süresine göre sistemdeki güncel durumudur (0–3 trafik ışığı).">
+                            <strong>Aşama giriş durumu:</strong> Protez işleminin hedef teslim süresine göre sistemdeki güncel durumudur (0–3 trafik ışığı).
+                        </span>
+                        <span class="protez-durum-legend-scale" data-t="0 Süre içinde · 1 Normal · 2 Uyarı · 3 Kritik">
+                            <span class="protez-durum protez-durum-0">Süre içinde</span>
+                            <span class="protez-durum protez-durum-1">Normal</span>
+                            <span class="protez-durum protez-durum-2">Uyarı</span>
+                            <span class="protez-durum protez-durum-3">Kritik</span>
+                        </span>
+                    </p>
+                </div>
             </div>
         </div>
     </div>
+
+    <script id="protezHekimDetayData" type="application/json">{{ hekim_detay_list | tojson }}</script>
+    <script>
+    (function () {
+        var detayColumns = {{ detay_columns | tojson }};
+        var durumEtiketleri = {{ durum_etiketleri | tojson }};
+        var hekimDetay = [];
+        try {
+            var dataEl = document.getElementById('protezHekimDetayData');
+            if (dataEl && dataEl.textContent) {
+                hekimDetay = JSON.parse(dataEl.textContent);
+            }
+        } catch (e) {
+            console.error('[PROTEZ] Hekim detay verisi okunamadi:', e);
+        }
+        var modal = document.getElementById('protezDetayModal');
+        var modalTitle = document.getElementById('protezDetayModalTitle');
+        var modalClose = document.getElementById('protezDetayModalClose');
+        var onlyDelayedCb = document.getElementById('protezOnlyDelayed');
+        var thead = document.getElementById('protezDetayThead');
+        var tbody = document.getElementById('protezDetayTbody');
+        var legend = document.getElementById('protezDetayLegend');
+        var activeHekimIdx = -1;
+
+        function colLabel(k) {
+            return k === 'DURUM' ? 'Aşama Giriş Durumu' : k;
+        }
+
+        function durumLabel(n) {
+            if (durumEtiketleri[n] != null) return durumEtiketleri[n];
+            if (durumEtiketleri[String(n)] != null) return durumEtiketleri[String(n)];
+            return String(n);
+        }
+
+        function durumCell(v) {
+            var n = parseInt(v, 10);
+            if (isNaN(n)) n = 0;
+            var label = durumLabel(n);
+            return '<span class="protez-durum protez-durum-' + n + '" title="Skor: ' + n + '">' + label + '</span>';
+        }
+
+        function renderTable(rows) {
+            if (!thead || !tbody) return;
+            thead.innerHTML = '';
+            tbody.innerHTML = '';
+            if (!detayColumns.length) {
+                tbody.innerHTML = '<tr><td class="protez-modal-empty">Kolon bilgisi yok.</td></tr>';
+                return;
+            }
+            var headRow = document.createElement('tr');
+            detayColumns.forEach(function (k) {
+                var th = document.createElement('th');
+                th.textContent = colLabel(k);
+                if (k === 'DURUM') th.setAttribute('data-t', 'Aşama Giriş Durumu');
+                headRow.appendChild(th);
+            });
+            thead.appendChild(headRow);
+
+            if (!rows || !rows.length) {
+                var empty = document.createElement('tr');
+                var td = document.createElement('td');
+                td.colSpan = detayColumns.length;
+                td.className = 'protez-modal-empty';
+                td.textContent = 'Bu hekim için kayıt bulunamadı.';
+                empty.appendChild(td);
+                tbody.appendChild(empty);
+                if (legend) legend.style.display = 'none';
+                return;
+            }
+            if (legend) legend.style.display = '';
+
+            rows.forEach(function (row) {
+                var tr = document.createElement('tr');
+                detayColumns.forEach(function (k) {
+                    var td = document.createElement('td');
+                    var v = row[k];
+                    if (k === 'DURUM') {
+                        td.innerHTML = durumCell(v);
+                    } else {
+                        td.textContent = v == null ? '' : v;
+                    }
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+        }
+
+        function currentRows() {
+            if (activeHekimIdx < 0 || !hekimDetay[activeHekimIdx]) return [];
+            var pack = hekimDetay[activeHekimIdx];
+            return (onlyDelayedCb && onlyDelayedCb.checked) ? (pack.delayed || []) : (pack.all || []);
+        }
+
+        function refreshModalTable() {
+            renderTable(currentRows());
+        }
+
+        function openModal(idx) {
+            var pack = hekimDetay[idx];
+            if (!pack) return;
+            activeHekimIdx = idx;
+            if (modalTitle) modalTitle.textContent = (pack.name || '') + ' — Hekim Bazlı Hasta Detay Durumu';
+            if (onlyDelayedCb) onlyDelayedCb.checked = false;
+            refreshModalTable();
+            if (modal) {
+                modal.classList.add('open');
+                modal.setAttribute('aria-hidden', 'false');
+            }
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            activeHekimIdx = -1;
+            if (modal) {
+                modal.classList.remove('open');
+                modal.setAttribute('aria-hidden', 'true');
+            }
+            document.body.style.overflow = '';
+        }
+
+        function rowIndexFromTarget(el) {
+            var row = el && el.closest ? el.closest('tr.protez-hekim-row') : null;
+            if (!row) return NaN;
+            return parseInt(row.getAttribute('data-hekim-idx'), 10);
+        }
+
+        document.querySelectorAll('.protez-kritik-table tbody').forEach(function (tbody) {
+            tbody.addEventListener('click', function (e) {
+                var idx = rowIndexFromTarget(e.target);
+                if (!isNaN(idx)) openModal(idx);
+            });
+            tbody.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                var row = e.target.closest ? e.target.closest('tr.protez-hekim-row') : null;
+                if (!row || e.target !== row) return;
+                e.preventDefault();
+                var idx = parseInt(row.getAttribute('data-hekim-idx'), 10);
+                if (!isNaN(idx)) openModal(idx);
+            });
+        });
+
+        if (onlyDelayedCb) onlyDelayedCb.addEventListener('change', refreshModalTable);
+        if (modalClose) modalClose.addEventListener('click', closeModal);
+        if (modal) {
+            modal.addEventListener('click', function (e) {
+                if (e.target === modal) closeModal();
+            });
+        }
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && modal && modal.classList.contains('open')) closeModal();
+        });
+    })();
+    </script>
 
     <!-- Trend Analizi -->
     <div class="tab-content">
@@ -364,13 +714,11 @@
     </div>
 </div>
 
-<div class="section-title" data-t="Stratejik Analiz Özeti">Stratejik Analiz Özeti</div>
-<div class="analysis-box">
-    <ul>
-        {% for text in insights %}
-        <li>{{ text }}</li>
-        {% endfor %}
-    </ul>
+<div class="insights">
+    <h2 class="section-title" data-t="📋 Stratejik Analiz Özeti">📋 Stratejik Analiz Özeti</h2>
+    {% for text in insights %}
+    <div class="insight-row" data-t="{{ text }}">{{ text }}</div>
+    {% endfor %}
 </div>
 
 {% endif %}
