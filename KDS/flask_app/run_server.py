@@ -1,4 +1,13 @@
 import os
+import sys
+import io
+
+# Windows servis ortaminda sistem kod sayfasi (cp1254 / ANSI) yerine her zaman UTF-8 kullan.
+# Bu satirlar PYTHONUTF8=1 ortam degiskeni olmadan calisan eski kurulumlar icin de gerekli.
+if sys.stdout and hasattr(sys.stdout, 'buffer') and getattr(sys.stdout, 'encoding', '').lower() not in ('utf-8', 'utf8'):
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8', errors='replace')
+if sys.stderr and hasattr(sys.stderr, 'buffer') and getattr(sys.stderr, 'encoding', '').lower() not in ('utf-8', 'utf8'):
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8', errors='replace')
 
 from waitress import serve
 

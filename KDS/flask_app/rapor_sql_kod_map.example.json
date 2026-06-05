@@ -32,6 +32,18 @@
   "poliklinik.poliklinik_performans_verisi_yukle": [
     "HEKIM_POLIKLINIK_HASTA_SAYFASI"
   ],
+  "poliklinik.basvuru_klinik_dagilim": [
+    "HASTA_BILGI_SQL_KLINIK"
+  ],
+  "poliklinik.basvuru_hekim_dagilim": [
+    "HASTA_BILGI_SQL_HEKIM"
+  ],
+  "poliklinik.basvuru_sevk_turu_dagilim": [
+    "HASTA_BILGI_SQL_SEVK_TUR"
+  ],
+  "poliklinik.basvuru_brans_dagilim": [
+    "HASTA_BILGI_SQL_BRANS"
+  ],
   "tedavi_grubu.tedavi_grubu_verisi_yukle": [
     "TEDAVI_GRUPLARI_ANALIZ_SAYFASI"
   ],
@@ -62,11 +74,15 @@
   "vezne.kasa_aylik_verisi_yukle": [
     "KASA_AYLIK_ANALIZ"
   ],
+  "protez.protez_verisi_yukle": [
+    "PROTEZ_SURESI_GECMIS_HASTA_LISTESI"
+  ],
   "protez_takibi.protez_suresi_gecen_hasta_birim_yukle": [
-    "PROTEZ_ANALIZ_1"
+    "PROTEZ_SURESI_GECEN_HASTA_BIRIM"
   ],
   "protez_takibi.asama_girilmemis_hasta_listesi_yukle": [
-    "PROTEZ_ANALIZ_2"
+    "ASAMA_GRILMEMIS_HASTA_LISTESI",
+    "ASAMA_GIRILMEMIS_HASTA_LISTESI"
   ],
   "rontgen.rontgen_verisi_hekim": [
     "RONTGEN_VERISI_HEKIM"

@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, session
 from datetime import date, timedelta
 import pandas as pd
+import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 import sys, os
@@ -11,6 +12,44 @@ from database.hekim_puan_sorgular import hekim_puan_verisi_yukle
 from routes.dashboard import get_date_range
 
 hekim_puan_bp = Blueprint('hekim_puan', __name__)
+
+PAGE_SQL_KODLARI = ["hekim_puan.hekim_puan_verisi_yukle"]
+
+
+def _tr_number(v, decimals=2):
+    """Binlik ayırıcı nokta, ondalık virgül (tr-TR)."""
+    if v is None or pd.isna(v):
+        return "-"
+    fmt = f"{{:,.{decimals}f}}"
+    s = fmt.format(float(v))
+    return s.replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+def _bar_value_labels(series, sort_key):
+    if sort_key in ("Toplam_Gelir", "Hasta_Basi_Gelir"):
+        return [f"₺ {_tr_number(x, 2)}" for x in series]
+    return [_tr_number(x, 2) for x in series]
+
+
+def _apply_hekim_puan_from_api(df):
+    """
+    HEKIM_PUAN_TAB1: Toplampuan bazı satırlarda 0 iken mesaiIciPuan/mesaiDisiPuan dolu olabilir.
+    Ayrıca sütun adı varyasyonlarını tek TETKIK_TOPLAM_PUAN altında toplar.
+    """
+    puan_col = None
+    for c in ("TETKIK_TOPLAM_PUAN", "Toplampuan", "toplampuan", "TOPLAMPUAN"):
+        if c in df.columns:
+            puan_col = c
+            break
+    base = pd.to_numeric(df[puan_col], errors="coerce").fillna(0) if puan_col else pd.Series(0.0, index=df.index)
+    if "mesaiIciPuan" in df.columns and "mesaiDisiPuan" in df.columns:
+        mesai = pd.to_numeric(df["mesaiIciPuan"], errors="coerce").fillna(0) + pd.to_numeric(
+            df["mesaiDisiPuan"], errors="coerce"
+        ).fillna(0)
+        df["TETKIK_TOPLAM_PUAN"] = np.where(base > 0, base, mesai)
+    else:
+        df["TETKIK_TOPLAM_PUAN"] = base
+    return df
 
 
 @hekim_puan_bp.route('/hekim-puan')
@@ -31,6 +70,7 @@ def hekim_puan():
             genel_cmi_gelir=0.0,
             total_gelir=0.0,
             aktif_hekim=0,
+            page_sql_kodlari=PAGE_SQL_KODLARI,
         )
 
     df = df_raw.copy()
@@ -41,8 +81,7 @@ def hekim_puan():
     if 'TETKIK_ADET' not in df.columns:
         df['TETKIK_ADET'] = 1
 
-    puan_col = 'TETKIK_TOPLAM_PUAN' if 'TETKIK_TOPLAM_PUAN' in df.columns else 'Toplampuan'
-    df['TETKIK_TOPLAM_PUAN'] = pd.to_numeric(df.get(puan_col, 0), errors='coerce').fillna(0)
+    df = _apply_hekim_puan_from_api(df)
     df['TETKIK_ADET'] = pd.to_numeric(df.get('TETKIK_ADET', 1), errors='coerce').fillna(0)
     df['TETKIK_BIRIM_UCRET'] = pd.to_numeric(df.get('TETKIK_BIRIM_UCRET', 0), errors='coerce').fillna(0)
     
@@ -62,7 +101,6 @@ def hekim_puan():
         'TOPLAM_GELIR': 'sum'
     }).reset_index()
     hekim_perf.columns = ['Hekim', 'Calisma_Gun', 'Toplam_Hasta', 'Toplam_Puan', 'Toplam_Gelir']
-    import numpy as np
     hekim_perf['Hasta_Basi_Gelir'] = (hekim_perf['Toplam_Gelir'] / hekim_perf['Toplam_Hasta']).round(2).replace([np.inf, -np.inf], 0).fillna(0)
 
     total_puan = hekim_perf['Toplam_Puan'].sum()
@@ -84,20 +122,42 @@ def hekim_puan():
     top_df = hekim_perf.nlargest(limit, sort_by).sort_values(sort_by, ascending=True)
     fig_max = px.bar(top_df, x=sort_by, y='Hekim', orientation='h',
                      title="",
-                     color=sort_by, color_continuous_scale='Greens', text_auto='.3s')
-    
+                     color=sort_by, color_continuous_scale='Greens')
+    fig_max.update_traces(
+        text=_bar_value_labels(top_df[sort_by], sort_by),
+        texttemplate='%{text}',
+        textposition='inside',
+        insidetextanchor='end',
+        textfont=dict(color='white', size=12),
+    )
+    axis_title = {'Toplam_Puan': 'Toplam puan', 'Toplam_Gelir': 'Toplam gelir (₺)', 'Hasta_Basi_Gelir': 'Hasta başı gelir (₺)'}.get(sort_by, sort_by)
     if sort_by in ['Toplam_Gelir', 'Hasta_Basi_Gelir']:
         fig_max.update_layout(xaxis_tickprefix="")
-    fig_max.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig_max.update_layout(
+        template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)',
+        xaxis_title=axis_title,
+    )
 
-    bottom_df = hekim_perf.nsmallest(limit, sort_by).sort_values(sort_by, ascending=False)
-    fig_min = px.bar(bottom_df, x=sort_by, y='Hekim', orientation='h',
-                     title="",
-                     color=sort_by, color_continuous_scale='Reds', text_auto='.3s')
-    
+    bottom_df = hekim_perf.nsmallest(limit, sort_by).sort_values(sort_by, ascending=True)
+    fig_min = px.bar(bottom_df, x=sort_by, y='Hekim', orientation='h', title="")
+    fig_min.update_traces(
+        marker_color='#fca5a5',
+        marker_line=dict(color='#f87171', width=1),
+        text=_bar_value_labels(bottom_df[sort_by], sort_by),
+        texttemplate='%{text}',
+        textposition='inside',
+        insidetextanchor='end',
+        textfont=dict(color='#7f1d1d', size=12),
+    )
     if sort_by in ['Toplam_Gelir', 'Hasta_Basi_Gelir']:
         fig_min.update_layout(xaxis_tickprefix="")
-    fig_min.update_layout(template='plotly_white', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)')
+    fig_min.update_layout(
+        template='plotly_white',
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis_title=axis_title,
+        showlegend=False,
+    )
 
     # Tab 2: Pareto
     pareto_df = hekim_perf.sort_values("Toplam_Gelir", ascending=False).copy()
@@ -175,5 +235,6 @@ def hekim_puan():
         hekim_hizmet_dict=hekim_hizmet_dict,
         df_detayli_records=df_detayli_records,
         hekim_perf_records=hekim_perf_records,
-        charts=charts, current_sort=sort_by, current_limit=limit
+        charts=charts, current_sort=sort_by, current_limit=limit,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

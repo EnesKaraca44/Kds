@@ -73,6 +73,16 @@ const translations = {
         'Aktif Hekim': 'Aktif Hekim',
         'Branş Sayısı': 'Branş Sayısı',
         '📊 Performans (Sıralama Kriterli)': '📊 Performans (Sıralama Kriterli)',
+        '📋 Başvuru Sayıları': '📋 Başvuru Sayıları',
+        'BAŞVURU SAYILARI': 'BAŞVURU SAYILARI',
+        'HEKİMLERE GÖRE BAŞVURU SAYILARI': 'HEKİMLERE GÖRE BAŞVURU SAYILARI',
+        'Başvuru Adedi': 'Başvuru Adedi',
+        'BRANŞLARA GÖRE DAĞILIM': 'BRANŞLARA GÖRE DAĞILIM',
+        'SEVK TÜRLERİNE GÖRE DAĞILIM': 'SEVK TÜRLERİNE GÖRE DAĞILIM',
+        'KLİNİKLERE GÖRE DAĞILIM': 'KLİNİKLERE GÖRE DAĞILIM',
+        'Toplam :': 'Toplam :',
+        'Adet': 'Adet',
+        '(Grafiğe aktar)': '(Grafiğe aktar)',
         '📈 Kurum & Trend': '📈 Kurum & Trend',
         '🔥 Yoğunluk Analizi': '🔥 Yoğunluk Analizi',
         '🔍 Hekim Detay': '🔍 Hekim Detay',
@@ -99,8 +109,19 @@ const translations = {
         'Kurum Türüne Göre Gelir': 'Kurum Türüne Göre Gelir',
         'En Çok Ciro Yapan 10 Kurum/İlgili': 'En Çok Ciro Yapan 10 Kurum/İlgili',
         'Günlük Fatura Gelir Trendi': 'Günlük Fatura Gelir Trendi',
+        'Her nokta, o gün kesilen tüm faturaların net tutarının (KDV hariç) toplamıdır. Üstteki «Toplam Gelir» kartı ile aynı tutar türünü kullanır; vezne tahsilatı burada yer almaz. Turuncu kesik çizgi: 7 günlük hareketli ortalama; yatay noktalı çizgi: dönem günlük ortalaması.': 'Her nokta, o gün kesilen tüm faturaların net tutarının (KDV hariç) toplamıdır. Üstteki «Toplam Gelir» kartı ile aynı tutar türünü kullanır; vezne tahsilatı burada yer almaz. Turuncu kesik çizgi: 7 günlük hareketli ortalama; yatay noktalı çizgi: dönem günlük ortalaması.',
+        '⬇️ Fatura Kayıtlarını CSV Olarak İndir': '⬇️ Fatura Kayıtlarını CSV Olarak İndir',
         '⬇️ Tüm Veriyi CSV Olarak İndir': '⬇️ Tüm Veriyi CSV Olarak İndir',
         'Son 500 Fatura Kaydı': 'Son 500 Fatura Kaydı',
+        'Fatura No': 'Fatura No',
+        'Fatura Tarihi': 'Fatura Tarihi',
+        'Fatura İlgili': 'Fatura İlgili',
+        'Kurum Türü': 'Kurum Türü',
+        'KDV Dahil Tutar': 'KDV Dahil Tutar',
+        'Kişi Sayısı': 'Kişi Sayısı',
+        'Açıklama': 'Açıklama',
+        'Toplam KDV': 'Toplam KDV',
+        'Net Tutar': 'Net Tutar',
         'Kasa Seç:': 'Kasa Seç:',
         'Kasa Hareketleri Dağılımı': 'Kasa Hareketleri Dağılımı',
         'Aylara Göre Tahsilat': 'Aylara Göre Tahsilat',
@@ -370,8 +391,12 @@ const translations = {
         'Tedavi Grupları Analizi': 'Tedavi Grupları Analizi',
         '📊 Performans Kıyaslama': '📊 Performans Kıyaslama',
         '🔍 Grup Detayları': '🔍 Grup Detayları',
-        'Gelire Göre Top': 'Gelire Göre Top',
-        'İşleme Göre Top': 'İşleme Göre Top',
+        'En Yüksek Cirolu Tedavi Grupları': 'En Yüksek Cirolu Tedavi Grupları',
+        'En Çok İşlem Yapılan Tedavi Grupları': 'En Çok İşlem Yapılan Tedavi Grupları',
+        'Her grafikte listelenecek grup sayısı': 'Her grafikte listelenecek grup sayısı',
+        'Seçilen dönemde toplam gelire göre sıralanmış ilk gruplar. Çubuk üzerindeki tutar: o grubun toplam cirosu (₺).': 'Seçilen dönemde toplam gelire göre sıralanmış ilk gruplar. Çubuk üzerindeki tutar: o grubun toplam cirosu (₺).',
+        'Seçilen dönemde işlem adedine göre sıralanmış ilk gruplar. Çubuk üzerindeki sayı: o gruptaki toplam işlem adedi (hasta sayısı değil).': 'Seçilen dönemde işlem adedine göre sıralanmış ilk gruplar. Çubuk üzerindeki sayı: o gruptaki toplam işlem adedi (hasta sayısı değil).',
+        'Her nokta bir tedavi grubudur. Yatay eksen: işlem adedi; dikey eksen: işlem başına ortalama gelir (₺).': 'Her nokta bir tedavi grubudur. Yatay eksen: işlem adedi; dikey eksen: işlem başına ortalama gelir (₺).',
         '💡 Verimlilik Analizi (Birim Başı Gelir)': '💡 Verimlilik Analizi (Birim Başı Gelir)',
         '🎯 Sistem Analizi': '🎯 Sistem Analizi',
         'Detaylı incelemek için bir grup seçin:': 'Detaylı incelemek için bir grup seçin:',
@@ -439,7 +464,9 @@ const translations = {
         'Branş Bazlı Dağılım': 'Branş Bazlı Dağılım',
         'Branş Bazlı Toplam Tetkik Hacmi': 'Branş Bazlı Toplam Tetkik Hacmi',
         'Dental Tomografi': 'Dental Tomografi',
-        'Branş bazlı veri bulunamadı.': 'Branş bazlı veri bulunamadı.'
+        'Branş bazlı veri bulunamadı.': 'Branş bazlı veri bulunamadı.',
+        '📋 Stratejik Analiz Özeti': '📋 Stratejik Analiz Özeti',
+        'Durum 0–3: 0 normal, 1 izleme eşiği, 2 uyarı, 3 hedef süreyi aştı (SQL CASE ile uyumlu).': 'Durum 0–3: 0 normal, 1 izleme eşiği, 2 uyarı, 3 hedef süreyi aştı (SQL CASE ile uyumlu).',
     },
     'en': {
         'Kurum Performans Yönetim Sistemi': 'Institution Performance<br>Management System',
@@ -510,6 +537,16 @@ const translations = {
         'Aktif Hekim': 'Active Physicians',
         'Branş Sayısı': 'Number of Specialties',
         '📊 Performans (Sıralama Kriterli)': '📊 Performance (by Ranking Criteria)',
+        '📋 Başvuru Sayıları': '📋 Application Counts',
+        'BAŞVURU SAYILARI': 'APPLICATION COUNTS',
+        'HEKİMLERE GÖRE BAŞVURU SAYILARI': 'APPLICATIONS BY PHYSICIAN',
+        'Başvuru Adedi': 'Application Count',
+        'BRANŞLARA GÖRE DAĞILIM': 'DISTRIBUTION BY SPECIALTY',
+        'SEVK TÜRLERİNE GÖRE DAĞILIM': 'DISTRIBUTION BY REFERRAL TYPE',
+        'KLİNİKLERE GÖRE DAĞILIM': 'DISTRIBUTION BY CLINIC',
+        'Toplam :': 'Total:',
+        'Adet': 'Qty',
+        '(Grafiğe aktar)': '(Show in chart)',
         '📈 Kurum & Trend': '📈 Institution & Trend',
         '🔥 Yoğunluk Analizi': '🔥 Density Analysis',
         '🔍 Hekim Detay': '🔍 MD Detail',
@@ -536,8 +573,19 @@ const translations = {
         'Kurum Türüne Göre Gelir': 'Revenue by Institution Type',
         'En Çok Ciro Yapan 10 Kurum/İlgili': 'Top 10 Revenue-Generating Institutions',
         'Günlük Fatura Gelir Trendi': 'Daily Invoice Revenue Trend',
+        'Her nokta, o gün kesilen tüm faturaların net tutarının (KDV hariç) toplamıdır. Üstteki «Toplam Gelir» kartı ile aynı tutar türünü kullanır; vezne tahsilatı burada yer almaz. Turuncu kesik çizgi: 7 günlük hareketli ortalama; yatay noktalı çizgi: dönem günlük ortalaması.': 'Each point is the sum of net invoice amounts (excl. VAT) issued that day. Same amount type as the «Total Revenue» card above; cashier collections are not included. Orange dashed line: 7-day moving average; horizontal dotted line: period daily average.',
+        '⬇️ Fatura Kayıtlarını CSV Olarak İndir': '⬇️ Download Invoice Records as CSV',
         '⬇️ Tüm Veriyi CSV Olarak İndir': '⬇️ Download All Data as CSV',
         'Son 500 Fatura Kaydı': 'Last 500 Invoice Records',
+        'Fatura No': 'Invoice No',
+        'Fatura Tarihi': 'Invoice Date',
+        'Fatura İlgili': 'Related Party',
+        'Kurum Türü': 'Institution Type',
+        'KDV Dahil Tutar': 'Amount incl. VAT',
+        'Kişi Sayısı': 'Person Count',
+        'Açıklama': 'Description',
+        'Toplam KDV': 'Total VAT',
+        'Net Tutar': 'Net Amount',
         'Kasa Seç:': 'Select Cashier Box:',
         'Kasa Hareketleri Dağılımı': 'Cashier Activity Distribution',
         'Aylara Göre Tahsilat': 'Collections by Month',
@@ -746,9 +794,12 @@ const translations = {
         'İşlem Hacmi': 'Procedure Volume',
         '📊 Performans Kıyaslama': '📊 Performance Comparison',
         '🔍 Grup Detayları': '🔍 Group Details',
-        'Gösterilecek Grup Sayısı': 'Number of Groups to Show',
-        'Gelire Göre Top': 'Top by Revenue',
-        'İşleme Göre Top': 'Top by Procedure',
+        'Her grafikte listelenecek grup sayısı': 'Number of groups shown in each chart',
+        'En Yüksek Cirolu Tedavi Grupları': 'Top Treatment Groups by Revenue',
+        'En Çok İşlem Yapılan Tedavi Grupları': 'Top Treatment Groups by Procedure Count',
+        'Seçilen dönemde toplam gelire göre sıralanmış ilk gruplar. Çubuk üzerindeki tutar: o grubun toplam cirosu (₺).': 'Top groups in the selected period, ranked by total revenue. The value on each bar is that group\'s total revenue (₺).',
+        'Seçilen dönemde işlem adedine göre sıralanmış ilk gruplar. Çubuk üzerindeki sayı: o gruptaki toplam işlem adedi (hasta sayısı değil).': 'Top groups in the selected period, ranked by procedure count. The number on each bar is total procedures in that group (not patient count).',
+        'Her nokta bir tedavi grubudur. Yatay eksen: işlem adedi; dikey eksen: işlem başına ortalama gelir (₺).': 'Each point is a treatment group. Horizontal axis: procedure count; vertical axis: average revenue per procedure (₺).',
         '💡 Verimlilik Analizi (Birim Başı Gelir)': '💡 Efficiency Analysis (Revenue Per Unit)',
         '🎯 Sistem Analizi': '🎯 System Analysis',
         'Detaylı incelemek için bir grup seçin:': 'Select a group to examine in detail:',
@@ -776,7 +827,9 @@ const translations = {
         'Hekim ve Hasta Bazlı Detay Sorgulama': 'Physician and Patient Based Detail Query',
         'Sadece gecikenleri göster': 'Show only delayed',
         'Haftalık / Aylık Ortalama Gecikme Trendi': 'Weekly / Monthly Average Delay Trend',
+        'Durum 0–3: 0 normal, 1 izleme eşiği, 2 uyarı, 3 hedef süreyi aştı (SQL CASE ile uyumlu).': 'Status 0–3: 0 normal, 1 watch threshold, 2 warning, 3 past target (matches SQL CASE).',
         'Stratejik Analiz Özeti': 'Strategic Analysis Summary',
+        '📋 Stratejik Analiz Özeti': '📋 Strategic Analysis Summary',
         'Gün': 'Days',
         'Malzeme Tüketim': 'Material Consumption',
         '📦 Kurum Malzeme Tüketim Analizi': '📦 Institution Material Consumption Analysis',
@@ -923,8 +976,12 @@ const translations = {
         'Tedavi Grupları Analizi': 'Treatment Groups Analysis',
         '📊 Performans Kıyaslama': '📊 Performance Comparison',
         '🔍 Grup Detayları': '🔍 Group Details',
-        'Gelire Göre Top': 'Top by Revenue',
-        'İşleme Göre Top': 'Top by Procedure Count',
+        'Her grafikte listelenecek grup sayısı': 'Number of groups shown in each chart',
+        'En Yüksek Cirolu Tedavi Grupları': 'Top Treatment Groups by Revenue',
+        'En Çok İşlem Yapılan Tedavi Grupları': 'Top Treatment Groups by Procedure Count',
+        'Seçilen dönemde toplam gelire göre sıralanmış ilk gruplar. Çubuk üzerindeki tutar: o grubun toplam cirosu (₺).': 'Top groups in the selected period, ranked by total revenue. The value on each bar is that group\'s total revenue (₺).',
+        'Seçilen dönemde işlem adedine göre sıralanmış ilk gruplar. Çubuk üzerindeki sayı: o gruptaki toplam işlem adedi (hasta sayısı değil).': 'Top groups in the selected period, ranked by procedure count. The number on each bar is total procedures in that group (not patient count).',
+        'Her nokta bir tedavi grubudur. Yatay eksen: işlem adedi; dikey eksen: işlem başına ortalama gelir (₺).': 'Each point is a treatment group. Horizontal axis: procedure count; vertical axis: average revenue per procedure (₺).',
         '💡 Verimlilik Analizi (Birim Başı Gelir)': '💡 Efficiency Analysis (Revenue Per Unit)',
         '🎯 Sistem Analizi': '🎯 System Analysis',
         'Detaylı incelemek için bir grup seçin:': 'Select a group for detailed review:',
@@ -1048,10 +1105,10 @@ const translations = {
 window.KDS_i18n = {
     translations: translations,
     apply: applyTranslations,
+    resolve: resolveDataTKey,
     get: function(key) {
         const lang = localStorage.getItem('kds-language') || 'tr';
-        const dict = translations[lang] || translations['tr'];
-        return dict[key] || key;
+        return resolveDataTKey(key, lang) || key;
     },
     translateCharts: function() {
         if (typeof Plotly === 'undefined') return;
@@ -1159,40 +1216,62 @@ window.KDS_i18n = {
     }
 };
 
-function applyTranslations(lang) {
-    document.querySelectorAll('[data-t]').forEach(el => {
-        let key = el.getAttribute('data-t');
-        let translated = "";
+function resolveDataTKey(key, lang) {
+    if (!key) return null;
+    lang = lang || 'tr';
+    const trDict = translations.tr || {};
+    const langDict = (translations[lang] && lang !== 'tr') ? translations[lang] : trDict;
 
-        // Support for placeholder-based translations (e.g., KEY|val1|val2)
-        if (key.includes('|')) {
-            const parts = key.split('|');
-            const baseKey = parts[0];
-            let template = (translations[lang] && translations[lang][baseKey]) || (translations['tr'][baseKey] || baseKey);
-            
-            for (let i = 1; i < parts.length; i++) {
-                // Also translate placeholders if they are keys themselves (like metric labels)
-                let val = parts[i];
-                if (translations[lang] && translations[lang][val]) {
-                    val = translations[lang][val];
-                }
-                template = template.replace('{' + (i - 1) + '}', val);
+    // INSIGHT_APPOINTMENT_SUCCESS|85.1 gibi sablonlar (TR dahil her dilde cozulmeli)
+    if (key.includes('|')) {
+        const parts = key.split('|');
+        const baseKey = parts[0];
+        let template = langDict[baseKey] || trDict[baseKey] || baseKey;
+
+        for (let i = 1; i < parts.length; i++) {
+            let val = parts[i];
+            if (langDict[val]) {
+                val = langDict[val];
+            } else if (trDict[val]) {
+                val = trDict[val];
             }
-            translated = template;
-        } else {
-            translated = (translations[lang] && translations[lang][key]) || (translations['tr'][key] || key);
+            const idx = i - 1;
+            template = template
+                .replace(new RegExp('\\{' + idx + '\\}', 'g'), val)
+                .replace(new RegExp('%\\{' + idx + '\\}', 'g'), val);
+        }
+        return template;
+    }
+
+    // INSIGHT_* anahtarlari (parametresiz): ham anahtar gorunmesin
+    if (key.startsWith('INSIGHT_') && (trDict[key] || langDict[key])) {
+        return langDict[key] || trDict[key];
+    }
+
+    // Duz metin: TR sayfada Jinja zaten dogru; yalnizca yabanci dilde degistir
+    if (lang === 'tr') {
+        return null;
+    }
+    return langDict[key] || trDict[key] || null;
+}
+
+function applyTranslations(lang) {
+    lang = lang || localStorage.getItem('kds-language') || 'tr';
+
+    document.querySelectorAll('[data-t]').forEach(el => {
+        const key = el.getAttribute('data-t');
+        const translated = resolveDataTKey(key, lang);
+
+        if (!translated) {
+            return;
         }
 
-        if (translated) {
-            if (el.tagName === 'OPTION') {
-                el.text = translated;
-            } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
-                el.placeholder = translated;
-            } else {
-                // If it contains HTML spans (like the emoji), we might want to preserve it
-                // but usually data-t is for the whole content.
-                el.innerHTML = translated;
-            }
+        if (el.tagName === 'OPTION') {
+            el.text = translated;
+        } else if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+            el.placeholder = translated;
+        } else {
+            el.innerHTML = translated;
         }
     });
 
@@ -1433,7 +1512,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 langOptions.forEach(opt => opt.classList.remove('active'));
                 option.classList.add('active');
                 localStorage.setItem('kds-language', lang);
-                applyTranslations(lang);
+                if (lang === 'tr') {
+                    location.reload();
+                } else {
+                    applyTranslations(lang);
+                }
                 langDropdown.classList.remove('active');
             });
         });
@@ -1447,6 +1530,8 @@ document.addEventListener('DOMContentLoaded', function () {
             langOptions.forEach(opt => opt.classList.remove('active'));
             activeOption.classList.add('active');
             applyTranslations(savedLang);
+        } else {
+            applyTranslations('tr');
         }
     }
 

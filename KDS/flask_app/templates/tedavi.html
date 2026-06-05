@@ -1,9 +1,8 @@
 {% extends "base.html" %}
-{% block title %}Tedavi Grupları{% endblock %}
-{% block page_title %}<span data-t="Tedavi Grupları Analizi">🩺 Tedavi Grupları Analizi</span>{% endblock %}
+{% block title %}Tedavi Gruplar&#305;{% endblock %}
+{% block page_title %}Tedavi Gruplar&#305; Analizi{% endblock %}
 {% block head %}
 <style>
-  /* Page-specific small tweaks */
   .tedavi-topbar {
     display: flex;
     align-items: center;
@@ -40,39 +39,16 @@
     color: #cdd9f5;
     font-size: 0.95rem;
     font-weight: 700;
-    margin: 0 0 10px;
+    margin: 0 0 4px;
     letter-spacing: 0.2px;
   }
-  .insights {
-    margin-top: 16px;
+  .chart-subtitle {
+    color: #94a3b8;
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin: 0 0 12px;
+    line-height: 1.4;
   }
-  .insight-row {
-    border-radius: 12px;
-    padding: 16px 20px;
-    margin-bottom: 12px;
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-left: 5px solid #3B82F6;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .insight-row:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(0,0,0,0.08);
-  }
-  .insight-row:nth-child(2) { border-left-color: #10B981; }
-  .insight-row:nth-child(3) { border-left-color: #8B5CF6; }
-  .insight-row:nth-child(4) { border-left-color: #F59E0B; }
-  
-  .insight-row strong {
-    color: var(--text-main); /* Vurgulu renk */
-    font-weight: 800;
-  }
-
-  /* Modern Dashboard Cards Styles (Tedavi Sayfası Adaptasyonu) */
   .metric-card {
       border-radius: 16px;
       border: 1px solid rgba(255, 255, 255, 0.08);
@@ -127,20 +103,17 @@
       line-height: 1.1;
       text-shadow: 0 2px 4px rgba(0,0,0,0.15);
   }
-
-  /* Yüksek Kontrastlı & Renk Körlüğü Dostu Palet */
   .card-blue { background: linear-gradient(135deg, #2563EB, #1E40AF); }
   .card-orange { background: linear-gradient(135deg, #EA580C, #9A3412); }
   .card-amber { background: linear-gradient(135deg, #D97706, #92400E); }
   .card-green { background: linear-gradient(135deg, #059669, #064E3B); }
   .card-teal { background: linear-gradient(135deg, #0891B2, #155E75); }
-
 </style>
 {% endblock %}
 
 {% block content %}
 {% if no_data %}
-<div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında veri bulunamadı.">⚠️ Seçilen tarih aralığında veri bulunamadı.</div>
+<div class="alert alert-warning">&#9888;&#65039; Se&#231;ilen tarih aral&#305;&#287;&#305;nda veri bulunamad&#305;.</div>
 {% else %}
 <div class="metrics-grid cols-4">
     <div class="metric-card card-orange">
@@ -149,7 +122,7 @@
         </div>
         <div class="metric-body">
             <div class="metric-value">{{ grup_sayisi }}</div>
-            <div class="metric-label" data-t="Grup Sayısı">Grup Sayısı</div>
+            <div class="metric-label">Grup Say&#305;s&#305;</div>
         </div>
     </div>
     <div class="metric-card card-blue">
@@ -158,7 +131,7 @@
         </div>
         <div class="metric-body">
             <div class="metric-value">{{ tekil_hasta|turkish_number(0) }}</div>
-            <div class="metric-label" data-t="Tekil Hasta">Tekil Hasta</div>
+            <div class="metric-label">Tekil Hasta</div>
         </div>
     </div>
     <div class="metric-card card-teal">
@@ -167,7 +140,7 @@
         </div>
         <div class="metric-body">
             <div class="metric-value">{{ islem_hacmi|turkish_number(0) }}</div>
-            <div class="metric-label" data-t="İşlem Hacmi">İşlem Hacmi</div>
+            <div class="metric-label">&#304;&#351;lem Hacmi</div>
         </div>
     </div>
     <div class="metric-card card-green">
@@ -176,29 +149,29 @@
         </div>
         <div class="metric-body">
             <div class="metric-value">{{ toplam_ciro|turkish_number }}</div>
-            <div class="metric-label" data-t="Toplam Ciro">Toplam Ciro</div>
+            <div class="metric-label">Toplam Ciro</div>
         </div>
     </div>
 </div>
 
 <div class="tabs" data-target="#tedaviTabs">
-  <button class="tab-btn active" data-t="📊 Performans Kıyaslama">📊 Performans Kıyaslama</button>
-  <button class="tab-btn" data-t="🔍 Grup Detayları">🔍 Grup Detayları</button>
+  <button class="tab-btn active">&#128202; Performans K&#305;yaslama</button>
+  <button class="tab-btn">&#128269; Grup Detaylar&#305;</button>
 </div>
 <div id="tedaviTabs">
   <div class="tab-content active">
     <div class="tedavi-topbar">
       <div></div>
-      <form method="GET" class="topn-select" title="Grafiklerde gösterilecek grup sayısı">
+      <form method="GET" class="topn-select">
         {% for key, value in request.args.items() %}
           {% if key not in ['top', 'grup'] %}
             <input type="hidden" name="{{ key }}" value="{{ value }}">
           {% endif %}
         {% endfor %}
-        <label for="top" data-t="Gösterilecek Grup Sayısı">Gösterilecek Grup Sayısı</label>
+        <label for="top">Her grafikte listelenecek grup say&#305;s&#305;</label>
         <select id="top" name="top" onchange="this.form.submit()">
           {% for n in [5,10,15,20,25,30,35,40,45,50] %}
-            <option value="{{ n }}" {% if top_n == n %}selected{% endif %}>{{ n }}</option>
+            <option value="{{ n }}" {% if top_n == n %}selected{% endif %}>&#304;lk {{ n }} grup</option>
           {% endfor %}
         </select>
       </form>
@@ -206,22 +179,25 @@
 
     <div class="chart-row">
       <div class="chart-container">
-        <div class="chart-title" data-t="Gelire Göre Top">Gelire Göre Top</div>
+        <div class="chart-title">En Y&#252;ksek Cirolu Tedavi Gruplar&#305;</div>
+        <p class="chart-subtitle">Se&#231;ilen d&#246;nemde toplam gelire g&#246;re s&#305;ralanm&#305;&#351; ilk gruplar. &#199;ubuk &#252;zerindeki tutar: o grubun toplam cirosu (&#8378;).</p>
         {{ charts.fig_gelir | safe }}
       </div>
       <div class="chart-container">
-        <div class="chart-title" data-t="İşleme Göre Top">İşleme Göre Top</div>
+        <div class="chart-title">En &#199;ok &#304;&#351;lem Yap&#305;lan Tedavi Gruplar&#305;</div>
+        <p class="chart-subtitle">Se&#231;ilen d&#246;nemde i&#351;lem adedine g&#246;re s&#305;ralanm&#305;&#351; ilk gruplar. &#199;ubuk &#252;zerindeki say&#305;: o gruptaki toplam i&#351;lem adedi (hasta say&#305;s&#305; de&#287;il).</p>
         {{ charts.fig_islem | safe }}
       </div>
     </div>
 
     <div class="chart-container">
-      <div class="chart-title" data-t="💡 Verimlilik Analizi (Birim Başı Gelir)">💡 Verimlilik Analizi (Birim Başı Gelir)</div>
+      <div class="chart-title">&#128161; Verimlilik Analizi (Birim Ba&#351;&#305; Gelir)</div>
+      <p class="chart-subtitle">Her nokta bir tedavi grubudur. Yatay eksen: i&#351;lem adedi; dikey eksen: i&#351;lem ba&#351;&#305;na ortalama gelir (&#8378;).</p>
       {{ charts.fig_scatter | safe }}
     </div>
 
     <div class="insights">
-      <h2 class="section-title" data-t="🎯 Sistem Analizi">🎯 Sistem Analizi</h2>
+      <h2 class="section-title">&#127919; Sistem Analizi</h2>
       {% for item in insights %}
         <div class="insight-row" data-t="{{ item }}">{{ item }}</div>
       {% endfor %}
@@ -230,7 +206,7 @@
 
   <div class="tab-content">
     <div class="chart-container">
-      <div class="chart-title" data-t="🔍 Grup Detayları">🔍 Grup Detayları</div>
+      <div class="chart-title">&#128269; Grup Detaylar&#305;</div>
       <form method="GET" style="margin-bottom: 16px; display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
         {% for key, value in request.args.items() %}
           {% if key not in ['grup', 'tab'] %}
@@ -238,11 +214,11 @@
           {% endif %}
         {% endfor %}
         <input type="hidden" name="tab" value="1">
-        <label for="grup" style="font-size:0.85rem; font-weight:600; color:#cdd9f5;" data-t="Detaylı incelemek için bir grup seçin:">Detaylı incelemek için bir grup seçin:</label>
+        <label for="grup" style="font-size:0.85rem; font-weight:600; color:#cdd9f5;">Detayl&#305; incelemek i&#231;in bir grup se&#231;in:</label>
         <select id="grup" name="grup" onchange="this.form.submit()"
                 style="padding:8px 12px; border-radius:8px; border:1px solid var(--border-color); background:var(--bg-input); color:var(--text-primary); min-width:200px; width:100%; max-width:400px;">
           {% for g in group_list %}
-            <option value="{{ g }}" data-t="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
+            <option value="{{ g }}" {% if g == selected_group %}selected{% endif %}>{{ g }}</option>
           {% endfor %}
         </select>
       </form>
@@ -252,15 +228,15 @@
         <table class="data-table">
           <thead>
             <tr>
-              <th data-t="Tetkik Adı">Tetkik Adı</th>
-              <th data-t="İşlem Adedi">İşlem Adedi</th>
-              <th data-t="Toplam Ciro">Toplam Ciro</th>
+              <th>Tetkik Ad&#305;</th>
+              <th>&#304;&#351;lem Adedi</th>
+              <th>Toplam Ciro</th>
             </tr>
           </thead>
           <tbody>
             {% for r in detay_rows %}
             <tr>
-              <td data-t="{{ r.tetkik_adi }}">{{ r.tetkik_adi }}</td>
+              <td>{{ r.tetkik_adi }}</td>
               <td>{{ r.adet|turkish_number(0) }}</td>
               <td>{{ r.ciro|turkish_number(2) }}</td>
             </tr>
@@ -269,7 +245,7 @@
         </table>
       </div>
       {% else %}
-      <div class="alert alert-info" data-t="Seçili grup için detay bulunamadı.">Seçili grup için detay bulunamadı.</div>
+      <div class="alert alert-info">Se&#231;ili grup i&#231;in detay bulunamad&#305;.</div>
       {% endif %}
     </div>
   </div>

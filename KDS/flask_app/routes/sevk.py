@@ -10,6 +10,10 @@ from routes.dashboard import get_date_range
 
 sevk_bp = Blueprint('sevk', __name__)
 
+PAGE_SQL_KODLARI = [
+    "local:Yerel veritabanı: sevk_sorgular.sevk_verisi_yukle (Rapor SQL API kullanılmıyor)",
+]
+
 
 def _safe_float(value):
     try:
@@ -25,7 +29,7 @@ def sevk():
     df_referrals = sevk_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_referrals is None or df_referrals.empty:
-        return render_template('sevk.html', start_date=sd, end_date=ed, no_data=True)
+        return render_template('sevk.html', start_date=sd, end_date=ed, no_data=True, page_sql_kodlari=PAGE_SQL_KODLARI)
 
     df = df_referrals.copy()
 
@@ -390,4 +394,5 @@ def sevk():
         detail_accept_table=detail_accept_table,
         raw_cols=raw_cols,
         raw_rows=raw_rows,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

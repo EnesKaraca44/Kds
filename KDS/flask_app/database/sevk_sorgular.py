@@ -3,7 +3,7 @@ from .baglanti import baglanti_olustur
 from .cache_helper import ttl_cache
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def sevk_verisi_yukle(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:
@@ -82,7 +82,7 @@ def sevk_verisi_yukle(start_date_str, end_date_str):
         df = pd.read_sql(sql_query, conn, params=params)
         return df
     except Exception as e:
-        print(f"❌ SQL Hatası: {e}")
+        print(f"SQL Hatasi: {e}")
         return pd.DataFrame()
     finally:
         conn.close()

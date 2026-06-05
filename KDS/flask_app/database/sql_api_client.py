@@ -6,6 +6,8 @@ from urllib import error, request
 
 _PLACEHOLDER_RE = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")
 _AT_TOKEN_RE = re.compile(r"@([A-Za-z_][A-Za-z0-9_]*)@")
+_APP_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+_DEBUG_PAYLOAD_FILE = os.path.join(_APP_ROOT, "api_payload_debug.txt")
 
 
 def _default_api_url():
@@ -84,6 +86,53 @@ def _resolve_kod_candidates(rapor_sql_kod):
     return candidates
 
 
+def _looks_like_sql_text(value):
+    if not isinstance(value, str):
+        return False
+    s = value.strip()
+    if len(s) < 12:
+        return False
+    upper_val = s.upper()
+    return any(
+        token in upper_val
+        for token in ("SELECT ", "WITH ", "EXEC ", "{CALL ", "INSERT ", "UPDATE ", "DELETE ")
+    )
+
+
+def _dict_get_sql_string_ci(data, *key_names):
+    """data icinde anahtar adi buyuk/kucuk harf duyarsiz aranir; bos string atlanir."""
+    if not isinstance(data, dict):
+        return None
+    lower_to_actual = {str(k).lower(): k for k in data.keys()}
+    for name in key_names:
+        actual = lower_to_actual.get(name.lower())
+        if not actual:
+            continue
+        value = data.get(actual)
+        if isinstance(value, str) and value.strip():
+            return value.strip()
+    return None
+
+
+def _scan_object_for_sql_text(obj, depth=0, max_depth=8):
+    """API cevabinda SQL baska alan adiyla veya ic ice geldiyse bulmaya calisir."""
+    if depth > max_depth:
+        return None
+    if isinstance(obj, str) and _looks_like_sql_text(obj):
+        return obj.strip()
+    if isinstance(obj, dict):
+        for v in obj.values():
+            found = _scan_object_for_sql_text(v, depth + 1, max_depth)
+            if found:
+                return found
+    if isinstance(obj, list):
+        for v in obj:
+            found = _scan_object_for_sql_text(v, depth + 1, max_depth)
+            if found:
+                return found
+    return None
+
+
 def _extract_sql_text(payload):
     # Format-1: [{fieldName, fieldValue, ...}] benzeri liste cevap
     if isinstance(payload, list):
@@ -95,11 +144,7 @@ def _extract_sql_text(payload):
                     candidate_values.append(value.strip())
 
         for value in candidate_values:
-            upper_val = value.upper()
-            if any(
-                token in upper_val
-                for token in ("SELECT ", "WITH ", "EXEC ", "{CALL ", "INSERT ", "UPDATE ", "DELETE ")
-            ):
+            if _looks_like_sql_text(value):
                 return value
 
         if candidate_values:
@@ -109,16 +154,39 @@ def _extract_sql_text(payload):
     if isinstance(payload, dict):
         data = payload.get("data")
         if isinstance(data, dict):
-            for key in ("raporAnaSql", "raporProjeSql", "raporSql", "sql", "query"):
+            for key in ("raporProjeSql", "raporAnaSql", "raporSql", "sql", "query"):
                 value = data.get(key)
                 if isinstance(value, str) and value.strip():
                     return value.strip()
+            # PascalCase / farkli isimlendirme
+            ci = _dict_get_sql_string_ci(
+                data,
+                "raporProjeSql",
+                "raporAnaSql",
+                "raporSql",
+                "RaporProjeSql",
+                "RaporAnaSql",
+                "RaporSql",
+                "sqlMetni",
+                "SqlMetni",
+                "projeSql",
+                "anaSql",
+            )
+            if ci:
+                return ci
+            scanned = _scan_object_for_sql_text(data)
+            if scanned:
+                return scanned
 
         # Bazı implementasyonlarda SQL üst seviyede olabilir
-        for key in ("raporAnaSql", "raporProjeSql", "raporSql", "sql", "query"):
+        for key in ("raporProjeSql", "raporAnaSql", "raporSql", "sql", "query"):
             value = payload.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
+
+        scanned_root = _scan_object_for_sql_text(payload.get("data") or payload)
+        if scanned_root:
+            return scanned_root
 
     return None
 
@@ -136,10 +204,12 @@ def _safe_format_sql(sql_text, params):
     formatted = _PLACEHOLDER_RE.sub(_replace, sql_text)
 
     # Rapor SQL tarafinda sik gecen alternatif placeholder adlari
-    # Ornek: '@BASLANGIC_TRH', '@BITIS_TRH'
+    # Ornek: '@BASLANGIC_TRH@', '@BAS_TRH@', '@BITIS_TRH@', '@BIT_TRH@'
     alias_values = {
         "BASLANGIC_TRH": format_map.get("start_date", ""),
+        "BAS_TRH": format_map.get("start_date", ""),
         "BITIS_TRH": format_map.get("end_date", ""),
+        "BIT_TRH": format_map.get("end_date", ""),
     }
 
     for alias, value in alias_values.items():
@@ -150,6 +220,21 @@ def _safe_format_sql(sql_text, params):
         formatted = formatted.replace(f"@{alias}@", f"'{value}'")
         formatted = formatted.replace(f"'@{alias}'", f"'{value}'")
         formatted = formatted.replace(f"@{alias}", f"'{value}'")
+
+    # Tirnak icindeki bos opsiyonel parametrelerde "'NULL'" olusmasini engelle.
+    # Ornek: isnull('@BIRIM_ID@', b.BIRIM_ID) -> isnull(NULL, b.BIRIM_ID)
+    def _replace_quoted_at_token(match):
+        token = match.group(1)
+        value = (
+            format_map.get(token)
+            or format_map.get(token.lower())
+            or format_map.get(token.upper())
+        )
+        if value is None or value == "":
+            return "NULL"
+        return f"'{value}'"
+
+    formatted = re.sub(r"'@([A-Za-z_][A-Za-z0-9_]*)@'", _replace_quoted_at_token, formatted)
 
     # @PARAM@ formatindaki token'lar (or: @KADRO_UNVAN_ID@, @Id@)
     # Parametre map'inde karsiligi varsa onu, yoksa NULL kullan.
@@ -165,6 +250,27 @@ def _safe_format_sql(sql_text, params):
         return f"'{value}'"
 
     formatted = _AT_TOKEN_RE.sub(_replace_at_token, formatted)
+
+    # Bazi Rapor SQL sablonlarinda @RECETE_GRUP_KODU@ yok; bosluklu "RECETE_GRUP_KODU" kelimesi
+    # parametre yerine geciyor. Degistirilmezse SQL Server gecersiz ad / bos sonuc uretir.
+    for bare_key in ("RECETE_GRUP_KODU",):
+        if not re.search(r"(?i)\b" + re.escape(bare_key) + r"\b", formatted):
+            continue
+        raw_val = (
+            format_map.get(bare_key)
+            or format_map.get(bare_key.lower())
+            or format_map.get(bare_key.upper())
+            or ""
+        )
+        if raw_val is None or str(raw_val).strip() == "":
+            repl = "''"
+        else:
+            repl = "'" + str(raw_val).replace("'", "''") + "'"
+        formatted = re.sub(
+            re.compile(r"\b" + re.escape(bare_key) + r"\b", re.IGNORECASE),
+            repl,
+            formatted,
+        )
 
     return formatted
 
@@ -194,10 +300,28 @@ def _get_remote_sql_single_code(rapor_sql_kod, timeout=10):
         with request.urlopen(req, timeout=timeout) as resp:
             raw = resp.read().decode("utf-8", errors="replace")
             payload = json.loads(raw)
-            # DEBUG: Payload'ı görelim
-            with open(r"c:\Users\ENES\Desktop\KDS_enson\KDS\flask_app\api_payload_debug.txt", "w", encoding="utf-8") as f:
-                f.write(json.dumps(payload, indent=2, ensure_ascii=False))
-            return _extract_sql_text(payload)
+            # DEBUG: istek + cevap (hangi kod icin SQL geldigini ayirt etmek icin)
+            try:
+                debug_bundle = {
+                    "requested_rapor_sql_kod": rapor_sql_kod,
+                    "payload": payload,
+                }
+                with open(_DEBUG_PAYLOAD_FILE, "w", encoding="utf-8") as f:
+                    f.write(json.dumps(debug_bundle, indent=2, ensure_ascii=False))
+            except OSError as exc:
+                print(f"Payload debug dosyasi yazilamadi ({_DEBUG_PAYLOAD_FILE}): {exc}")
+            sql_text = _extract_sql_text(payload)
+            if not sql_text and isinstance(payload, dict):
+                msg = payload.get("messageText") or payload.get("message") or ""
+                data = payload.get("data")
+                kod = None
+                if isinstance(data, dict):
+                    kod = data.get("raporSqlKod") or data.get("RaporSqlKod")
+                print(
+                    f"Rapor SQL API: SQL metni cikarilamadi (kod={rapor_sql_kod}, "
+                    f"cevaptakiKod={kod}, messageText={msg!r})"
+                )
+            return sql_text
     except (error.URLError, TimeoutError, json.JSONDecodeError, ValueError) as exc:
         print(f"Rapor SQL API hatasi ({rapor_sql_kod}): {exc}")
         return None
@@ -216,3 +340,33 @@ def get_remote_sql(rapor_sql_kod, params=None, timeout=10):
             return _safe_format_sql(sql_text, params or {})
 
     return None
+
+
+def page_sql_api_kodlari_satirlari(keys):
+    """
+    Destek icin: rapor_sql_kod_map.json eslemesinden yalnizca API rapor SQL kod adlari
+    (ornek: HEKIM_PUAN_TAB1). Tekrar yok; route listesindeki sira korunur.
+    'local:' ile baslayan girdiler atlanir. Haritada olmayan mantiksal kodlar atlanir.
+    """
+    if not keys:
+        return []
+    kod_map = _load_kod_map()
+    seen = set()
+    out = []
+    for raw in keys:
+        if not isinstance(raw, str):
+            continue
+        key = raw.strip()
+        if not key or key.lower().startswith("local:"):
+            continue
+        mapped = kod_map.get(key)
+        apis = []
+        if isinstance(mapped, list):
+            apis = [str(x).strip() for x in mapped if str(x).strip()]
+        elif isinstance(mapped, str) and mapped.strip():
+            apis = [mapped.strip()]
+        for api in apis:
+            if api not in seen:
+                seen.add(api)
+                out.append(api)
+    return out

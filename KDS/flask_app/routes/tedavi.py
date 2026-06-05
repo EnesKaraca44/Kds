@@ -10,6 +10,51 @@ from routes.dashboard import get_date_range
 
 tedavi_bp = Blueprint('tedavi', __name__)
 
+PAGE_SQL_KODLARI = ["tedavi_grubu.tedavi_grubu_verisi_yukle"]
+
+
+def _tr_int(v):
+    if v is None or pd.isna(v):
+        return "0"
+    return f"{int(round(float(v))):,}".replace(",", ".")
+
+
+def _tr_money(v):
+    if v is None or pd.isna(v):
+        return "0 ₺"
+    return f"{float(v):,.0f}".replace(",", ".") + " ₺"
+
+
+def _build_grup_bar_chart(df, x_col, axis_title, bar_color, bar_line, text_fn):
+    """Yatay çubuk: eksen ve çubuk üzerinde tam sayı/gelir (kısaltmasız)."""
+    fig = px.bar(
+        df,
+        x=x_col,
+        y='TEDAVI_GRUBU_ADI',
+        orientation='h',
+        text=df[x_col],
+    )
+    fig.update_traces(
+        marker_color=bar_color,
+        marker_line=dict(color=bar_line, width=1),
+        text=[text_fn(x) for x in df[x_col]],
+        texttemplate="%{text}",
+        textposition="outside",
+        cliponaxis=False,
+        textfont=dict(size=11),
+    )
+    fig.update_layout(
+        template='plotly_dark',
+        height=480,
+        margin=dict(l=10, r=80, t=10, b=50),
+        paper_bgcolor='rgba(0,0,0,0)',
+        plot_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(showgrid=True, gridcolor='rgba(255,255,255,0.08)', zeroline=False, title=axis_title),
+        yaxis=dict(title='', tickfont=dict(size=10)),
+        showlegend=False,
+    )
+    return fig
+
 
 @tedavi_bp.route('/tedavi')
 @login_required
@@ -18,7 +63,7 @@ def tedavi():
     df_raw = tedavi_grubu_verisi_yukle(sd.strftime('%Y-%m-%d'), ed.strftime('%Y-%m-%d'))
 
     if df_raw.empty:
-        return render_template('tedavi.html', start_date=sd, end_date=ed, no_data=True, top_n=15)
+        return render_template('tedavi.html', start_date=sd, end_date=ed, no_data=True, top_n=15, page_sql_kodlari=PAGE_SQL_KODLARI)
 
     df = df_raw.copy()
     df.columns = [c.upper().strip() for c in df.columns]
@@ -45,49 +90,23 @@ def tedavi():
     top_n = max(5, min(50, (top_n // 5) * 5))
 
     top_gelir = summary.nlargest(top_n, 'TOPLAM_CIRO').sort_values('TOPLAM_CIRO')
-    fig_gelir = px.bar(
-        top_gelir,
-        x='TOPLAM_CIRO',
-        y=group_col,
-        orientation='h',
-        color='TOPLAM_CIRO',
-        color_continuous_scale='Blues',
-        text_auto='.3s',
-    )
-    fig_gelir.update_traces(textposition='outside', cliponaxis=False)
-    fig_gelir.update_layout(
-        template='plotly_dark',
-        height=480,
-        margin=dict(l=10, r=40, t=10, b=10),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False, tickformat='.3s', title=''),
-        yaxis=dict(title='', tickfont=dict(size=10)),
-        coloraxis_colorbar=dict(title='Ciro', tickformat='.2s'),
-        showlegend=False,
+    fig_gelir = _build_grup_bar_chart(
+        top_gelir.rename(columns={group_col: 'TEDAVI_GRUBU_ADI'}),
+        'TOPLAM_CIRO',
+        'Toplam ciro (₺)',
+        '#3b82f6',
+        '#1d4ed8',
+        _tr_money,
     )
 
     top_islem = summary.nlargest(top_n, 'ISLEM_ADETI').sort_values('ISLEM_ADETI')
-    fig_islem = px.bar(
-        top_islem,
-        x='ISLEM_ADETI',
-        y=group_col,
-        orientation='h',
-        color='ISLEM_ADETI',
-        color_continuous_scale='Greens',
-        text_auto='.3s',
-    )
-    fig_islem.update_traces(textposition='outside', cliponaxis=False)
-    fig_islem.update_layout(
-        template='plotly_dark',
-        height=480,
-        margin=dict(l=10, r=40, t=10, b=10),
-        paper_bgcolor='rgba(0,0,0,0)',
-        plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(showgrid=False, tickformat='.3s', title=''),
-        yaxis=dict(title='', tickfont=dict(size=10)),
-        coloraxis_colorbar=dict(title='Adet', tickformat='.2s'),
-        showlegend=False,
+    fig_islem = _build_grup_bar_chart(
+        top_islem.rename(columns={group_col: 'TEDAVI_GRUBU_ADI'}),
+        'ISLEM_ADETI',
+        'Toplam işlem adedi',
+        '#10b981',
+        '#047857',
+        _tr_int,
     )
 
     summary = summary[summary['ISLEM_ADETI'] > 0].copy()
@@ -129,7 +148,7 @@ def tedavi():
                 color=y_vals, # Rengi verimliliğe göre yapıyoruz
                 colorscale='Plasma',
                 showscale=True,
-                colorbar=dict(title='Verimlilik', thickness=15),
+                colorbar=dict(title='İşlem başı gelir (₺)', thickness=15, tickformat=',.0f'),
                 line=dict(width=1.5, color='rgba(255,255,255,0.7)')
             ),
             customdata=ciro_vals,
@@ -142,8 +161,8 @@ def tedavi():
         margin=dict(l=30, r=20, t=30, b=30),
         paper_bgcolor='rgba(0,0,0,0)',
         plot_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(tickformat='.3s', title='İşlem Adeti (Hacim)', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
-        yaxis=dict(tickformat='.3s', title='Birim Başı Gelir', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
+        xaxis=dict(tickformat=',.0f', title='Toplam işlem adedi', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
+        yaxis=dict(tickformat=',.0f', title='İşlem başı gelir (₺)', zeroline=True, showgrid=True, gridcolor='rgba(255,255,255,0.08)'),
     )
 
     insights = []
@@ -196,4 +215,5 @@ def tedavi():
         group_list=group_list,
         selected_group=selected_group,
         detay_rows=detay_rows,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

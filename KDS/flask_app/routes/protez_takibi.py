@@ -16,6 +16,34 @@ from database.protez_takibi_sorgular import (  # noqa: E402
 
 protez_takibi_bp = Blueprint("protez_takibi", __name__)
 
+PAGE_SQL_KODLARI = [
+    "protez_takibi.asama_girilmemis_hasta_listesi_yukle",
+    "protez_takibi.protez_suresi_gecen_hasta_birim_yukle",
+]
+
+# SQL kolon adlari -> tabloda gorunen Turkce basliklar
+PT_KOLON_ETIKETLERI = {
+    "dosyaNo": "Dosya No",
+    "hastaAdSoyad": "Hasta",
+    "doktorAdSoyad": "Hekim",
+    "hizmetSutTanimi": "İşlem",
+    "hizmetSutKodu": "SUT Kodu",
+    "tarihFark": "Geçen Süre (Gün)",
+    "servisAd": "Servis",
+    "islemTarihi": "İşlem Tarihi",
+}
+
+ASAMA_LISTE_KOLONLARI = [
+    "dosyaNo",
+    "hastaAdSoyad",
+    "doktorAdSoyad",
+    "servisAd",
+    "hizmetSutKodu",
+    "hizmetSutTanimi",
+    "islemTarihi",
+    "tarihFark",
+]
+
 
 @protez_takibi_bp.route("/protez-takibi")
 @login_required
@@ -53,9 +81,28 @@ def protez_takibi():
         toplam_hasta = int(df_asama["hastaKimlikId"].nunique())
 
     toplam_islem = int(len(df_rpt))
-    devam_eden = int(len(df_asama))
-    tamamlanan = max(toplam_islem - devam_eden, 0)
-    genel_rpt_orani = (devam_eden / toplam_islem * 100.0) if toplam_islem > 0 else 0.0
+
+    # Kartlar: T2/T3 ve RPT, df_rpt icindeki sure (0-3 trafik) ile hizalanir; grafiklerle ayni mantik.
+    sure_ser = None
+    if not df_rpt.empty and "sure" in df_rpt.columns:
+        sure_ser = (
+            pd.to_numeric(df_rpt["sure"], errors="coerce")
+            .fillna(0)
+            .round(0)
+            .astype(int)
+            .clip(0, 3)
+        )
+
+    if sure_ser is not None:
+        devam_eden = int((sure_ser == 2).sum())
+        tamamlanan = int((sure_ser == 3).sum())
+        rpt_adedi = tamamlanan
+        genel_rpt_orani = float((sure_ser == 3).mean() * 100.0) if toplam_islem > 0 else 0.0
+    else:
+        devam_eden = int(len(df_asama))
+        tamamlanan = max(toplam_islem - devam_eden, 0)
+        rpt_adedi = 0
+        genel_rpt_orani = 0.0
 
     # Sekme 1: En yogun hekim grafigi
     fig_hekim = go.Figure()
@@ -180,11 +227,15 @@ def protez_takibi():
     )
 
     # Sekme 3: Kritik takip listeleri
+    # tarihFark (SQL): DATEDIFF(gun, islemTarihi, bugun) — islemin baslangicindan bu yana gecen gun
     kritik_30gun_rows = []
+    kritik_30gun_columns = []
     if not df_rpt.empty:
         kritik_df = df_rpt.copy()
         if "tarihFark" in kritik_df.columns:
-            kritik_df["tarihFark"] = pd.to_numeric(kritik_df["tarihFark"], errors="coerce").fillna(0)
+            kritik_df["tarihFark"] = (
+                pd.to_numeric(kritik_df["tarihFark"], errors="coerce").fillna(0).round(0).astype(int)
+            )
             kritik_df = kritik_df[kritik_df["tarihFark"] >= 30]
         kritik_cols = [
             "dosyaNo",
@@ -193,23 +244,32 @@ def protez_takibi():
             "hizmetSutTanimi",
             "tarihFark",
         ]
-        kritik_cols = [c for c in kritik_cols if c in kritik_df.columns]
-        if kritik_cols:
-            kritik_30gun_rows = kritik_df[kritik_cols].head(200).to_dict(orient="records")
+        kritik_30gun_columns = [c for c in kritik_cols if c in kritik_df.columns]
+        if kritik_30gun_columns:
+            kritik_30gun_rows = kritik_df[kritik_30gun_columns].head(200).to_dict(orient="records")
 
-    vezne_bekleyen_rows = []
+    asama_girilmemis_rows = []
+    asama_girilmemis_columns = []
     if not df_asama.empty:
-        vezne_df = df_asama.copy()
-        vezne_cols = [
-            "dosyaNo",
-            "hastaAdSoyad",
-            "doktorAdSoyad",
-            "servisAd",
-            "islemTarihi",
-        ]
-        vezne_cols = [c for c in vezne_cols if c in vezne_df.columns]
-        if vezne_cols:
-            vezne_bekleyen_rows = vezne_df[vezne_cols].head(200).to_dict(orient="records")
+        asama_df = df_asama.copy()
+        if "tarihFark" in asama_df.columns:
+            asama_df["tarihFark"] = (
+                pd.to_numeric(asama_df["tarihFark"], errors="coerce").fillna(0).round(0).astype(int)
+            )
+        asama_girilmemis_columns = [c for c in ASAMA_LISTE_KOLONLARI if c in asama_df.columns]
+        if not asama_girilmemis_columns:
+            asama_girilmemis_columns = list(asama_df.columns)
+        hekim_col = next(
+            (c for c in ("doktorAdSoyad", "doktorAd", "hekimAdSoyad") if c in asama_df.columns),
+            None,
+        )
+        if hekim_col:
+            asama_df = asama_df.sort_values(
+                by=hekim_col,
+                key=lambda s: s.astype(str).str.casefold(),
+                na_position="last",
+            )
+        asama_girilmemis_rows = asama_df[asama_girilmemis_columns].head(500).to_dict(orient="records")
 
     # Sekme 4: Islem dagilimi
     fig_top_islem = go.Figure()
@@ -267,8 +327,9 @@ def protez_takibi():
         plot_bgcolor="rgba(0,0,0,0)",
     )
 
-    # Sekme 5: Islem listesi
+    # Sekme 5: Islem listesi (sure kolonu gosterilmez; durumEtiketi renkli rozet)
     islem_listesi_rows = []
+    islem_listesi_columns = []
     if not df_rpt.empty:
         list_cols = [
             "dosyaNo",
@@ -278,20 +339,28 @@ def protez_takibi():
             "DIS_NO",
             "doktorAdSoyad",
             "servisAd",
-            "sure",
         ]
         list_cols = [c for c in list_cols if c in df_rpt.columns]
         if list_cols:
-            list_df = df_rpt[list_cols].copy()
+            extra = ["sure"] if "sure" in df_rpt.columns else []
+            list_df = df_rpt[list_cols + extra].copy()
             if "sure" in list_df.columns:
+                s = pd.to_numeric(list_df["sure"], errors="coerce").fillna(0).round(0).astype(int).clip(0, 3)
+                list_df["durumKodu"] = s
                 durum_map = {
                     3: "Kritik",
                     2: "Uyarı",
                     1: "Normal",
                     0: "Süre İçinde",
                 }
-                list_df["durumEtiketi"] = list_df["sure"].map(durum_map).fillna("Bilinmiyor")
-            islem_listesi_rows = list_df.head(500).to_dict(orient="records")
+                list_df["durumEtiketi"] = s.map(durum_map).fillna("Bilinmiyor")
+                list_df = list_df.drop(columns=["sure"])
+            else:
+                list_df["durumKodu"] = 0
+                list_df["durumEtiketi"] = "—"
+            islem_listesi_columns = list_cols + ["durumEtiketi"]
+            out_cols = islem_listesi_columns + ["durumKodu"]
+            islem_listesi_rows = list_df[out_cols].head(500).to_dict(orient="records")
 
     cfg = {"responsive": True, "displaylogo": False}
     return render_template(
@@ -303,17 +372,23 @@ def protez_takibi():
         tamamlanan=tamamlanan,
         devam_eden=devam_eden,
         genel_rpt_orani=genel_rpt_orani,
-        rpt_adedi=devam_eden,
+        rpt_adedi=rpt_adedi,
         has_hekim_data=has_hekim_data,
         has_servis_data=has_servis_data,
         has_top_islem_data=has_top_islem_data,
         has_kirilim_data=has_kirilim_data,
         kritik_30gun_rows=kritik_30gun_rows,
-        vezne_bekleyen_rows=vezne_bekleyen_rows,
+        kritik_30gun_columns=kritik_30gun_columns,
+        asama_girilmemis_rows=asama_girilmemis_rows,
+        asama_girilmemis_columns=asama_girilmemis_columns,
+        asama_girilmemis_adet=len(asama_girilmemis_rows),
+        pt_kolon_etiketleri=PT_KOLON_ETIKETLERI,
         islem_listesi_rows=islem_listesi_rows,
+        islem_listesi_columns=islem_listesi_columns,
         fig_hekim=fig_hekim.to_html(full_html=False, include_plotlyjs=False, config=cfg),
         fig_servis=fig_servis.to_html(full_html=False, include_plotlyjs=False, config=cfg),
         fig_rpt=fig_rpt.to_html(full_html=False, include_plotlyjs=False, config=cfg),
         fig_top_islem=fig_top_islem.to_html(full_html=False, include_plotlyjs=False, config=cfg),
         fig_kirilim=fig_kirilim.to_html(full_html=False, include_plotlyjs=False, config=cfg),
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

@@ -1,0 +1,1099 @@
+{% extends "base.html" %}
+{% block title %}{{ ui.page_title }}{% endblock %}
+{% block page_title %}<span data-t="{{ ui.page_title }}">{{ ui.page_title }}</span>{% endblock %}
+{# Metinler Python JSON (tedavi_kartlari_tr.json) uzerinden gelir; sablon ANSI olsa bile ? olmaz #}
+
+{% block head %}
+<style>
+  .tedavi-top-label {
+    display: block;
+    margin: 0 0 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .treatment-hero {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    background: linear-gradient(135deg, #ffffff 0%, #f8fbff 100%);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .theme-dark .treatment-hero {
+    background: rgba(13, 27, 62, 0.55);
+    border-color: rgba(45, 74, 138, 0.55);
+  }
+
+  .treatment-hero-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .treatment-hero-text {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    max-width: 760px;
+  }
+
+  .treatment-count-pill {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    color: #1d4ed8;
+    font-weight: 800;
+  }
+
+  .theme-dark .treatment-count-pill {
+    background: rgba(37, 99, 235, 0.2);
+    border-color: rgba(96, 165, 250, 0.35);
+    color: #bfdbfe;
+  }
+
+  .treatment-card-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+  }
+
+  .treatment-card {
+    appearance: none;
+    text-align: left;
+    width: 100%;
+    min-height: 142px;
+    border: 1px solid var(--border-color);
+    border-radius: 18px;
+    padding: 16px;
+    background: var(--bg-card);
+    box-shadow: var(--shadow-sm);
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  }
+
+  .treatment-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: var(--card-color);
+  }
+
+  .treatment-card:hover,
+  .treatment-card.active {
+    transform: translateY(-3px);
+    border-color: var(--card-color);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.12);
+  }
+
+  .theme-dark .treatment-card {
+    background: rgba(26, 39, 68, 0.92);
+    border-color: rgba(45, 74, 138, 0.55);
+  }
+
+  .treatment-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .treatment-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 12px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: color-mix(in srgb, var(--card-color) 14%, transparent);
+    color: var(--card-color);
+    font-size: 0.95rem;
+    font-weight: 900;
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+
+  .treatment-category {
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: #ecfdf5;
+    color: #047857;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .theme-dark .treatment-category {
+    background: rgba(16, 185, 129, 0.14);
+    color: #a7f3d0;
+  }
+
+  .treatment-title {
+    display: block;
+    min-height: 38px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 800;
+    line-height: 1.25;
+  }
+
+  .treatment-value {
+    display: block;
+    margin-top: 8px;
+    color: var(--text-primary);
+    font-size: 2rem;
+    font-weight: 900;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .treatment-modal-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1500;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 22px;
+    background: rgba(15, 23, 42, 0.62);
+    backdrop-filter: blur(5px);
+  }
+
+  .treatment-modal-overlay.open {
+    display: flex;
+  }
+
+  .treatment-modal {
+    width: min(980px, 96vw);
+    max-height: 92vh;
+    overflow: auto;
+    border-radius: 22px;
+    border: 1px solid var(--border-color);
+    background: var(--bg-card);
+    box-shadow: 0 28px 80px rgba(15, 23, 42, 0.35);
+    animation: modalIn 0.22s ease;
+  }
+
+  .theme-dark .treatment-modal {
+    background: #0d1b3e;
+    border-color: rgba(96, 165, 250, 0.35);
+  }
+
+  .treatment-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .theme-dark .treatment-modal-head {
+    border-bottom-color: rgba(45, 74, 138, 0.55);
+  }
+
+  .treatment-modal-title {
+    color: var(--text-primary);
+    font-size: 1rem;
+    font-weight: 900;
+  }
+
+  .treatment-modal-close {
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--bg-input);
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+
+  .treatment-modal-close:hover {
+    border-color: var(--accent-danger);
+    color: var(--accent-danger);
+  }
+
+  .treatment-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 18px;
+  }
+
+  .treatment-modal-main {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.75fr) minmax(480px, 1.35fr);
+    gap: 18px;
+    align-items: stretch;
+  }
+
+  .sut-breakdown-section {
+    border: 1px solid var(--border-color);
+    border-top: 3px solid #dc2626;
+    border-radius: var(--radius-lg);
+    background: var(--bg-card);
+    padding: 16px 18px;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .theme-dark .sut-breakdown-section {
+    background: rgba(13, 27, 62, 0.55);
+    border-color: rgba(45, 74, 138, 0.55);
+    border-top-color: #f87171;
+  }
+
+  .sut-breakdown-title {
+    color: #dc2626;
+    font-size: 1.02rem;
+    font-weight: 900;
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 4px solid #dc2626;
+    line-height: 1.35;
+  }
+
+  .theme-dark .sut-breakdown-title {
+    color: #f87171;
+    border-left-color: #f87171;
+  }
+
+  .sut-breakdown-wrap {
+    max-height: 240px;
+    overflow: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+  }
+
+  .sut-breakdown-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.86rem;
+  }
+
+  .sut-breakdown-table th,
+  .sut-breakdown-table td {
+    padding: 10px 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .sut-breakdown-table th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: #f1f5f9;
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 0.74rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .theme-dark .sut-breakdown-table th {
+    background: rgba(15, 23, 42, 0.92);
+  }
+
+  .sut-breakdown-table td.num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .sut-breakdown-table tbody tr:hover {
+    background: rgba(37, 99, 235, 0.06);
+  }
+
+  .sut-breakdown-table tfoot td {
+    font-weight: 900;
+    background: #f8fafc;
+    border-bottom: none;
+  }
+
+  .theme-dark .sut-breakdown-table tfoot td {
+    background: rgba(15, 23, 42, 0.65);
+  }
+
+  .sut-breakdown-empty {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    font-weight: 600;
+    padding: 8px 2px;
+  }
+
+  .sut-breakdown-section.is-hidden {
+    display: none;
+  }
+
+  .selected-detail-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: 20px;
+    border-top: 5px solid var(--selected-color, #2563eb);
+  }
+
+  .theme-dark .selected-detail-card {
+    background: rgba(13, 27, 62, 0.55);
+    border-color: rgba(45, 74, 138, 0.55);
+  }
+
+  .selected-kicker {
+    color: var(--text-muted);
+    font-weight: 800;
+    font-size: 0.76rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .selected-title {
+    font-size: 1.3rem;
+    font-weight: 900;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+  }
+
+  .selected-description {
+    color: var(--text-secondary);
+    font-size: 0.92rem;
+    margin-bottom: 18px;
+  }
+
+  .selected-stat-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .selected-stat {
+    padding: 14px;
+    border-radius: 14px;
+    background: #f8fafc;
+    border: 1px solid var(--border-color);
+  }
+
+  .theme-dark .selected-stat {
+    background: rgba(15, 23, 42, 0.55);
+  }
+
+  .selected-stat-label {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 5px;
+  }
+
+  .selected-stat-value {
+    color: var(--text-primary);
+    font-size: 1.4rem;
+    font-weight: 900;
+  }
+
+  .period-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .period-title {
+    color: var(--text-primary);
+    font-size: 0.98rem;
+    font-weight: 900;
+  }
+
+  .period-buttons {
+    display: inline-flex;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--bg-input);
+  }
+
+  .period-btn {
+    border: 0;
+    border-left: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 9px 13px;
+    font-family: var(--font-family);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  .period-btn:first-child {
+    border-left: 0;
+  }
+
+  .period-btn.active,
+  .period-btn:hover {
+    background: rgba(37, 99, 235, 0.14);
+    color: var(--accent-primary);
+  }
+
+  .chart-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 360px;
+    color: var(--text-muted);
+    font-weight: 700;
+    font-size: 0.92rem;
+  }
+
+  @keyframes modalIn {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .treatment-card-grid {
+      grid-template-columns: repeat(3, minmax(180px, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .treatment-modal-main {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 768px) {
+    .treatment-hero {
+      flex-direction: column;
+    }
+
+    .treatment-card-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .treatment-card {
+      min-height: 132px;
+      padding: 14px;
+    }
+
+    .treatment-title {
+      font-size: 0.82rem;
+    }
+
+    .treatment-value {
+      font-size: 1.55rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .treatment-card-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .treatment-modal-overlay {
+      padding: 10px;
+    }
+
+    .treatment-modal-body {
+      padding: 12px;
+    }
+
+    .selected-stat-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="treatment-hero">
+  <div>
+    <div class="treatment-hero-title" data-t="{{ ui.hero_title }}">{{ ui.hero_title }}</div>
+    <div class="treatment-hero-text" data-t="{{ ui.hero_text }}">{{ ui.hero_text }}</div>
+  </div>
+  <div class="treatment-count-pill">
+    <span>{{ treatment_cards|length }}</span>
+    <span data-t="{{ ui.islem_grubu }}">{{ ui.islem_grubu }}</span>
+  </div>
+</div>
+{% if deploy_build %}
+<p style="font-size:0.7rem;color:#94a3b8;margin:-8px 0 12px 0;" title="Deploy kontrol">Sürüm: {{ deploy_build }}</p>
+{% endif %}
+
+<div class="treatment-card-grid" id="treatmentCardGrid">
+  {% if no_data %}
+  <div class="alert alert-warning" style="grid-column: 1 / -1;" data-t="{{ ui.no_data }}">{{ ui.no_data }}</div>
+  {% endif %}
+  {% for item in treatment_cards %}
+  <button
+    type="button"
+    class="treatment-card {% if loop.first %}active{% endif %}"
+    style="--card-color: {{ item.color }};"
+    data-card-id="{{ item.id }}"
+    data-recete-grup-kodu="{{ item.recete_grup_kodu }}"
+    aria-label="{{ item.title }} detayını göster">
+    <span class="treatment-card-top">
+      <span class="treatment-icon">{{ item.icon }}</span>
+      <span class="treatment-category" data-t="{{ item.category }}">{{ item.category }}</span>
+    </span>
+    <span class="treatment-title" data-t="{{ item.title }}">{{ item.title }}</span>
+    <span class="treatment-value">{{ item.value }}</span>
+  </button>
+  {% endfor %}
+</div>
+
+<div class="treatment-modal-overlay" id="treatmentModalOverlay" aria-hidden="true">
+  <div class="treatment-modal" role="dialog" aria-modal="true" aria-labelledby="treatmentModalTitle">
+    <div class="treatment-modal-head">
+      <div class="treatment-modal-title" id="treatmentModalTitle" data-t="{{ ui.modal_title }}">{{ ui.modal_title }}</div>
+      <button type="button" class="treatment-modal-close" id="treatmentModalClose" aria-label="{{ ui.modal_close }}">&times;</button>
+    </div>
+
+    <div class="treatment-modal-body">
+      <div class="treatment-modal-main">
+      <div class="selected-detail-card" id="selectedDetailCard">
+        <div class="selected-kicker" data-t="{{ ui.selected_kicker }}">{{ ui.selected_kicker }}</div>
+        <div class="selected-title" id="selectedTitle"></div>
+        <div class="selected-description" id="selectedDescription"></div>
+        <div class="selected-stat-row">
+          <div class="selected-stat">
+            <div class="selected-stat-label" data-t="{{ ui.total_islem }}">{{ ui.total_islem }}</div>
+            <div class="selected-stat-value" id="selectedTotal"></div>
+          </div>
+          <div class="selected-stat">
+            <div class="selected-stat-label" data-t="{{ ui.kategori }}">{{ ui.kategori }}</div>
+            <div class="selected-stat-value" id="selectedCategory"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chart-container" style="margin-bottom: 0;">
+        <div class="period-toolbar">
+          <div class="period-title" data-t="{{ ui.chart_title }}">{{ ui.chart_title }}</div>
+          <div class="period-buttons" id="periodButtons" aria-label="Grafik ay aralığı">
+            <button type="button" class="period-btn active" data-months="1">1 Ay</button>
+            <button type="button" class="period-btn" data-months="2">2 Ay</button>
+            <button type="button" class="period-btn" data-months="3">3 Ay</button>
+            <button type="button" class="period-btn" data-months="6">6 Ay</button>
+          </div>
+        </div>
+        <div id="treatmentBarChart" style="width: 100%; min-height: 360px;"></div>
+      </div>
+      </div>
+
+      <section class="sut-breakdown-section is-hidden" id="sutBreakdownSection" aria-live="polite">
+        <div class="sut-breakdown-title" id="sutBreakdownTitle"></div>
+        <div id="sutBreakdownHost">
+          <div class="sut-breakdown-empty" data-t="{{ ui.breakdown_loading }}">{{ ui.breakdown_loading }}</div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script id="treatmentCardsData" type="application/json">{{ treatment_cards|tojson|safe }}</script>
+<script>
+(function() {
+  const uiStrings = {{ ui|tojson|safe }};
+  const kartSerisiUrl = {{ url_for('tedavi_kartlari.tedavi_kartlari_kart_serisi')|tojson }};
+  const kartDegerleriUrl = {{ url_for('tedavi_kartlari.tedavi_kartlari_kart_degerleri')|tojson }};
+  const cardsData = document.getElementById('treatmentCardsData');
+  const cards = cardsData ? JSON.parse(cardsData.textContent || '[]') : [];
+  let selectedId = cards[0] ? cards[0].id : null;
+  let selectedMonths = 1;
+  const modalOverlay = document.getElementById('treatmentModalOverlay');
+  const modalClose = document.getElementById('treatmentModalClose');
+  const chartHost = document.getElementById('treatmentBarChart');
+  const sutBreakdownSection = document.getElementById('sutBreakdownSection');
+  const sutBreakdownHost = document.getElementById('sutBreakdownHost');
+  const sutBreakdownTitle = document.getElementById('sutBreakdownTitle');
+  const seriesCache = {};
+  const breakdownCache = {};
+  let seriesFetchToken = 0;
+  let breakdownFetchToken = 0;
+
+  function formatNumber(value) {
+    return new Intl.NumberFormat('tr-TR').format(value || 0);
+  }
+
+  function normalizeCardTitle(text) {
+    return String(text || '')
+      .normalize('NFC')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .toLocaleLowerCase('tr-TR');
+  }
+
+  function findCardForUpdate(row) {
+    const gid = String(row.recete_grup_kodu || '').replace(/\s+/g, '');
+    if (gid) {
+      const byGid = cards.find(function(c) {
+        return String(c.recete_grup_kodu || '').replace(/\s+/g, '') === gid;
+      });
+      if (byGid) return byGid;
+    }
+    const titleKey = normalizeCardTitle(row.title);
+    if (!titleKey) return null;
+    return cards.find(function(c) {
+      return normalizeCardTitle(c.title) === titleKey;
+    }) || null;
+  }
+
+  function syncCardValueToGrid(item) {
+    if (!item || !item.id) return;
+    const btn = document.querySelector('.treatment-card[data-card-id="' + item.id + '"]');
+    if (!btn) return;
+    const valueEl = btn.querySelector('.treatment-value');
+    if (valueEl) valueEl.textContent = formatNumber(item.value);
+  }
+
+  function applyDeferredCardValues(updates) {
+    if (!updates || !updates.length) return;
+    updates.forEach(function(row) {
+      const value = Math.max(0, Math.round(Number(row.value) || 0));
+      const card = findCardForUpdate(row);
+      if (!card) {
+        if (window.console) {
+          console.warn('[TEDAVI_KARTLARI] kart eslesmedi:', row.title, row.recete_grup_kodu);
+        }
+        return;
+      }
+      if (card.value === value) return;
+      card.value = value;
+      syncCardValueToGrid(card);
+      if (selectedId === card.id) {
+        const totalEl = document.getElementById('selectedTotal');
+        if (totalEl) totalEl.textContent = formatNumber(value);
+      }
+    });
+  }
+
+  function refreshDeferredCardValues() {
+    if (!kartDegerleriUrl) return;
+    const qs = window.location.search || '';
+    fetch(kartDegerleriUrl + qs, {
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Kart degerleri yuklenemedi');
+        return response.json();
+      })
+      .then(function(payload) {
+        applyDeferredCardValues(payload.updates || []);
+      })
+      .catch(function(err) {
+        if (window.console) console.warn('[TEDAVI_KARTLARI] kart-degerleri:', err);
+      });
+  }
+
+  function buildMonthlySeries(item, months) {
+    const labels = item.monthly_labels || [];
+    const values = item.monthly_values || [];
+    const startIndex = Math.max(0, labels.length - months);
+
+    return {
+      labels: labels.slice(startIndex),
+      values: values.slice(startIndex).map(value => Math.max(0, Math.round(Number(value) || 0)))
+    };
+  }
+
+  function activeThemeIsDark() {
+    return document.body.classList.contains('theme-dark');
+  }
+
+  function showChartLoading() {
+    if (!chartHost) return;
+    // NOT: data-t koymuyoruz; main.js'in applyTranslations'i bu mesaji
+    // Plotly cizdikten sonra geri yazmasin diye.
+    chartHost.innerHTML = '<div class="chart-loading">' + (uiStrings.chart_loading || 'Yukleniyor...') + '</div>';
+  }
+
+  function seriesCacheKey(item) {
+    return (item.id || '') + '|' + (item.recete_grup_kodu || '') + '|' + (item.title || '');
+  }
+
+  function breakdownCacheKey(item) {
+    return seriesCacheKey(item) + '|m' + selectedMonths;
+  }
+
+  function updateTotalFromChart(item) {
+    const series = buildMonthlySeries(item, selectedMonths);
+    const chartSum = (series.values || []).reduce(function(a, b) {
+      return a + (Number(b) || 0);
+    }, 0);
+    if (chartSum > 0) {
+      document.getElementById('selectedTotal').textContent = formatNumber(chartSum);
+    }
+  }
+
+  function refreshBreakdown(item) {
+    if (!item || !item.recete_grup_kodu) {
+      hideBreakdownSection();
+      return Promise.resolve();
+    }
+
+    const key = breakdownCacheKey(item);
+    if (breakdownCache[key]) {
+      item.sut_breakdown = breakdownCache[key];
+      renderSutBreakdown(item.sut_breakdown, item);
+      return Promise.resolve();
+    }
+
+    const params = new URLSearchParams();
+    if (item.title) params.set('title', item.title);
+    if (item.recete_grup_kodu) params.set('recete_grup_kodu', item.recete_grup_kodu);
+    params.set('months', String(selectedMonths));
+    params.set('breakdown_only', '1');
+
+    const token = ++breakdownFetchToken;
+    showBreakdownLoading(item);
+
+    return fetch(kartSerisiUrl + '?' + params.toString(), {
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Kirilim yuklenemedi');
+        return response.json();
+      })
+      .then(function(payload) {
+        if (token !== breakdownFetchToken) return;
+        item.sut_breakdown = payload.breakdown || [];
+        breakdownCache[key] = item.sut_breakdown;
+        renderSutBreakdown(item.sut_breakdown, item);
+      })
+      .catch(function(err) {
+        if (window.console) console.warn('[TEDAVI_KARTLARI] kirilim hatasi:', err);
+        if (token !== breakdownFetchToken) return;
+        item.sut_breakdown = [];
+        renderSutBreakdown([], item);
+      });
+  }
+
+  function escapeHtml(text) {
+    return String(text || '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function breakdownHeading(item) {
+    const title = (item && item.title) ? String(item.title).trim() : '';
+    const suffix = uiStrings.breakdown_title_suffix || ' Hizmet Adedi';
+    return title ? title + suffix : suffix.trim();
+  }
+
+  function updateBreakdownTitle(item) {
+    if (!sutBreakdownTitle || !item) return;
+    sutBreakdownTitle.textContent = breakdownHeading(item);
+  }
+
+  function showBreakdownLoading(item) {
+    if (!sutBreakdownSection || !sutBreakdownHost) return;
+    updateBreakdownTitle(item);
+    sutBreakdownSection.classList.remove('is-hidden');
+    sutBreakdownHost.innerHTML = '<div class="sut-breakdown-empty">' +
+      escapeHtml(uiStrings.breakdown_loading || '') + '</div>';
+  }
+
+  function hideBreakdownSection() {
+    if (sutBreakdownSection) sutBreakdownSection.classList.add('is-hidden');
+    if (sutBreakdownHost) sutBreakdownHost.innerHTML = '';
+  }
+
+  function renderSutBreakdown(rows, item) {
+    if (!sutBreakdownSection || !sutBreakdownHost) return;
+    if (item) updateBreakdownTitle(item);
+    const list = rows || [];
+    if (!list.length) {
+      sutBreakdownSection.classList.remove('is-hidden');
+      sutBreakdownHost.innerHTML = '<div class="sut-breakdown-empty">' +
+        escapeHtml(uiStrings.breakdown_empty || '') + '</div>';
+      return;
+    }
+    let total = 0;
+    list.forEach(function(row) { total += Number(row.adet) || 0; });
+    let html = '<div class="sut-breakdown-wrap"><table class="sut-breakdown-table"><thead><tr>' +
+      '<th>' + escapeHtml(uiStrings.breakdown_col_kod || 'Kod') + '</th>' +
+      '<th>' + escapeHtml(uiStrings.breakdown_col_tanim || 'Tanim') + '</th>' +
+      '<th class="num">' + escapeHtml(uiStrings.breakdown_col_adet || 'Adet') + '</th>' +
+      '<th class="num">' + escapeHtml(uiStrings.breakdown_col_pct || '%') + '</th>' +
+      '</tr></thead><tbody>';
+    list.forEach(function(row) {
+      html += '<tr><td>' + escapeHtml(row.sut_kodu) + '</td>' +
+        '<td>' + escapeHtml(row.sut_tanimi) + '</td>' +
+        '<td class="num">' + formatNumber(row.adet) + '</td>' +
+        '<td class="num">' + escapeHtml(String(row.yuzde != null ? row.yuzde : '')) + '%</td></tr>';
+    });
+    html += '</tbody><tfoot><tr><td colspan="2">' +
+      escapeHtml(uiStrings.breakdown_total || 'Toplam') + '</td>' +
+      '<td class="num">' + formatNumber(total) + '</td><td class="num">100%</td></tr></tfoot></table></div>';
+    sutBreakdownSection.classList.remove('is-hidden');
+    sutBreakdownHost.innerHTML = html;
+  }
+
+  function ensureMonthlySeries(item) {
+    const key = seriesCacheKey(item);
+    if (seriesCache[key]) {
+      item.monthly_labels = seriesCache[key].labels;
+      item.monthly_values = seriesCache[key].values;
+      updateTotalFromChart(item);
+      renderChart(item);
+      return refreshBreakdown(item).then(function() { return item; });
+    }
+    if ((item.monthly_labels || []).length) {
+      seriesCache[key] = {
+        labels: item.monthly_labels,
+        values: item.monthly_values
+      };
+      updateTotalFromChart(item);
+      renderChart(item);
+      return refreshBreakdown(item).then(function() { return item; });
+    }
+
+    const params = new URLSearchParams();
+    if (item.title) params.set('title', item.title);
+    if (item.recete_grup_kodu) params.set('recete_grup_kodu', item.recete_grup_kodu);
+    params.set('months', String(selectedMonths));
+
+    const token = ++seriesFetchToken;
+    showChartLoading();
+    if (item.recete_grup_kodu) {
+      showBreakdownLoading(item);
+    } else {
+      hideBreakdownSection();
+    }
+
+    return fetch(kartSerisiUrl + '?' + params.toString(), {
+      credentials: 'same-origin',
+      headers: { 'Accept': 'application/json' }
+    })
+      .then(function(response) {
+        if (!response.ok) throw new Error('Seri yüklenemedi');
+        return response.json();
+      })
+      .then(function(payload) {
+        if (token !== seriesFetchToken) return item;
+        item.monthly_labels = payload.labels || [];
+        item.monthly_values = payload.values || [];
+        if (payload.period_total > 0) {
+          item.value = payload.period_total;
+          syncCardValueToGrid(item);
+        }
+        item.sut_breakdown = payload.breakdown || [];
+        seriesCache[key] = {
+          labels: item.monthly_labels,
+          values: item.monthly_values
+        };
+        breakdownCache[breakdownCacheKey(item)] = item.sut_breakdown;
+        renderSutBreakdown(item.sut_breakdown, item);
+        updateTotalFromChart(item);
+        return item;
+      })
+      .catch(function(err) {
+        if (window.console) console.warn('[TEDAVI_KARTLARI] kart-serisi hatasi:', err);
+        if (token !== seriesFetchToken) return item;
+        item.monthly_labels = [];
+        item.monthly_values = [];
+        item.sut_breakdown = [];
+        renderSutBreakdown([], item);
+        return item;
+      });
+  }
+
+  function renderChart(item) {
+    if (!chartHost) return;
+    if (typeof Plotly === 'undefined') {
+      chartHost.innerHTML = '<div class="chart-loading">Plotly yuklenemedi.</div>';
+      return;
+    }
+    const series = buildMonthlySeries(item, selectedMonths);
+    if (!series.labels.length) {
+      chartHost.innerHTML = '<div class="chart-loading">' + (uiStrings.chart_empty || '') + '</div>';
+      return;
+    }
+    // Plotly.react kendi yapisini koyar; loading div'i kaldirmak icin once temizle.
+    chartHost.innerHTML = '';
+    const dark = activeThemeIsDark();
+
+    try {
+      Plotly.newPlot('treatmentBarChart', [{
+      type: 'bar',
+      x: series.labels,
+      y: series.values,
+      text: series.values.map(formatNumber),
+      textposition: 'outside',
+      marker: {
+        color: item.color,
+        line: { color: item.color, width: 1 }
+      },
+      hovertemplate: '<b>%{x}</b><br>' + (uiStrings.total_islem || 'Toplam') + ': %{y:,}<extra></extra>'
+    }], {
+      height: 360,
+      margin: { t: 20, r: 18, b: 48, l: 54 },
+      paper_bgcolor: dark ? '#0b1a3a' : '#ffffff',
+      plot_bgcolor: dark ? '#0b1a3a' : '#ffffff',
+      font: { color: dark ? '#e8f0fe' : '#0f172a', family: 'Inter, sans-serif' },
+      xaxis: {
+        title: '',
+        gridcolor: dark ? 'rgba(148, 163, 184, 0.18)' : 'rgba(100, 116, 139, 0.15)',
+        zeroline: false
+      },
+      yaxis: {
+        title: uiStrings.yaxis_title || '',
+        rangemode: 'tozero',
+        gridcolor: dark ? 'rgba(148, 163, 184, 0.22)' : 'rgba(100, 116, 139, 0.18)',
+        zeroline: false
+      },
+      showlegend: false,
+      bargap: 0.36
+    }, {
+      displayModeBar: false,
+      responsive: true
+    });
+    } catch (err) {
+      if (window.console) console.error('[TEDAVI_KARTLARI] Plotly cizim hatasi:', err);
+      chartHost.innerHTML = '<div class="chart-loading">' + (uiStrings.chart_empty || '') + '</div>';
+    }
+  }
+
+  function renderDetail() {
+    const item = cards.find(card => card.id === selectedId);
+    if (!item) return;
+
+    document.getElementById('selectedDetailCard').style.setProperty('--selected-color', item.color);
+    document.getElementById('selectedTitle').textContent = item.title;
+    document.getElementById('selectedDescription').textContent = item.description;
+    document.getElementById('selectedTotal').textContent = formatNumber(item.value);
+    document.getElementById('selectedCategory').textContent = item.category;
+
+    if (!item.recete_grup_kodu) {
+      hideBreakdownSection();
+    } else {
+      updateBreakdownTitle(item);
+    }
+
+    ensureMonthlySeries(item).then(function(loaded) {
+      if (loaded.id !== selectedId) return;
+      updateTotalFromChart(loaded);
+      renderChart(loaded);
+    });
+  }
+
+  function onPeriodMonthsChange() {
+    const item = cards.find(function(card) { return card.id === selectedId; });
+    if (!item) return;
+    delete breakdownCache[breakdownCacheKey(item)];
+    updateTotalFromChart(item);
+    renderChart(item);
+    refreshBreakdown(item);
+  }
+
+  function openModal() {
+    if (!modalOverlay) return;
+    modalOverlay.classList.add('open');
+    modalOverlay.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    renderDetail();
+    // Modal acildiktan sonra Plotly host'un gercek genisligini ogrenir.
+    setTimeout(function() {
+      const chart = document.getElementById('treatmentBarChart');
+      if (chart && typeof Plotly !== 'undefined' && chart.querySelector('.js-plotly-plot, .plotly')) {
+        Plotly.Plots.resize(chart);
+      }
+    }, 120);
+  }
+
+  function closeModal() {
+    if (!modalOverlay) return;
+    modalOverlay.classList.remove('open');
+    modalOverlay.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  document.querySelectorAll('.treatment-card').forEach(button => {
+    button.addEventListener('click', function() {
+      selectedId = this.dataset.cardId;
+      document.querySelectorAll('.treatment-card').forEach(card => card.classList.remove('active'));
+      this.classList.add('active');
+      openModal();
+    });
+  });
+
+  document.querySelectorAll('.period-btn').forEach(button => {
+    button.addEventListener('click', function() {
+      selectedMonths = parseInt(this.dataset.months, 10) || 1;
+      document.querySelectorAll('.period-btn').forEach(btn => btn.classList.remove('active'));
+      this.classList.add('active');
+      onPeriodMonthsChange();
+    });
+  });
+
+  if (modalClose) {
+    modalClose.addEventListener('click', closeModal);
+  }
+
+  if (modalOverlay) {
+    modalOverlay.addEventListener('click', function(event) {
+      if (event.target === modalOverlay) {
+        closeModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape' && modalOverlay && modalOverlay.classList.contains('open')) {
+      closeModal();
+    }
+  });
+
+  window.addEventListener('resize', function() {
+    const chart = document.getElementById('treatmentBarChart');
+    if (chart && typeof Plotly !== 'undefined' && chart.querySelector('.js-plotly-plot, .plotly')) {
+      Plotly.Plots.resize(chart);
+    }
+  });
+
+  // Tema degisiminde sadece modal acikken yeniden ciz; aksi halde fetch'leri iptal eder.
+  const themeObserver = new MutationObserver(function() {
+    if (modalOverlay && modalOverlay.classList.contains('open')) {
+      const item = cards.find(card => card.id === selectedId);
+      if (item) renderChart(item);
+    }
+  });
+  themeObserver.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+
+  refreshDeferredCardValues();
+})();
+</script>
+{% endblock %}

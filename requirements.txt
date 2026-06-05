@@ -1,0 +1,6 @@
+flask
+waitress
+pyodbc
+pandas
+plotly
+pycryptodome

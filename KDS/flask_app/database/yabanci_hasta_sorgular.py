@@ -5,7 +5,7 @@ from .cache_helper import ttl_cache
 from .sql_api_client import get_remote_sql
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def yabanci_hasta_verisi_yukle(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:

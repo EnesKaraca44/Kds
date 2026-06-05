@@ -88,6 +88,10 @@
   /* Mor (CMI) - Belirgin İndigo/Mor */
   .hp-kpis .metric-card.kpi-purple { background: linear-gradient(135deg, #7C3AED, #4C1D95); }
 
+  .hp-fin-perf-charts .js-plotly-plot {
+    width: 100% !important;
+  }
+
   /* Hizmet Dağılımı table alignment fixes (scoped) */
   #hekimTableContainer .table-wrapper {
     max-height: 520px;
@@ -358,12 +362,12 @@
             </form>
         </div>
 
-        <div class="chart-row">
-            <div class="chart-container" style="padding: 10px;">
+        <div class="chart-row hp-fin-perf-charts">
+            <div class="chart-container hp-chart-horizontal" style="padding: 10px;">
                 <div class="chart-title" data-t="En Yüksek {{ current_sort }} Üretenler">En Yüksek {{ current_sort }} Üretenler</div>
                 {{ charts.fig_max | safe }}
             </div>
-            <div class="chart-container" style="padding: 10px;">
+            <div class="chart-container hp-chart-low" style="padding: 10px;">
                 <div class="chart-title" data-t="En Düşük {{ current_sort }} Üretenler">En Düşük {{ current_sort }} Üretenler</div>
                 {{ charts.fig_min | safe }}
             </div>

@@ -10,7 +10,7 @@ def _normalize_broken_null_literals(sql: str) -> str:
     return sql.replace("'NULL'", "NULL").replace("'null'", "NULL")
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def rontgen_verisi_hekim(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:
@@ -34,7 +34,7 @@ def rontgen_verisi_hekim(start_date_str, end_date_str):
         conn.close()
 
 
-@ttl_cache(maxsize=32, ttl=600)
+@ttl_cache(maxsize=32, ttl=60)
 def rontgen_brans_verisi(start_date_str, end_date_str):
     """Branş bazlı röntgen tetkik dağılımını döndürür."""
     conn = baglanti_olustur()

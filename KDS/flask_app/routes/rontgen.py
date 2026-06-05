@@ -14,6 +14,11 @@ from routes.dashboard import get_date_range  # noqa: E402
 
 rontgen_bp = Blueprint("rontgen", __name__)
 
+PAGE_SQL_KODLARI = [
+    "rontgen.rontgen_verisi_hekim",
+    "rontgen.rontgen_brans_verisi",
+]
+
 
 def _find_column(candidates, df_cols):
     for cand in candidates:
@@ -86,7 +91,7 @@ def rontgen():
     df_hekim = rontgen_verisi_hekim(sd, ed)
 
     if df_hekim is None or df_hekim.empty:
-        return render_template("rontgen.html", start_date=sd, end_date=ed, no_data=True)
+        return render_template("rontgen.html", start_date=sd, end_date=ed, no_data=True, page_sql_kodlari=PAGE_SQL_KODLARI)
 
     # Rapor sütunlarını sayısala çevir
     rapor_raporlu_cols = ["Periapikal_Raporlu", "Panoramik_Raporlu", "Sefalometrik_Raporlu", "DentalTomografi_Raporlu"]
@@ -433,4 +438,5 @@ def rontgen():
         hekim_table=hekim_table,
         hekim_en_fazla=hekim_en_fazla,
         hekim_en_az=hekim_en_az,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )

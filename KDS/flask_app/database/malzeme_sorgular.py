@@ -65,7 +65,65 @@ def _normalize_malzeme_tuketim_columns(df: pd.DataFrame) -> pd.DataFrame:
     return out
 
 
-@ttl_cache(maxsize=32, ttl=300)
+def _safe_read_sql(conn, sql: str, param_candidates):
+    """
+    SQL'de ? placeholder varsa farklı parametre kombinasyonlarını sırayla dener.
+    Bazı ortamlarda aynı rapor SQL'i farklı sayıda ? ile dönebiliyor.
+    """
+    qmark_count = sql.count("?")
+    if qmark_count <= 0:
+        return pd.read_sql(sql, conn)
+
+    last_err = None
+    for candidate in param_candidates:
+        if candidate is None:
+            continue
+        try:
+            params = tuple(candidate)
+            if qmark_count != len(params):
+                continue
+            return pd.read_sql(sql, conn, params=params)
+        except Exception as exc:
+            last_err = exc
+            continue
+
+    # Son çare: ilk adayın uzunluğunu qmark sayısına zorlayıp tekrar dene.
+    if param_candidates:
+        base = list(param_candidates[0] or [])
+        if base:
+            if len(base) < qmark_count:
+                repeat = (qmark_count + len(base) - 1) // len(base)
+                base = (base * repeat)[:qmark_count]
+            else:
+                base = base[:qmark_count]
+            return pd.read_sql(sql, conn, params=tuple(base))
+
+    if last_err:
+        raise last_err
+    return pd.read_sql(sql, conn)
+
+
+def _parse_miad_dates(series: pd.Series) -> pd.Series:
+    """
+    shVadeTarih farkli formatlarda gelebilir:
+    - datetime/string
+    - YYYYMMDD sayisal metin
+    Varsayilan to_datetime sayisal degeri unix epoch gibi yorumlayip 1970'e cekebilir.
+    """
+    if series is None or series.empty:
+        return series
+
+    raw = series.astype(str).str.strip()
+    numeric_8 = raw.str.fullmatch(r"\d{8}")
+
+    parsed = pd.to_datetime(series, errors="coerce")
+    if numeric_8.any():
+        parsed_yyyymmdd = pd.to_datetime(raw.where(numeric_8), format="%Y%m%d", errors="coerce")
+        parsed = parsed.where(~numeric_8, parsed_yyyymmdd)
+    return parsed
+
+
+@ttl_cache(maxsize=32, ttl=60)
 def malzeme_tuketim_verisi_yukle(start_date_str, end_date_str):
     conn = baglanti_olustur()
     if not conn:
@@ -82,10 +140,16 @@ def malzeme_tuketim_verisi_yukle(start_date_str, end_date_str):
         start_dt = datetime.strptime(f'{start_date_str} 00:00:00', '%Y-%m-%d %H:%M:%S')
         end_dt_param = datetime.strptime(f'{end_date_str}', '%Y-%m-%d')
 
-        if "?" in sql:
-            df = pd.read_sql(sql, conn, params=[start_dt, end_dt_param])
-        else:
-            df = pd.read_sql(sql, conn)
+        df = _safe_read_sql(
+            conn,
+            sql,
+            [
+                (start_dt, end_dt_param),
+                (start_dt, end_dt_param, start_dt, end_dt_param),
+                (start_date_str, end_date_str),
+                (start_date_str, end_date_str, start_date_str, end_date_str),
+            ],
+        )
 
         df = _normalize_malzeme_tuketim_columns(df)
 
@@ -121,7 +185,7 @@ def depo_birim_liste_yukle():
         conn.close()
 
 
-@ttl_cache(maxsize=32, ttl=300)
+@ttl_cache(maxsize=32, ttl=60)
 def depo_mevcut_verisi_yukle(start_date_str, end_date_str, birim_id=None, birim_id_list=None):
     """Depo mevcut stok ve miad verisi — Kategori 6 & 7 icin.
     birim_id: tek depo secimi
@@ -151,10 +215,24 @@ def depo_mevcut_verisi_yukle(start_date_str, end_date_str, birim_id=None, birim_
         if not sql:
             return pd.DataFrame()
 
-        df = pd.read_sql(sql, conn)
+        start_dt = datetime.strptime(f"{start_date_str} 00:00:00", "%Y-%m-%d %H:%M:%S")
+        end_dt = datetime.strptime(f"{end_date_str} 00:00:00", "%Y-%m-%d %H:%M:%S")
+        df = _safe_read_sql(
+            conn,
+            sql,
+            [
+                (start_dt, end_dt, birim_id_param),
+                (start_date_str, end_date_str, birim_id_param),
+                (start_dt, end_dt, birim_id_param, birim_id_param),
+                (start_date_str, end_date_str, birim_id_param, birim_id_param),
+                (start_dt, end_dt),
+                (start_date_str, end_date_str),
+                (birim_id_param,),
+            ],
+        )
 
         if not df.empty and 'shVadeTarih' in df.columns:
-            df['shVadeTarih'] = pd.to_datetime(df['shVadeTarih'], errors='coerce')
+            df['shVadeTarih'] = _parse_miad_dates(df['shVadeTarih'])
 
         for col in ('shMiktar', 'shMevcutMiktar', 'shCikisMiktar',
                      'kritikStokMiktar', 'minStokMiktar', 'maxStokMiktar'):

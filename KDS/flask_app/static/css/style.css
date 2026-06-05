@@ -319,12 +319,6 @@ body {
     color: var(--text-primary) !important;
 }
 
-.theme-light .analysis-box {
-    background: #eff6ff !important;
-    border-color: #bfdbfe !important;
-    color: #1e3a8a !important;
-}
-
 .theme-light .protez-settings,
 .theme-light .protez-settings-number,
 .theme-light .protez-detail-toolbar select,
@@ -345,6 +339,40 @@ body {
 .theme-light .protez-settings-number button {
     background: #f8fafc !important;
     color: var(--text-primary) !important;
+}
+
+.theme-light .protez-settings-number input[type="number"] {
+    color: #0f172a !important;
+    background: #f1f5f9 !important;
+    font-weight: 700;
+}
+
+.theme-light .protez-hekim-value {
+    color: #0f172a !important;
+    background: linear-gradient(135deg, #fecaca, #fca5a5) !important;
+    border: 1px solid #f87171;
+}
+
+.theme-dark .protez-hekim-value {
+    color: #fef2f2 !important;
+    background: rgba(185, 28, 28, 0.45) !important;
+    border: 1px solid rgba(248, 113, 113, 0.5);
+}
+
+.theme-light .protez-durum-0 {
+    background: #e2e8f0 !important;
+    color: #0f172a !important;
+    border-color: #cbd5e1 !important;
+}
+
+.theme-light .protez-durum-legend {
+    color: #334155 !important;
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+}
+
+.theme-light .protez-durum-legend-intro {
+    color: #475569 !important;
 }
 
 a {
@@ -887,6 +915,73 @@ body.sidebar-collapsed .main-content {
     border-bottom: 2px solid var(--border-color);
     padding-bottom: 8px;
     display: inline-block;
+}
+
+/* ---------- Stratejik / sistem özeti (Tedavi, Protez, vb.) ---------- */
+.insights {
+    margin-top: 24px;
+}
+
+.insights > .section-title,
+.insights > h2.section-title {
+    margin-top: 0;
+    display: block;
+    width: 100%;
+}
+
+.insight-row {
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-left: 5px solid #3b82f6;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.insight-row:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.insight-row:nth-child(2) {
+    border-left-color: #10b981;
+}
+
+.insight-row:nth-child(3) {
+    border-left-color: #8b5cf6;
+}
+
+.insight-row:nth-child(4) {
+    border-left-color: #f59e0b;
+}
+
+.insight-row:nth-child(5) {
+    border-left-color: #ef4444;
+}
+
+.insight-row:nth-child(6) {
+    border-left-color: #0891b2;
+}
+
+.insight-row strong {
+    font-weight: 800;
+    color: var(--text-main, var(--text-primary));
+}
+
+.theme-dark .insight-row {
+    background: rgba(13, 27, 62, 0.45);
+    border-color: rgba(45, 74, 138, 0.45);
+    color: #e5e7eb;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.theme-dark .insight-row:hover {
+    border-color: rgba(96, 165, 250, 0.45);
 }
 
 /* ============================================
@@ -2606,4 +2701,79 @@ body.sidebar-collapsed .main-content {
 .theme-dark .table-search-count {
     background: rgba(15, 23, 42, 0.9);
     color: #94a3b8;
+}
+
+/* Destek: Rapor API kodlari — sayfa sonunda akista; tablolarin uzerine binmez */
+.page-sql-hint {
+    position: relative;
+    flex-shrink: 0;
+    align-self: stretch;
+    margin: 16px 28px 4px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    border: 1px dashed var(--border-accent);
+    background: var(--bg-secondary);
+    box-shadow: var(--shadow-sm);
+    font-size: 0.75rem;
+    line-height: 1.4;
+    color: var(--text-secondary);
+    max-width: none;
+    z-index: auto;
+}
+
+.page-sql-hint__title {
+    font-weight: 600;
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+}
+
+.page-sql-hint__list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 8px;
+    font-family: ui-monospace, "Cascadia Mono", "Consolas", monospace;
+    word-break: break-word;
+}
+
+.page-sql-hint__list li {
+    display: inline-block;
+    padding: 4px 9px;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    background: rgba(37, 99, 235, 0.08);
+    border: 1px solid rgba(37, 99, 235, 0.18);
+    color: var(--text-primary);
+}
+
+.theme-dark .page-sql-hint {
+    background: rgba(15, 23, 42, 0.55);
+    border-color: rgba(45, 74, 138, 0.5);
+    color: #cbd5e1;
+}
+
+.theme-dark .page-sql-hint__title {
+    color: #94a3b8;
+}
+
+.theme-dark .page-sql-hint__list li {
+    background: rgba(59, 130, 246, 0.12);
+    border-color: rgba(59, 130, 246, 0.28);
+    color: #e8f0fe;
+}
+
+@media (max-width: 768px) {
+    .page-sql-hint {
+        margin: 14px 16px 4px;
+        font-size: 0.7rem;
+    }
+
+    .page-sql-hint__list li {
+        font-size: 0.68rem;
+    }
 }

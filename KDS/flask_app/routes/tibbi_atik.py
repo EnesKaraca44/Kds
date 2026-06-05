@@ -10,6 +10,10 @@ from routes.dashboard import get_date_range
 
 tibbi_atik_bp = Blueprint('tibbi_atik', __name__)
 
+PAGE_SQL_KODLARI = [
+    "local:Yerel veritabanı SP: RPR_STDS_15_5_V1 — tıbbi_atık_sorgular.tibbi_atik_verisi_yukle",
+]
+
 
 @tibbi_atik_bp.route('/tibbi-atik')
 @login_required
@@ -18,7 +22,7 @@ def tibbi_atik():
     df = tibbi_atik_verisi_yukle(sd, ed)
 
     if df.empty:
-        return render_template('tibbi_atik.html', start_date=sd, end_date=ed, no_data=True)
+        return render_template('tibbi_atik.html', start_date=sd, end_date=ed, no_data=True, page_sql_kodlari=PAGE_SQL_KODLARI)
 
     df.columns = [c.upper().strip() for c in df.columns]
     aylar = ['OCAK', 'ŞUBAT', 'MART', 'NİSAN', 'MAYIS', 'HAZİRAN',
@@ -50,4 +54,5 @@ def tibbi_atik():
         start_date=sd, end_date=ed, no_data=False,
         total_val=total_val, aylik_ort=aylik_ort, birim_sayisi=len(df),
         charts=charts,
+        page_sql_kodlari=PAGE_SQL_KODLARI,
     )
