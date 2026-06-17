@@ -40,8 +40,8 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleye
 
 1.  **Depoyu Klonlayın:**
     ```bash
-    git clone https://github.com/EnesKaraca44/Kds.git
-    cd Kds
+    git clone https://gitlab.com/EnesKaraca44/kds.git
+    cd kds
     ```
 
 2.  **Sanal Ortam Oluşturun ve Aktifleştirin:**
