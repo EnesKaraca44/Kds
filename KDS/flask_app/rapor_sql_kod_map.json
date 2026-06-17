@@ -101,5 +101,32 @@
   ],
   "dinamik_gelir.dinamik_dashboard_metrikleri_getir": [
     "FINANSAL_PERFORMANS_OZETI"
+  ],
+  "cari_sorusturma.cari_firma_ara": [
+    "CARI_FIRMA_ARAMA"
+  ],
+  "cari_sorusturma.cari_hareketleri_yukle": [
+    "CARI_FIRMA_SORUSTURMA"
+  ],
+  "cari_sorusturma.banka_cari_fis": [
+    "BANKA_CARI_FIS"
+  ],
+  "cari_sorusturma.banka_cari_fis_hareket": [
+    "BANKA_CARIF_FIS_HAREKET"
+  ],
+  "cari_sorusturma.cari_finans": [
+    "CARI_FINANS"
+  ],
+  "cari_sorusturma.cari_finans_detay": [
+    "CARI_FINANS_DETAY"
+  ],
+  "cari_sorusturma.kasa_cari_fis": [
+    "KASA_CARI_FIS"
+  ],
+  "cari_sorusturma.alis_faturasi_master": [
+    "ALIS_FATURASI_MASTER"
+  ],
+  "cari_sorusturma.alis_faturasi_detay": [
+    "ALIS_FATURASI_DETAY"
   ]
 }

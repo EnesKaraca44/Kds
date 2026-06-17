@@ -130,12 +130,14 @@
         </header>
 
         <!-- Active Period Banner -->
+        {% block period_banner %}
         {% if start_date and end_date %}
         <div class="period-banner">
             📅 <span data-t="Aktif Dönem">Aktif Dönem</span>: <strong>{{ start_date.strftime('%d.%m.%Y') }}</strong> – <strong>{{
                 end_date.strftime('%d.%m.%Y') }}</strong>
         </div>
         {% endif %}
+        {% endblock %}
 
         <!-- Page Content -->
         <div class="content-area">

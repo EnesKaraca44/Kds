@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}Cari Soruşturma{% endblock %}
 {% block page_title %}<span data-t="Cari Soruşturma">Cari Soruşturma</span>{% endblock %}
+{% block period_banner %}{% endblock %}
 
 {% block head %}
 <style>
@@ -15,67 +16,23 @@
         gap: 12px;
     }
 
-    .cs-summary-hero {
+    .cs-table-meta {
         display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: 14px 18px;
-        padding: 16px 20px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #1e40af 0%, #2563eb 55%, #0ea5e9 100%);
-        border: 1px solid rgba(255, 255, 255, 0.15);
-        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
-        color: #fff;
+        justify-content: flex-end;
     }
 
-    .theme-dark .cs-summary-hero {
-        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #0369a1 100%);
-        box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
-    }
-
-    .cs-summary-icon {
-        width: 48px;
-        height: 48px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 12px;
-        font-size: 1.45rem;
-        background: rgba(255, 255, 255, 0.18);
-        backdrop-filter: blur(4px);
-        flex-shrink: 0;
-    }
-
-    .cs-summary-hero-text {
-        flex: 1;
-        min-width: 200px;
-    }
-
-    .cs-summary-hero-text h2 {
-        margin: 0 0 4px;
-        font-size: 1.15rem;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-    }
-
-    .cs-summary-hero-text p {
-        margin: 0;
-        font-size: 0.8rem;
-        opacity: 0.92;
-        font-weight: 500;
+    .cs-table-meta:has(.cs-record-badge:not(.is-hidden)) {
+        padding: 10px 14px 0;
     }
 
     .cs-record-badge {
-        flex-shrink: 0;
-        font-size: 0.78rem;
-        font-weight: 800;
-        padding: 8px 16px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        padding: 5px 12px;
         border-radius: 999px;
-        background: rgba(255, 255, 255, 0.95);
-        color: #1d4ed8;
-        border: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+        background: color-mix(in srgb, var(--primary) 12%, var(--bg-card));
+        color: var(--primary);
+        border: 1px solid color-mix(in srgb, var(--primary) 25%, transparent);
         letter-spacing: 0.02em;
     }
 
@@ -180,7 +137,7 @@
         border: 1px solid color-mix(in srgb, var(--border-color) 75%, transparent);
         border-radius: 14px;
         overflow: auto;
-        max-height: calc(100vh - 280px);
+        max-height: calc(100vh - 240px);
         -webkit-overflow-scrolling: touch;
         background: var(--bg-card);
         box-shadow: var(--shadow-sm);
@@ -255,61 +212,127 @@
     .cs-modul {
         display: inline-flex;
         align-items: center;
-        padding: 3px 10px;
-        border-radius: 6px;
-        font-size: 0.72rem;
-        font-weight: 700;
-        letter-spacing: 0.02em;
+        justify-content: center;
+        min-width: 58px;
+        padding: 4px 11px;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        border: none;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, 0.14);
     }
 
     .cs-modul--satinalma {
-        background: rgba(139, 92, 246, 0.12);
-        color: #6d28d9;
-        border: 1px solid rgba(139, 92, 246, 0.25);
+        background: linear-gradient(180deg, #f97316 0%, #ea580c 100%);
+        color: #fff;
     }
 
     .cs-modul--banka {
-        background: rgba(16, 185, 129, 0.12);
-        color: #047857;
-        border: 1px solid rgba(16, 185, 129, 0.25);
+        background: linear-gradient(180deg, #10b981 0%, #047857 100%);
+        color: #fff;
     }
 
     .cs-modul--cari {
-        background: rgba(59, 130, 246, 0.12);
-        color: #1d4ed8;
-        border: 1px solid rgba(59, 130, 246, 0.25);
+        background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+        color: #fff;
     }
 
-    .theme-dark .cs-modul--satinalma { color: #c4b5fd; }
-    .theme-dark .cs-modul--banka { color: #6ee7b7; }
-    .theme-dark .cs-modul--cari { color: #93c5fd; }
+    .cs-modul--kasa {
+        background: linear-gradient(180deg, #a855f7 0%, #7c3aed 100%);
+        color: #fff;
+    }
+
+    button.cs-modul-btn {
+        cursor: pointer;
+        font: inherit;
+        font-family: inherit;
+        line-height: inherit;
+        transition: filter 0.15s ease, transform 0.15s ease;
+    }
+
+    button.cs-modul-btn:hover {
+        filter: brightness(1.08);
+        transform: translateY(-1px);
+    }
+
+    button.cs-modul-btn:active {
+        transform: translateY(0);
+    }
+
+    .theme-dark .cs-modul--satinalma {
+        background: linear-gradient(180deg, #fb923c 0%, #ea580c 100%);
+        color: #fff;
+        box-shadow: 0 0 0 1px rgba(251, 146, 60, 0.45);
+    }
+
+    .theme-dark .cs-modul--banka {
+        background: linear-gradient(180deg, #34d399 0%, #059669 100%);
+        color: #fff;
+        box-shadow: 0 0 0 1px rgba(52, 211, 153, 0.4);
+    }
+
+    .theme-dark .cs-modul--cari {
+        background: linear-gradient(180deg, #60a5fa 0%, #2563eb 100%);
+        color: #fff;
+        box-shadow: 0 0 0 1px rgba(96, 165, 250, 0.45);
+    }
+
+    .theme-dark .cs-modul--kasa {
+        background: linear-gradient(180deg, #c084fc 0%, #9333ea 100%);
+        color: #fff;
+        box-shadow: 0 0 0 1px rgba(192, 132, 252, 0.45);
+    }
 
     .cs-ba {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        min-width: 26px;
-        height: 26px;
-        border-radius: 6px;
-        font-size: 0.75rem;
-        font-weight: 800;
+        min-width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        font-size: 0.76rem;
+        font-weight: 900;
+        border: none;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.12);
     }
 
     .cs-ba--a {
-        background: rgba(37, 99, 235, 0.12);
-        color: #1d4ed8;
-        border: 1px solid rgba(37, 99, 235, 0.2);
+        background: linear-gradient(180deg, #3b82f6 0%, #1d4ed8 100%);
+        color: #fff;
     }
 
     .cs-ba--b {
-        background: rgba(220, 38, 38, 0.1);
-        color: #b91c1c;
-        border: 1px solid rgba(220, 38, 38, 0.2);
+        background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+        color: #fff;
     }
 
-    .cs-tutar-a { color: #2563eb; }
-    .cs-tutar-b { color: #dc2626; }
-    .cs-bakiye-a { color: #2563eb; font-weight: 600; }
+    .cs-table td.cs-tutar-a,
+    .cs-table td.cs-bakiye-a {
+        color: #1d4ed8;
+        font-weight: 700;
+        background: color-mix(in srgb, #3b82f6 14%, transparent);
+    }
+
+    .cs-table td.cs-tutar-b,
+    .cs-table td.cs-bakiye-b {
+        color: #b91c1c;
+        font-weight: 700;
+        background: color-mix(in srgb, #ef4444 14%, transparent);
+    }
+
+    .theme-dark .cs-table td.cs-tutar-a,
+    .theme-dark .cs-table td.cs-bakiye-a {
+        color: #93c5fd;
+        background: color-mix(in srgb, #3b82f6 26%, transparent);
+    }
+
+    .theme-dark .cs-table td.cs-tutar-b,
+    .theme-dark .cs-table td.cs-bakiye-b {
+        color: #fca5a5;
+        background: color-mix(in srgb, #ef4444 26%, transparent);
+    }
 
     .cs-empty {
         padding: 56px 24px;
@@ -324,9 +347,1349 @@
         opacity: 0.5;
     }
 
+    .cs-filter-bar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        gap: 14px 18px;
+        padding: 16px 18px;
+        border-radius: 14px;
+        border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
+        background: color-mix(in srgb, var(--bg-card) 92%, var(--bg-body));
+        box-shadow: var(--shadow-sm);
+    }
+
+    .cs-filter-field {
+        flex: 1 1 320px;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .cs-filter-label {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-secondary);
+    }
+
+    .cs-cari-picker {
+        position: relative;
+    }
+
+    .cs-cari-input-wrap {
+        display: flex;
+        align-items: stretch;
+        gap: 8px;
+    }
+
+    .cs-cari-search {
+        flex: 1;
+        min-width: 0;
+        padding: 11px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+        background: var(--bg-body);
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-weight: 600;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .cs-cari-search::placeholder {
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .cs-cari-search:focus {
+        outline: none;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .cs-cari-clear {
+        flex: 0 0 auto;
+        padding: 0 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+        background: var(--bg-body);
+        color: var(--text-secondary);
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: background 0.2s ease, color 0.2s ease;
+    }
+
+    .cs-cari-clear:hover {
+        background: color-mix(in srgb, #ef4444 10%, var(--bg-body));
+        color: #b91c1c;
+        border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .cs-cari-clear:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+    }
+
+    .cs-cari-dropdown {
+        display: none;
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: calc(100% + 6px);
+        z-index: 30;
+        max-height: 280px;
+        overflow: auto;
+        border-radius: 12px;
+        border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+        background: var(--bg-card);
+        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    .cs-cari-dropdown.open {
+        display: block;
+    }
+
+    .cs-cari-option {
+        display: block;
+        width: 100%;
+        text-align: left;
+        padding: 11px 14px;
+        border: none;
+        border-bottom: 1px solid color-mix(in srgb, var(--border-color) 55%, transparent);
+        background: transparent;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .cs-cari-option:last-child {
+        border-bottom: none;
+    }
+
+    .cs-cari-option:hover,
+    .cs-cari-option.active {
+        background: color-mix(in srgb, #3b82f6 10%, transparent);
+    }
+
+    .cs-cari-option-kod {
+        display: block;
+        font-size: 0.72rem;
+        font-weight: 800;
+        color: #2563eb;
+        margin-bottom: 2px;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cs-cari-option-unvan {
+        display: block;
+        font-size: 0.84rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    .cs-cari-empty-opt {
+        padding: 16px 14px;
+        text-align: center;
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    .cs-filter-hint {
+        flex: 1 1 220px;
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        line-height: 1.45;
+        padding-bottom: 2px;
+    }
+
+    .cs-info-value.is-empty {
+        color: var(--text-muted);
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    .cs-record-badge.is-hidden {
+        display: none;
+    }
+
+    .theme-dark .cs-cari-dropdown {
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45);
+    }
+
+    .cs-inv-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(15, 23, 42, 0.55);
+        backdrop-filter: blur(4px);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+    }
+
+    .cs-inv-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .cs-inv-modal {
+        width: min(920px, 100%);
+        max-height: calc(100vh - 40px);
+        display: flex;
+        flex-direction: column;
+        border-radius: 18px;
+        overflow: hidden;
+        background: var(--bg-card);
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.28);
+        animation: csInvIn 0.22s ease;
+    }
+
+    @keyframes csInvIn {
+        from { opacity: 0; transform: translateY(12px) scale(0.98); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .cs-inv-head {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 16px 24px;
+        padding: 22px 56px 20px 24px;
+        background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 55%, #0ea5e9 100%);
+        color: #fff;
+    }
+
+    .cs-inv-head-main h2 {
+        margin: 0 0 6px;
+        font-size: 1.35rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+    }
+
+    .cs-inv-head-badges {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+
+    .cs-inv-badge {
+        display: inline-flex;
+        padding: 3px 10px;
+        border-radius: 999px;
+        font-size: 0.68rem;
+        font-weight: 700;
+        background: rgba(16, 185, 129, 0.22);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        color: #d1fae5;
+    }
+
+    .cs-inv-islem-no {
+        margin: 0;
+        font-size: 0.82rem;
+        opacity: 0.92;
+    }
+
+    .cs-inv-head-side {
+        text-align: right;
+        align-self: start;
+    }
+
+    .cs-inv-head-side .cs-inv-label {
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        opacity: 0.8;
+        text-transform: uppercase;
+    }
+
+    .cs-inv-head-side .cs-inv-value {
+        margin-top: 4px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.35;
+    }
+
+    .cs-inv-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 34px;
+        height: 34px;
+        border: none;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .cs-inv-close:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .cs-inv-body {
+        overflow: auto;
+        padding: 20px 24px 8px;
+    }
+
+    .cs-inv-firma {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .cs-inv-firma h3 {
+        margin: 0 0 4px;
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .cs-inv-firma p {
+        margin: 0;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+    }
+
+    .cs-inv-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cs-inv-tag {
+        padding: 5px 12px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        border: 1px solid var(--border-color);
+        background: color-mix(in srgb, var(--bg-body) 60%, var(--bg-card));
+        color: var(--text-secondary);
+    }
+
+    .cs-inv-tag--accent {
+        color: #1d4ed8;
+        border-color: rgba(37, 99, 235, 0.25);
+        background: rgba(37, 99, 235, 0.08);
+    }
+
+    .cs-inv-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .cs-inv-meta-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid var(--border-color);
+        background: color-mix(in srgb, var(--bg-body) 50%, var(--bg-card));
+    }
+
+    .cs-inv-meta-card .cs-inv-label {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        margin-bottom: 4px;
+    }
+
+    .cs-inv-meta-card .cs-inv-value {
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        word-break: break-word;
+    }
+
+    .cs-inv-aciklama {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        margin-bottom: 16px;
+        border-radius: 12px;
+        border: 1px solid rgba(37, 99, 235, 0.2);
+        background: rgba(37, 99, 235, 0.06);
+        color: var(--text-primary);
+        font-size: 0.84rem;
+        line-height: 1.45;
+    }
+
+    .cs-inv-lines {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.8rem;
+        margin-bottom: 16px;
+    }
+
+    .cs-inv-lines thead th {
+        padding: 10px 12px;
+        text-align: left;
+        font-size: 0.68rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--text-muted);
+        border-bottom: 2px solid var(--border-color);
+        background: color-mix(in srgb, var(--bg-body) 40%, var(--bg-card));
+    }
+
+    .cs-inv-lines tbody td {
+        padding: 11px 12px;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-primary);
+    }
+
+    .cs-inv-lines .col-num {
+        text-align: right;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cs-inv-kdv-badge {
+        display: inline-flex;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        background: rgba(37, 99, 235, 0.1);
+        color: #1d4ed8;
+    }
+
+    .cs-inv-totals {
+        margin-left: auto;
+        width: min(340px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 8px;
+    }
+
+    .cs-inv-total-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+    }
+
+    .cs-inv-total-row strong {
+        color: var(--text-primary);
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cs-inv-total-row--net {
+        margin-top: 4px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
+        color: #fff;
+        font-size: 0.95rem;
+        font-weight: 700;
+    }
+
+    .cs-inv-total-row--net strong {
+        color: #fff;
+        font-size: 1.05rem;
+    }
+
+    .cs-inv-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 24px 18px;
+        border-top: 1px solid var(--border-color);
+        background: color-mix(in srgb, var(--bg-body) 35%, var(--bg-card));
+    }
+
+    .cs-inv-btn {
+        padding: 9px 18px;
+        border-radius: 10px;
+        font-size: 0.82rem;
+        font-weight: 700;
+        cursor: pointer;
+        border: 1px solid var(--border-color);
+        background: var(--bg-card);
+        color: var(--text-primary);
+    }
+
+    .cs-inv-btn:hover {
+        background: color-mix(in srgb, var(--bg-body) 50%, var(--bg-card));
+    }
+
+    .cs-inv-btn--primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+        color: #fff;
+    }
+
+    /* Satınalma fatura popup — turuncu tema */
+    .cs-inv-modal--satinalma .cs-inv-head {
+        background: linear-gradient(135deg, #9a3412 0%, #ea580c 55%, #f97316 100%);
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-tag--accent {
+        color: #9a3412;
+        border-color: rgba(234, 88, 12, 0.35);
+        background: rgba(249, 115, 22, 0.14);
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-aciklama {
+        border-color: rgba(234, 88, 12, 0.28);
+        background: rgba(249, 115, 22, 0.08);
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-kdv-badge {
+        background: rgba(234, 88, 12, 0.14);
+        color: #c2410c;
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-total-row--net {
+        background: linear-gradient(135deg, #c2410c 0%, #ea580c 100%);
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-btn--primary {
+        background: linear-gradient(135deg, #c2410c, #ea580c);
+    }
+
+    .cs-inv-modal--satinalma .cs-inv-btn--primary:hover {
+        background: linear-gradient(135deg, #9a3412, #c2410c);
+    }
+
+    @media (max-width: 768px) {
+        .cs-inv-meta-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .cs-inv-head {
+            grid-template-columns: 1fr;
+        }
+
+        .cs-inv-head-side {
+            text-align: left;
+        }
+    }
+
     @media (max-width: 768px) {
         .cs-table-shell {
-            max-height: calc(100vh - 320px);
+            max-height: calc(100vh - 280px);
+        }
+
+        .cs-filter-bar {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+
+    @media print {
+        body * { visibility: hidden; }
+        .cs-inv-overlay.open,
+        .cs-inv-overlay.open *,
+        .cs-bank-overlay.open,
+        .cs-bank-overlay.open *,
+        .cs-cf-overlay.open,
+        .cs-cf-overlay.open *,
+        .cs-kas-overlay.open,
+        .cs-kas-overlay.open * { visibility: visible; }
+        .cs-inv-overlay.open,
+        .cs-bank-overlay.open,
+        .cs-cf-overlay.open,
+        .cs-kas-overlay.open {
+            position: absolute;
+            inset: 0;
+            background: #fff;
+            padding: 0;
+        }
+        .cs-inv-modal,
+        .cs-bank-modal,
+        .cs-cf-modal,
+        .cs-kas-modal {
+            max-height: none;
+            box-shadow: none;
+        }
+        .cs-inv-close,
+        .cs-inv-foot,
+        .cs-bank-close,
+        .cs-bank-foot,
+        .cs-cf-close,
+        .cs-cf-foot,
+        .cs-kas-close,
+        .cs-kas-foot { display: none !important; }
+    }
+
+    /* Banka fiş detay popup */
+    .cs-bank-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.22s ease;
+    }
+
+    .cs-bank-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .cs-bank-modal {
+        width: min(1280px, 96vw);
+        max-height: min(90vh, 920px);
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid rgba(16, 185, 129, 0.35);
+        box-shadow: 0 24px 48px rgba(4, 120, 87, 0.22);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .theme-dark .cs-bank-modal {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-color: rgba(52, 211, 153, 0.3);
+    }
+
+    .cs-bank-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background: linear-gradient(135deg, #047857 0%, #059669 45%, #10b981 100%);
+        color: #fff;
+    }
+
+    .theme-dark .cs-bank-head {
+        background: linear-gradient(135deg, #064e3b 0%, #047857 50%, #059669 100%);
+    }
+
+    .cs-bank-head-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .cs-bank-head-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.18);
+        border: 1px solid rgba(255, 255, 255, 0.28);
+    }
+
+    .cs-bank-head h2 {
+        margin: 0 0 6px;
+        font-size: 1.12rem;
+        font-weight: 800;
+        color: #fff;
+    }
+
+    .cs-bank-sub {
+        margin: 0;
+        font-size: 0.82rem;
+        color: rgba(255, 255, 255, 0.92);
+        font-weight: 500;
+        line-height: 1.45;
+    }
+
+    .cs-bank-close {
+        border: none;
+        background: rgba(255, 255, 255, 0.15);
+        font-size: 1.35rem;
+        line-height: 1;
+        cursor: pointer;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 8px;
+    }
+
+    .cs-bank-close:hover {
+        background: rgba(255, 255, 255, 0.28);
+    }
+
+    .cs-bank-body {
+        padding: 0;
+        overflow: auto;
+        flex: 1;
+        background: #fff;
+    }
+
+    .theme-dark .cs-bank-body {
+        background: #0f172a;
+    }
+
+    .cs-bank-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.84rem;
+    }
+
+    .cs-bank-table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: linear-gradient(180deg, #d1fae5 0%, #a7f3d0 100%);
+        color: #065f46;
+        font-weight: 700;
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        text-align: left;
+        padding: 11px 12px;
+        border-bottom: 2px solid #34d399;
+        white-space: nowrap;
+    }
+
+    .cs-bank-table thead th:nth-child(5) {
+        background: linear-gradient(180deg, #fee2e2 0%, #fecaca 100%);
+        color: #991b1b;
+        border-bottom-color: #f87171;
+    }
+
+    .cs-bank-table thead th:nth-child(6) {
+        background: linear-gradient(180deg, #dbeafe 0%, #bfdbfe 100%);
+        color: #1e40af;
+        border-bottom-color: #60a5fa;
+    }
+
+    .theme-dark .cs-bank-table thead th {
+        background: linear-gradient(180deg, #064e3b 0%, #047857 100%);
+        color: #a7f3d0;
+        border-bottom-color: #10b981;
+    }
+
+    .theme-dark .cs-bank-table thead th:nth-child(5) {
+        background: linear-gradient(180deg, #7f1d1d 0%, #991b1b 100%);
+        color: #fecaca;
+    }
+
+    .theme-dark .cs-bank-table thead th:nth-child(6) {
+        background: linear-gradient(180deg, #1e3a8a 0%, #1d4ed8 100%);
+        color: #bfdbfe;
+    }
+
+    .cs-bank-table tbody td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5e7eb;
+        vertical-align: middle;
+        color: #111827;
+    }
+
+    .theme-dark .cs-bank-table tbody td {
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    .cs-bank-table tbody tr:nth-child(even) { background: rgba(240, 253, 244, 0.65); }
+    .theme-dark .cs-bank-table tbody tr:nth-child(even) { background: rgba(6, 78, 59, 0.15); }
+    .cs-bank-table tbody tr:hover { background: #ecfdf5; }
+    .theme-dark .cs-bank-table tbody tr:hover { background: rgba(6, 95, 70, 0.35); }
+
+    .cs-bank-table .col-num {
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+        font-weight: 600;
+    }
+
+    .cs-bank-table .col-borc {
+        color: #b91c1c;
+        background: rgba(254, 226, 226, 0.35);
+    }
+
+    .cs-bank-table .col-alacak {
+        color: #1d4ed8;
+        background: rgba(219, 234, 254, 0.45);
+    }
+
+    .theme-dark .cs-bank-table .col-borc {
+        color: #fca5a5;
+        background: rgba(127, 29, 29, 0.25);
+    }
+
+    .theme-dark .cs-bank-table .col-alacak {
+        color: #93c5fd;
+        background: rgba(30, 58, 138, 0.25);
+    }
+
+    .cs-bank-total-row td {
+        background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+        border-top: 2px solid #34d399;
+        font-weight: 800;
+        color: #065f46;
+        padding: 12px;
+    }
+
+    .cs-bank-total-row .col-borc { color: #b91c1c; }
+    .cs-bank-total-row .col-alacak { color: #1d4ed8; }
+
+    .theme-dark .cs-bank-total-row td {
+        background: linear-gradient(135deg, #064e3b 0%, #047857 100%);
+        border-color: #10b981;
+        color: #d1fae5;
+    }
+
+    .cs-bank-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 22px;
+        border-top: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+
+    .theme-dark .cs-bank-foot {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .cs-bank-btn--primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, #047857, #10b981);
+        color: #fff;
+    }
+
+    .cs-bank-btn--primary:hover {
+        background: linear-gradient(135deg, #065f46, #059669);
+    }
+
+    .cs-bank-empty {
+        padding: 56px 24px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .cs-bank-empty::before {
+        content: "📋";
+        display: block;
+        font-size: 2rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Cari fiş detay popup */
+    .cs-cf-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.22s ease;
+    }
+
+    .cs-cf-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .cs-cf-modal {
+        width: min(1100px, 96vw);
+        max-height: min(90vh, 900px);
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid rgba(37, 99, 235, 0.4);
+        box-shadow: 0 24px 48px rgba(29, 78, 216, 0.22);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .theme-dark .cs-cf-modal {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-color: rgba(96, 165, 250, 0.35);
+    }
+
+    .cs-cf-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background: linear-gradient(135deg, #1e40af 0%, #2563eb 45%, #3b82f6 100%);
+        color: #fff;
+    }
+
+    .theme-dark .cs-cf-head {
+        background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%);
+    }
+
+    .cs-cf-head-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .cs-cf-head-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+    }
+
+    .cs-cf-head h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+    }
+
+    .cs-cf-sub {
+        margin: 4px 0 0;
+        font-size: 0.82rem;
+        opacity: 0.92;
+    }
+
+    .cs-cf-close {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .cs-cf-close:hover {
+        background: rgba(255, 255, 255, 0.25);
+    }
+
+    .cs-cf-body {
+        flex: 1;
+        overflow: auto;
+        padding: 0;
+        background: #f8fafc;
+    }
+
+    .theme-dark .cs-cf-body {
+        background: #0b1220;
+    }
+
+    .cs-cf-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+    }
+
+    .cs-cf-table th,
+    .cs-cf-table td {
+        padding: 10px 14px;
+        border-bottom: 1px solid #e2e8f0;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .theme-dark .cs-cf-table th,
+    .theme-dark .cs-cf-table td {
+        border-color: #334155;
+    }
+
+    .cs-cf-table th {
+        background: #f1f5f9;
+        font-weight: 700;
+        color: #334155;
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .theme-dark .cs-cf-table th {
+        background: #1e293b;
+        color: #cbd5e1;
+    }
+
+    .cs-cf-table .col-num {
+        text-align: right;
+        white-space: nowrap;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .cs-cf-table .col-borc {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .cs-cf-table .col-alacak {
+        color: #2563eb;
+        font-weight: 600;
+    }
+
+    .cs-cf-summary {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0;
+        border-top: 2px solid #cbd5e1;
+    }
+
+    .theme-dark .cs-cf-summary {
+        border-color: #475569;
+    }
+
+    .cs-cf-summary-block {
+        padding: 14px 18px;
+        background: #fff;
+    }
+
+    .theme-dark .cs-cf-summary-block {
+        background: #0f172a;
+    }
+
+    .cs-cf-summary-block--borc {
+        border-right: 1px solid #e2e8f0;
+    }
+
+    .theme-dark .cs-cf-summary-block--borc {
+        border-color: #334155;
+    }
+
+    .cs-cf-summary-title {
+        font-weight: 800;
+        font-size: 0.78rem;
+        letter-spacing: 0.06em;
+        margin-bottom: 8px;
+        color: #64748b;
+    }
+
+    .cs-cf-summary-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 4px 0;
+        font-size: 0.88rem;
+    }
+
+    .cs-cf-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 18px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .theme-dark .cs-cf-foot {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .cs-cf-btn--primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+        color: #fff;
+    }
+
+    .cs-cf-btn--primary:hover {
+        background: linear-gradient(135deg, #1e40af, #2563eb);
+    }
+
+    .cs-cf-empty {
+        padding: 56px 24px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    .cs-cf-empty::before {
+        content: "📋";
+        display: block;
+        font-size: 2rem;
+        margin-bottom: 12px;
+        opacity: 0.5;
+    }
+
+    /* Kasa fiş detay popup */
+    .cs-kas-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 1200;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        background: rgba(15, 23, 42, 0.45);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.22s ease;
+    }
+
+    .cs-kas-overlay.open {
+        opacity: 1;
+        visibility: visible;
+    }
+
+    .cs-kas-modal {
+        width: min(920px, 96vw);
+        max-height: min(90vh, 880px);
+        background: #fff;
+        border-radius: 14px;
+        border: 1px solid rgba(124, 58, 237, 0.35);
+        box-shadow: 0 24px 48px rgba(91, 33, 182, 0.22);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+    }
+
+    .theme-dark .cs-kas-modal {
+        background: #0f172a;
+        color: #e2e8f0;
+        border-color: rgba(167, 139, 250, 0.35);
+    }
+
+    .cs-kas-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+        background: linear-gradient(135deg, #6b21a8 0%, #7c3aed 45%, #a855f7 100%);
+        color: #fff;
+    }
+
+    .theme-dark .cs-kas-head {
+        background: linear-gradient(135deg, #581c87 0%, #6b21a8 50%, #7c3aed 100%);
+    }
+
+    .cs-kas-head-main {
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+        min-width: 0;
+    }
+
+    .cs-kas-head-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.35rem;
+        background: rgba(255, 255, 255, 0.18);
+        border-radius: 10px;
+    }
+
+    .cs-kas-head h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+    }
+
+    .cs-kas-sub {
+        margin: 4px 0 0;
+        font-size: 0.82rem;
+        opacity: 0.92;
+    }
+
+    .cs-kas-close {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        border: none;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        color: #fff;
+        font-size: 1.5rem;
+        line-height: 1;
+        cursor: pointer;
+    }
+
+    .cs-kas-body {
+        flex: 1;
+        overflow: auto;
+        padding: 18px 22px;
+        background: #f8fafc;
+    }
+
+    .theme-dark .cs-kas-body {
+        background: #0b1220;
+    }
+
+    .cs-kas-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+
+    .cs-kas-meta-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+
+    .cs-kas-meta-card {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .theme-dark .cs-kas-meta-card {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .cs-kas-label {
+        display: block;
+        font-size: 0.65rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 4px;
+    }
+
+    .cs-kas-value {
+        font-size: 0.82rem;
+        font-weight: 700;
+        word-break: break-word;
+    }
+
+    .cs-kas-aciklama {
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        border: 1px solid rgba(124, 58, 237, 0.25);
+        background: rgba(124, 58, 237, 0.08);
+        font-size: 0.84rem;
+        line-height: 1.45;
+    }
+
+    .cs-kas-bank {
+        padding: 12px 14px;
+        margin-bottom: 14px;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .theme-dark .cs-kas-bank {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .cs-kas-totals {
+        margin-left: auto;
+        width: min(340px, 100%);
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .cs-kas-total-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        font-size: 0.84rem;
+        color: #64748b;
+    }
+
+    .cs-kas-total-row strong {
+        color: #0f172a;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .theme-dark .cs-kas-total-row strong {
+        color: #e2e8f0;
+    }
+
+    .cs-kas-total-row--net {
+        margin-top: 4px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #6b21a8 0%, #7c3aed 100%);
+        color: #fff;
+        font-weight: 700;
+    }
+
+    .cs-kas-total-row--net strong {
+        color: #fff;
+        font-size: 1.05rem;
+    }
+
+    .cs-kas-foot {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        padding: 14px 18px;
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .theme-dark .cs-kas-foot {
+        background: #0f172a;
+        border-color: #334155;
+    }
+
+    .cs-kas-btn--primary {
+        border-color: transparent;
+        background: linear-gradient(135deg, #6b21a8, #7c3aed);
+        color: #fff;
+    }
+
+    .cs-kas-btn--primary:hover {
+        background: linear-gradient(135deg, #581c87, #6b21a8);
+    }
+
+    .cs-kas-empty {
+        padding: 56px 24px;
+        text-align: center;
+        color: #64748b;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .cs-kas-meta-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
         }
     }
 </style>
@@ -335,42 +1698,64 @@
 {% block content %}
 <div class="chart-container cs-report">
     <div class="cs-summary">
-        <div class="cs-summary-hero">
-            <div class="cs-summary-icon" aria-hidden="true">📒</div>
-            <div class="cs-summary-hero-text">
-                <h2 data-t="Cari Soruşturma Listesi">Cari Soruşturma Listesi</h2>
-                <p data-t="Seçili cari hesabına ait hareket dökümü">Seçili cari hesabına ait hareket dökümü</p>
+        <div class="cs-filter-bar">
+            <div class="cs-filter-field">
+                <label class="cs-filter-label" for="csCariSearch" data-t="Cari Ünvan">Cari Ünvan</label>
+                <div class="cs-cari-picker" id="csCariPicker">
+                    <div class="cs-cari-input-wrap">
+                        <input
+                            type="text"
+                            id="csCariSearch"
+                            class="cs-cari-search"
+                            placeholder="Firma adı veya cari kodu ile arayın…"
+                            data-t="Firma adı veya cari kodu ile arayın…"
+                            autocomplete="off"
+                            role="combobox"
+                            aria-expanded="false"
+                            aria-controls="csCariDropdown"
+                            aria-autocomplete="list">
+                        <button type="button" class="cs-cari-clear" id="csCariClear" disabled data-t="Temizle">Temizle</button>
+                    </div>
+                    <div class="cs-cari-dropdown" id="csCariDropdown" role="listbox"></div>
+                </div>
             </div>
-            {% if hareketler %}
-            <span class="cs-record-badge">{{ hareketler|length }} <span data-t="kayıt">kayıt</span></span>
-            {% endif %}
+            <p class="cs-filter-hint" data-t="En az 2 karakter yazın; firma seçildikten sonra hareket satırına tıklayın (Banka: fiş detayı, diğer modüller: fatura detayı).">
+                En az 2 karakter yazın; firma seçildikten sonra hareket satırına tıklayın (Banka: fiş detayı, diğer modüller: fatura detayı).
+            </p>
         </div>
 
         <div class="cs-summary-grid">
             <div class="cs-info-card cs-info-card--kod">
                 <span class="cs-info-label" data-t="Cari Kod">Cari Kod</span>
-                <span class="cs-info-value">{{ cari_kod }}</span>
+                <span class="cs-info-value is-empty" id="csCariKod" data-t="Seçilmedi">Seçilmedi</span>
             </div>
             <div class="cs-info-card cs-info-card--unvan">
                 <span class="cs-info-label" data-t="Cari Ünvan">Cari Ünvan</span>
-                <span class="cs-info-value">{{ cari_unvan }}</span>
+                <span class="cs-info-value is-empty" id="csCariUnvan" data-t="Cari ünvan seçiniz">Cari ünvan seçiniz</span>
             </div>
             <div class="cs-info-card cs-info-card--donem">
                 <span class="cs-info-label" data-t="Dönem">Dönem</span>
-                <span class="cs-info-value">
+                <span class="cs-info-value" id="csDonem">
                     {{ start_date.strftime('%d.%m.%Y') }} – {{ end_date.strftime('%d.%m.%Y') }}
                 </span>
             </div>
         </div>
     </div>
 
-    <div class="cs-table-shell">
-        {% if hareketler %}
-        <table class="data-table cs-table">
+    <div class="cs-table-shell" id="csTableShell">
+        <div class="cs-table-meta">
+            <span class="cs-record-badge is-hidden" id="csRecordBadge">
+                <span id="csRecordCount">0</span> <span data-t="kayıt">kayıt</span>
+            </span>
+        </div>
+        <div class="cs-empty" id="csEmptyState">
+            <div class="cs-empty-icon">🏢</div>
+            <div data-t="Henüz cari seçilmedi. Üstteki listeden bir firma seçin.">Henüz cari seçilmedi. Üstteki listeden bir firma seçin.</div>
+        </div>
+        <table class="data-table cs-table" id="csHareketTable" hidden>
             <thead>
                 <tr>
                     <th class="col-center">No</th>
-                    <th class="col-center">***</th>
                     <th data-t="Modül">Modül</th>
                     <th data-t="Tarih">Tarih</th>
                     <th data-t="Fatura No">Fatura No</th>
@@ -389,44 +1774,1379 @@
                     <th data-t="Ödeme Türü">Ödeme Türü</th>
                 </tr>
             </thead>
-            <tbody>
-                {% for row in hareketler %}
-                {% set modul_key = 'satinalma' if row.modul == 'Satınalma' else ('banka' if row.modul == 'Banka' else 'cari') %}
-                <tr>
-                    <td class="col-center">{{ loop.index }}</td>
-                    <td class="col-center" style="color:var(--text-muted); letter-spacing:1px;">***</td>
-                    <td>
-                        <span class="cs-modul cs-modul--{{ modul_key }}">{{ row.modul }}</span>
-                    </td>
-                    <td>{{ row.tarih }}</td>
-                    <td>{{ row.fatura_no or '—' }}</td>
-                    <td>{{ row.belge_no or '—' }}</td>
-                    <td>{{ row.belge_tarihi or '—' }}</td>
-                    <td>{{ row.vade_tarihi or '—' }}</td>
-                    <td class="col-aciklama" title="{{ row.aciklama }}">{{ row.aciklama }}</td>
-                    <td>{{ row.islem_turu }}</td>
-                    <td class="col-center">
-                        <span class="cs-ba cs-ba--{{ row.ba|lower }}">{{ row.ba }}</span>
-                    </td>
-                    <td class="col-num {% if row.ba == 'A' %}cs-tutar-a{% elif row.ba == 'B' %}cs-tutar-b{% endif %}">
-                        {{ row.tutar|turkish_number(2) }}
-                    </td>
-                    <td class="col-num {% if '(A)' in row.bakiye %}cs-bakiye-a{% endif %}">{{ row.bakiye }}</td>
-                    <td class="col-num">{{ row.doviz_tutar or '—' }}</td>
-                    <td class="col-center">{{ row.para_birim }}</td>
-                    <td class="col-birim" title="{{ row.birim_adi }}">{{ row.birim_adi }}</td>
-                    <td>{{ row.ozel_kod or '—' }}</td>
-                    <td>{{ row.odeme_turu or '—' }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
+            <tbody id="csHareketBody"></tbody>
         </table>
-        {% else %}
-        <div class="cs-empty">
-            <div class="cs-empty-icon">📋</div>
-            <div data-t="Seçilen cari ve dönem için kayıt bulunamadı.">Seçilen cari ve dönem için kayıt bulunamadı.</div>
-        </div>
-        {% endif %}
     </div>
 </div>
+
+<div class="cs-inv-overlay" id="csInvOverlay" aria-hidden="true">
+    <div class="cs-inv-modal" id="csInvModal" role="dialog" aria-modal="true" aria-labelledby="csInvTitle">
+        <div class="cs-inv-head">
+            <div class="cs-inv-head-main">
+                <div class="cs-inv-head-badges">
+                    <h2 id="csInvTitle">İşlem Detayı</h2>
+                    <span class="cs-inv-badge" data-t="Salt Okunur">Salt Okunur</span>
+                </div>
+                <p class="cs-inv-islem-no" id="csInvIslemNo">—</p>
+            </div>
+            <div class="cs-inv-head-side">
+                <div class="cs-inv-label" data-t="Fatura No / Tarih">Fatura No / Tarih</div>
+                <div class="cs-inv-value" id="csInvFaturaMeta">—</div>
+            </div>
+            <button type="button" class="cs-inv-close" id="csInvClose" aria-label="Kapat">&times;</button>
+        </div>
+        <div class="cs-inv-body" id="csInvBody">
+            <div class="cs-inv-firma">
+                <div>
+                    <h3 id="csInvFirmaAd">—</h3>
+                    <p id="csInvFirmaKod">—</p>
+                </div>
+                <div class="cs-inv-tags" id="csInvTags"></div>
+            </div>
+            <div class="cs-inv-meta-grid">
+                <div class="cs-inv-meta-card">
+                    <span class="cs-inv-label" data-t="Belge No">Belge No</span>
+                    <span class="cs-inv-value" id="csInvBelgeNo">—</span>
+                </div>
+                <div class="cs-inv-meta-card">
+                    <span class="cs-inv-label" data-t="Belge Tarihi">Belge Tarihi</span>
+                    <span class="cs-inv-value" id="csInvBelgeTarih">—</span>
+                </div>
+                <div class="cs-inv-meta-card">
+                    <span class="cs-inv-label" data-t="Birim">Birim</span>
+                    <span class="cs-inv-value" id="csInvBirim">—</span>
+                </div>
+                <div class="cs-inv-meta-card">
+                    <span class="cs-inv-label" data-t="Vade Tarihi">Vade Tarihi</span>
+                    <span class="cs-inv-value" id="csInvVade">—</span>
+                </div>
+            </div>
+            <div class="cs-inv-aciklama" id="csInvAciklamaWrap" hidden>
+                <span aria-hidden="true">ℹ️</span>
+                <span id="csInvAciklama">—</span>
+            </div>
+            <table class="cs-inv-lines">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th data-t="Kod">Kod</th>
+                        <th data-t="Malzeme Adı">Malzeme Adı</th>
+                        <th class="col-num" data-t="KDV">KDV</th>
+                        <th class="col-num" data-t="Miktar">Miktar</th>
+                        <th class="col-num" data-t="Birim Fiyat">Birim Fiyat</th>
+                        <th class="col-num" data-t="Tutar">Tutar</th>
+                    </tr>
+                </thead>
+                <tbody id="csInvLinesBody"></tbody>
+            </table>
+            <div class="cs-inv-totals">
+                <div class="cs-inv-total-row">
+                    <span data-t="Toplam Matrah">Toplam Matrah</span>
+                    <strong id="csInvMatrah">—</strong>
+                </div>
+                <div class="cs-inv-total-row">
+                    <span data-t="Toplam KDV">Toplam KDV</span>
+                    <strong id="csInvKdv">—</strong>
+                </div>
+                <div class="cs-inv-total-row cs-inv-total-row--net">
+                    <span data-t="Net Tutar">Net Tutar</span>
+                    <strong id="csInvNet">—</strong>
+                </div>
+            </div>
+        </div>
+        <div class="cs-inv-foot">
+            <button type="button" class="cs-inv-btn" id="csInvPrint" data-t="Yazdır">Yazdır</button>
+            <button type="button" class="cs-inv-btn cs-inv-btn--primary" id="csInvCloseBtn" data-t="Kapat">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<div class="cs-bank-overlay" id="csBankOverlay" aria-hidden="true">
+    <div class="cs-bank-modal" role="dialog" aria-modal="true" aria-labelledby="csBankTitle">
+        <div class="cs-bank-head">
+            <div class="cs-bank-head-main">
+                <div class="cs-bank-head-icon" aria-hidden="true">🏦</div>
+                <div>
+                    <h2 id="csBankTitle" data-t="Banka Fiş Detayları">Banka Fiş Detayları</h2>
+                    <p class="cs-bank-sub" id="csBankSub">—</p>
+                </div>
+            </div>
+            <button type="button" class="cs-bank-close" id="csBankClose" aria-label="Kapat">&times;</button>
+        </div>
+        <div class="cs-bank-body" id="csBankBody">
+            <div class="cs-bank-empty" id="csBankLoading" hidden data-t="Yükleniyor…">Yükleniyor…</div>
+            <table class="cs-bank-table" id="csBankTable" hidden>
+                <thead>
+                    <tr>
+                        <th data-t="Banka Hesap Adı">Banka Hesap Adı</th>
+                        <th data-t="Banka Adı">Banka Adı</th>
+                        <th data-t="Cari Hesap Kodu">Cari Hesap Kodu</th>
+                        <th data-t="Cari Hesap Adı">Cari Hesap Adı</th>
+                        <th class="col-num" data-t="Borç">Borç</th>
+                        <th class="col-num" data-t="Alacak">Alacak</th>
+                        <th data-t="Belge No">Belge No</th>
+                        <th data-t="Açıklama">Açıklama</th>
+                        <th data-t="Özel Kod">Özel Kod</th>
+                    </tr>
+                </thead>
+                <tbody id="csBankBodyRows"></tbody>
+                <tfoot>
+                    <tr class="cs-bank-total-row">
+                        <td colspan="4" data-t="Toplam Borç / Alacak :">Toplam Borç / Alacak :</td>
+                        <td class="col-num col-borc" id="csBankToplamBorc">0,00</td>
+                        <td class="col-num col-alacak" id="csBankToplamAlacak">0,00</td>
+                        <td colspan="3"></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="cs-bank-empty" id="csBankEmpty" hidden data-t="Kayıt bulunamadı.">Kayıt bulunamadı.</div>
+        </div>
+        <div class="cs-bank-foot">
+            <button type="button" class="cs-inv-btn" id="csBankPrint" data-t="Yazdır">Yazdır</button>
+            <button type="button" class="cs-inv-btn cs-bank-btn--primary" id="csBankCloseBtn" data-t="Kapat">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<div class="cs-cf-overlay" id="csCfOverlay" aria-hidden="true">
+    <div class="cs-cf-modal" role="dialog" aria-modal="true" aria-labelledby="csCfTitle">
+        <div class="cs-cf-head">
+            <div class="cs-cf-head-main">
+                <div class="cs-cf-head-icon" aria-hidden="true">💼</div>
+                <div>
+                    <h2 id="csCfTitle" data-t="Cari Fiş Detayları">Cari Fiş Detayları</h2>
+                    <p class="cs-cf-sub" id="csCfSub">—</p>
+                </div>
+            </div>
+            <button type="button" class="cs-cf-close" id="csCfClose" aria-label="Kapat">&times;</button>
+        </div>
+        <div class="cs-cf-body" id="csCfBody">
+            <div class="cs-cf-empty" id="csCfLoading" hidden data-t="Yükleniyor…">Yükleniyor…</div>
+            <table class="cs-cf-table" id="csCfTable" hidden>
+                <thead>
+                    <tr>
+                        <th data-t="Cari Hesap Kodu - Ünvanı">Cari Hesap Kodu - Ünvanı</th>
+                        <th data-t="Makbuz No">Makbuz No</th>
+                        <th data-t="Açıklama">Açıklama</th>
+                        <th data-t="Özel Kod">Özel Kod</th>
+                        <th class="col-num" data-t="Borç">Borç</th>
+                        <th class="col-num" data-t="Alacak">Alacak</th>
+                    </tr>
+                </thead>
+                <tbody id="csCfBodyRows"></tbody>
+                <tfoot>
+                    <tr>
+                        <td colspan="6">
+                            <div class="cs-cf-summary">
+                                <div class="cs-cf-summary-block cs-cf-summary-block--borc">
+                                    <div class="cs-cf-summary-title" data-t="BORÇ">BORÇ</div>
+                                    <div class="cs-cf-summary-row">
+                                        <span data-t="Toplam">Toplam</span>
+                                        <span class="col-borc" id="csCfToplamBorc">0,00</span>
+                                    </div>
+                                    <div class="cs-cf-summary-row">
+                                        <span data-t="Bakiye">Bakiye</span>
+                                        <span class="col-borc" id="csCfBakiyeBorc">0,00</span>
+                                    </div>
+                                </div>
+                                <div class="cs-cf-summary-block cs-cf-summary-block--alacak">
+                                    <div class="cs-cf-summary-title" data-t="ALACAK">ALACAK</div>
+                                    <div class="cs-cf-summary-row">
+                                        <span data-t="Toplam">Toplam</span>
+                                        <span class="col-alacak" id="csCfToplamAlacak">0,00</span>
+                                    </div>
+                                    <div class="cs-cf-summary-row">
+                                        <span data-t="Bakiye">Bakiye</span>
+                                        <span class="col-alacak" id="csCfBakiyeAlacak">0,00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div class="cs-cf-empty" id="csCfEmpty" hidden data-t="Kayıt bulunamadı.">Kayıt bulunamadı.</div>
+        </div>
+        <div class="cs-cf-foot">
+            <button type="button" class="cs-inv-btn" id="csCfPrint" data-t="Yazdır">Yazdır</button>
+            <button type="button" class="cs-inv-btn cs-cf-btn--primary" id="csCfCloseBtn" data-t="Kapat">Kapat</button>
+        </div>
+    </div>
+</div>
+
+<div class="cs-kas-overlay" id="csKasOverlay" aria-hidden="true">
+    <div class="cs-kas-modal" role="dialog" aria-modal="true" aria-labelledby="csKasTitle">
+        <div class="cs-kas-head">
+            <div class="cs-kas-head-main">
+                <div class="cs-kas-head-icon" aria-hidden="true">💰</div>
+                <div>
+                    <h2 id="csKasTitle" data-t="Kasa Fiş Detayları">Kasa Fiş Detayları</h2>
+                    <p class="cs-kas-sub" id="csKasSub">—</p>
+                </div>
+            </div>
+            <button type="button" class="cs-kas-close" id="csKasClose" aria-label="Kapat">&times;</button>
+        </div>
+        <div class="cs-kas-body" id="csKasBody">
+            <div class="cs-kas-empty" id="csKasLoading" hidden data-t="Yükleniyor…">Yükleniyor…</div>
+            <div id="csKasContent" hidden>
+                <div class="cs-kas-tags" id="csKasTags"></div>
+                <div class="cs-kas-meta-grid">
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Kasa">Kasa</span>
+                        <span class="cs-kas-value" id="csKasKasa">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Birim">Birim</span>
+                        <span class="cs-kas-value" id="csKasBirim">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Belge No">Belge No</span>
+                        <span class="cs-kas-value" id="csKasBelgeNo">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Makbuz">Makbuz</span>
+                        <span class="cs-kas-value" id="csKasMakbuz">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="İşlem Türü">İşlem Türü</span>
+                        <span class="cs-kas-value" id="csKasIslemTur">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Hareket Türü">Hareket Türü</span>
+                        <span class="cs-kas-value" id="csKasHareketTur">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Cari">Cari</span>
+                        <span class="cs-kas-value" id="csKasCari">—</span>
+                    </div>
+                    <div class="cs-kas-meta-card">
+                        <span class="cs-kas-label" data-t="Durum">Durum</span>
+                        <span class="cs-kas-value" id="csKasDurum">—</span>
+                    </div>
+                </div>
+                <div class="cs-kas-aciklama" id="csKasAciklamaWrap" hidden>
+                    <span id="csKasAciklama">—</span>
+                </div>
+                <div class="cs-kas-bank" id="csKasBankWrap" hidden>
+                    <span class="cs-kas-label" data-t="Banka">Banka</span>
+                    <span class="cs-kas-value" id="csKasBank">—</span>
+                </div>
+                <div class="cs-kas-totals">
+                    <div class="cs-kas-total-row">
+                        <span data-t="Tutar">Tutar</span>
+                        <strong id="csKasTutar">—</strong>
+                    </div>
+                    <div class="cs-kas-total-row">
+                        <span data-t="KDV">KDV</span>
+                        <strong id="csKasKdv">—</strong>
+                    </div>
+                    <div class="cs-kas-total-row cs-kas-total-row--net">
+                        <span data-t="Net Tutar">Net Tutar</span>
+                        <strong id="csKasNet">—</strong>
+                    </div>
+                </div>
+            </div>
+            <div class="cs-kas-empty" id="csKasEmpty" hidden data-t="Kayıt bulunamadı.">Kayıt bulunamadı.</div>
+        </div>
+        <div class="cs-kas-foot">
+            <button type="button" class="cs-inv-btn" id="csKasPrint" data-t="Yazdır">Yazdır</button>
+            <button type="button" class="cs-inv-btn cs-kas-btn--primary" id="csKasCloseBtn" data-t="Kapat">Kapat</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+    const MIN_SEARCH_LEN = 2;
+    const SEARCH_DEBOUNCE_MS = 350;
+
+    const searchInput = document.getElementById('csCariSearch');
+    const clearBtn = document.getElementById('csCariClear');
+    const dropdown = document.getElementById('csCariDropdown');
+    const picker = document.getElementById('csCariPicker');
+    const kodEl = document.getElementById('csCariKod');
+    const unvanEl = document.getElementById('csCariUnvan');
+    const recordBadge = document.getElementById('csRecordBadge');
+    const recordCount = document.getElementById('csRecordCount');
+    const emptyState = document.getElementById('csEmptyState');
+    const table = document.getElementById('csHareketTable');
+    const tbody = document.getElementById('csHareketBody');
+    const invOverlay = document.getElementById('csInvOverlay');
+    const invModal = document.getElementById('csInvModal');
+    const invClose = document.getElementById('csInvClose');
+    const invCloseBtn = document.getElementById('csInvCloseBtn');
+    const invPrint = document.getElementById('csInvPrint');
+    const bankOverlay = document.getElementById('csBankOverlay');
+    const bankClose = document.getElementById('csBankClose');
+    const bankCloseBtn = document.getElementById('csBankCloseBtn');
+    const bankPrint = document.getElementById('csBankPrint');
+    const bankTable = document.getElementById('csBankTable');
+    const bankBodyRows = document.getElementById('csBankBodyRows');
+    const bankEmpty = document.getElementById('csBankEmpty');
+    const bankLoading = document.getElementById('csBankLoading');
+    const bankSub = document.getElementById('csBankSub');
+    const bankToplamBorc = document.getElementById('csBankToplamBorc');
+    const bankToplamAlacak = document.getElementById('csBankToplamAlacak');
+    const cfOverlay = document.getElementById('csCfOverlay');
+    const cfClose = document.getElementById('csCfClose');
+    const cfCloseBtn = document.getElementById('csCfCloseBtn');
+    const cfPrint = document.getElementById('csCfPrint');
+    const cfTable = document.getElementById('csCfTable');
+    const cfBodyRows = document.getElementById('csCfBodyRows');
+    const cfEmpty = document.getElementById('csCfEmpty');
+    const cfLoading = document.getElementById('csCfLoading');
+    const cfSub = document.getElementById('csCfSub');
+    const cfToplamBorc = document.getElementById('csCfToplamBorc');
+    const cfToplamAlacak = document.getElementById('csCfToplamAlacak');
+    const cfBakiyeBorc = document.getElementById('csCfBakiyeBorc');
+    const cfBakiyeAlacak = document.getElementById('csCfBakiyeAlacak');
+    const kasOverlay = document.getElementById('csKasOverlay');
+    const kasClose = document.getElementById('csKasClose');
+    const kasCloseBtn = document.getElementById('csKasCloseBtn');
+    const kasPrint = document.getElementById('csKasPrint');
+    const kasContent = document.getElementById('csKasContent');
+    const kasEmpty = document.getElementById('csKasEmpty');
+    const kasLoading = document.getElementById('csKasLoading');
+    const kasSub = document.getElementById('csKasSub');
+    const kasTitle = document.getElementById('csKasTitle');
+
+    const STORAGE_ID = 'cs_cari_id';
+    const STORAGE_KOD = 'cs_cari_kod';
+    const STORAGE_UNVAN = 'cs_cari_unvan';
+
+    let selectedCari = null;
+    let activeIndex = -1;
+    let fetchToken = 0;
+    let searchToken = 0;
+    let searchTimer = null;
+    let dropdownItems = [];
+    let hareketRows = [];
+
+    function buildDateQuery() {
+        const params = new URLSearchParams(window.location.search);
+        const out = new URLSearchParams();
+        ['quick', 'start', 'end'].forEach(function(key) {
+            const value = params.get(key);
+            if (value) out.set(key, value);
+        });
+        return out.toString();
+    }
+
+    function formatTurkishNumber(value, decimals) {
+        const num = Number(value);
+        if (!Number.isFinite(num)) return '—';
+        return num.toLocaleString('tr-TR', {
+            minimumFractionDigits: decimals,
+            maximumFractionDigits: decimals
+        });
+    }
+
+    function modulClass(modul) {
+        const m = String(modul || '').trim().toLowerCase();
+        if (m === 'satınalma' || m === 'satinalma') return 'satinalma';
+        if (m === 'banka') return 'banka';
+        if (m === 'kasa') return 'kasa';
+        if (m === 'cari') return 'cari';
+        return 'cari';
+    }
+
+    function isBankaRow(row) {
+        return String(row && row.modul || '').trim().toLowerCase() === 'banka';
+    }
+
+    function isCariRow(row) {
+        return String(row && row.modul || '').trim().toLowerCase() === 'cari';
+    }
+
+    function isKasaRow(row) {
+        return String(row && row.modul || '').trim().toLowerCase() === 'kasa';
+    }
+
+    function isSatinalmaRow(row) {
+        const m = String(row && row.modul || '').trim().toLowerCase();
+        return m === 'satınalma' || m === 'satinalma';
+    }
+
+    function anyModalOpen() {
+        return (invOverlay && invOverlay.classList.contains('open')) ||
+            (bankOverlay && bankOverlay.classList.contains('open')) ||
+            (cfOverlay && cfOverlay.classList.contains('open')) ||
+            (kasOverlay && kasOverlay.classList.contains('open'));
+    }
+
+    function escapeHtml(text) {
+        return String(text || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+
+    function persistSelection(cari) {
+        try {
+            sessionStorage.setItem(STORAGE_ID, cari.id || cari.kod || '');
+            sessionStorage.setItem(STORAGE_KOD, cari.kod || '');
+            sessionStorage.setItem(STORAGE_UNVAN, cari.unvan || cari.kod || '');
+        } catch (err) {
+            /* sessionStorage yoksa sessizce devam */
+        }
+    }
+
+    function clearPersistedSelection() {
+        try {
+            sessionStorage.removeItem(STORAGE_ID);
+            sessionStorage.removeItem(STORAGE_KOD);
+            sessionStorage.removeItem(STORAGE_UNVAN);
+        } catch (err) {
+            /* ignore */
+        }
+    }
+
+    function restoreSelection() {
+        try {
+            const id = sessionStorage.getItem(STORAGE_ID);
+            const kod = sessionStorage.getItem(STORAGE_KOD);
+            const unvan = sessionStorage.getItem(STORAGE_UNVAN);
+            if (!id && !kod) return;
+            const cari = { id: id || kod, kod: kod || id, unvan: unvan || kod || id };
+            selectedCari = cari;
+            searchInput.value = cari.unvan;
+            clearBtn.disabled = false;
+            loadHareketler(cari);
+        } catch (err) {
+            /* ignore */
+        }
+    }
+
+    function closeDropdown() {
+        dropdown.classList.remove('open');
+        searchInput.setAttribute('aria-expanded', 'false');
+        activeIndex = -1;
+    }
+
+    function openDropdown() {
+        dropdown.classList.add('open');
+        searchInput.setAttribute('aria-expanded', 'true');
+    }
+
+    function renderDropdown(items, emptyMessage) {
+        if (!items.length) {
+            dropdown.innerHTML = '<div class="cs-cari-empty-opt">' + escapeHtml(emptyMessage || 'Sonuç bulunamadı') + '</div>';
+            openDropdown();
+            return;
+        }
+        dropdown.innerHTML = items.map(function(item, index) {
+            return '<button type="button" class="cs-cari-option" role="option" data-index="' + index + '" data-kod="' + escapeHtml(item.kod) + '">' +
+                '<span class="cs-cari-option-kod">' + escapeHtml(item.kod) + '</span>' +
+                '<span class="cs-cari-option-unvan">' + escapeHtml(item.unvan) + '</span>' +
+                '</button>';
+        }).join('');
+        openDropdown();
+    }
+
+    function setSummaryEmpty() {
+        kodEl.textContent = 'Seçilmedi';
+        kodEl.classList.add('is-empty');
+        unvanEl.textContent = 'Cari ünvan seçiniz';
+        unvanEl.classList.add('is-empty');
+        recordBadge.classList.add('is-hidden');
+        recordCount.textContent = '0';
+    }
+
+    function setSummaryCari(cari) {
+        kodEl.textContent = cari.kod;
+        kodEl.classList.remove('is-empty');
+        unvanEl.textContent = cari.unvan;
+        unvanEl.classList.remove('is-empty');
+    }
+
+    function moneyText(value) {
+        return formatTurkishNumber(value, 2) + ' ₺';
+    }
+
+    function displayOrDash(value) {
+        const text = String(value || '').trim();
+        return text || '—';
+    }
+
+    function calcKdvPercent(matrah, kdv) {
+        const m = Number(matrah);
+        const k = Number(kdv);
+        if (!Number.isFinite(m) || m <= 0 || !Number.isFinite(k) || k <= 0) return null;
+        return Math.round((k / m) * 100);
+    }
+
+    function renderInvoiceModalFromRow(row) {
+        if (!row || !invOverlay) return;
+
+        const cariKod = row.cari_kod || (selectedCari && selectedCari.kod) || '—';
+        const cariUnvan = row.cari_unvan || (selectedCari && selectedCari.unvan) || '—';
+        const matrah = Number(row.tutar) || 0;
+        const kdv = Number(row.kdv_tutar) || 0;
+        const net = Number(row.net_tutar) || (matrah + kdv);
+        const kdvPct = calcKdvPercent(matrah, kdv);
+        const islemNo = row.islem_belge_kod || row.islem_id || row.finans_detay_id || '—';
+        const lineKod = row.ozel_kod || row.islem_belge_kod || '—';
+        const lineAd = row.aciklama || row.islem_turu || '—';
+
+        if (invModal) {
+            invModal.classList.remove('cs-inv-modal--satinalma');
+            if (modulClass(row.modul) === 'satinalma') {
+                invModal.classList.add('cs-inv-modal--satinalma');
+            }
+        }
+
+        document.getElementById('csInvTitle').textContent = row.islem_turu || 'İşlem Detayı';
+        document.getElementById('csInvIslemNo').textContent = 'İşlem No: ' + islemNo;
+        document.getElementById('csInvFaturaMeta').innerHTML =
+            escapeHtml(displayOrDash(row.fatura_no)) + '<br>' + escapeHtml(displayOrDash(row.tarih));
+        document.getElementById('csInvFirmaAd').textContent = cariUnvan;
+        document.getElementById('csInvFirmaKod').textContent = 'Kod: ' + cariKod;
+        document.getElementById('csInvBelgeNo').textContent = displayOrDash(row.belge_no);
+        document.getElementById('csInvBelgeTarih').textContent = displayOrDash(row.belge_tarihi || row.tarih);
+        document.getElementById('csInvBirim').textContent = displayOrDash(row.birim_adi);
+        document.getElementById('csInvVade').textContent = displayOrDash(row.vade_tarihi);
+
+        const tagsEl = document.getElementById('csInvTags');
+        const tags = [];
+        if (row.odeme_turu) tags.push('<span class="cs-inv-tag cs-inv-tag--accent">' + escapeHtml(row.odeme_turu) + '</span>');
+        if (row.para_birim) tags.push('<span class="cs-inv-tag">' + escapeHtml(row.para_birim) + '</span>');
+        if (row.modul) {
+            tags.push('<span class="cs-modul cs-modul--' + modulClass(row.modul) + '">' + escapeHtml(row.modul) + '</span>');
+        }
+        tagsEl.innerHTML = tags.join('');
+
+        const aciklamaWrap = document.getElementById('csInvAciklamaWrap');
+        const aciklama = String(row.aciklama || '').trim();
+        if (aciklama) {
+            document.getElementById('csInvAciklama').textContent = aciklama;
+            aciklamaWrap.hidden = false;
+        } else {
+            aciklamaWrap.hidden = true;
+        }
+
+        document.getElementById('csInvLinesBody').innerHTML =
+            '<tr>' +
+                '<td>1</td>' +
+                '<td>' + escapeHtml(lineKod) + '</td>' +
+                '<td>' + escapeHtml(lineAd) + '</td>' +
+                '<td class="col-num">' + (kdvPct ? '<span class="cs-inv-kdv-badge">%' + kdvPct + '</span>' : '—') + '</td>' +
+                '<td class="col-num">1,000000</td>' +
+                '<td class="col-num">' + formatTurkishNumber(matrah, 2) + '</td>' +
+                '<td class="col-num">' + formatTurkishNumber(matrah, 2) + '</td>' +
+            '</tr>';
+
+        document.getElementById('csInvMatrah').textContent = moneyText(matrah);
+        document.getElementById('csInvKdv').textContent = moneyText(kdv);
+        document.getElementById('csInvNet').textContent = moneyText(net);
+    }
+
+    function renderInvoiceModalFromApi(data, row) {
+        const fis = data && data.fis ? data.fis : null;
+        const lines = data && Array.isArray(data.satirlar) ? data.satirlar : [];
+        if (!fis) {
+            renderInvoiceModalFromRow(row);
+            return;
+        }
+
+        const rowFallback = row || {};
+        const cariKod = fis.cari_kod || rowFallback.cari_kod || (selectedCari && selectedCari.kod) || '—';
+        const cariUnvan = fis.cari_unvan || rowFallback.cari_unvan || (selectedCari && selectedCari.unvan) || '—';
+        const title = fis.hareket_tur_ad || rowFallback.islem_turu || 'Alış Faturası';
+        const islemNo = fis.islem_belge_kod || fis.fis_kod || rowFallback.islem_id || '—';
+        const faturaNo = fis.fatura_no || rowFallback.fatura_no || '';
+        const faturaTarih = fis.fatura_tarihi || rowFallback.tarih || '';
+        const matrah = Number(fis.toplam_matrah) || 0;
+        const kdv = Number(fis.toplam_kdv) || 0;
+        const net = Number(fis.net_toplam) || (matrah + kdv);
+
+        if (invModal) {
+            invModal.classList.add('cs-inv-modal--satinalma');
+        }
+
+        document.getElementById('csInvTitle').textContent = title;
+        document.getElementById('csInvIslemNo').textContent = 'İşlem No: ' + islemNo;
+        document.getElementById('csInvFaturaMeta').innerHTML =
+            escapeHtml(displayOrDash(faturaNo)) + '<br>' + escapeHtml(displayOrDash(faturaTarih));
+        document.getElementById('csInvFirmaAd').textContent = cariUnvan;
+        document.getElementById('csInvFirmaKod').textContent = 'Kod: ' + cariKod;
+        document.getElementById('csInvBelgeNo').textContent = displayOrDash(fis.belge_no || rowFallback.belge_no);
+        document.getElementById('csInvBelgeTarih').textContent = displayOrDash(
+            fis.belge_tarihi || rowFallback.belge_tarihi || faturaTarih
+        );
+        document.getElementById('csInvBirim').textContent = displayOrDash(
+            fis.birim_adi || rowFallback.birim_adi
+        );
+        document.getElementById('csInvVade').textContent = displayOrDash(rowFallback.vade_tarihi);
+
+        const tags = [];
+        if (fis.alis_yontem) tags.push('<span class="cs-inv-tag cs-inv-tag--accent">' + escapeHtml(fis.alis_yontem) + '</span>');
+        if (fis.butce_tur) tags.push('<span class="cs-inv-tag">' + escapeHtml(fis.butce_tur) + '</span>');
+        if (rowFallback.para_birim) tags.push('<span class="cs-inv-tag">' + escapeHtml(rowFallback.para_birim) + '</span>');
+        tags.push('<span class="cs-modul cs-modul--satinalma">Satınalma</span>');
+        document.getElementById('csInvTags').innerHTML = tags.join('');
+
+        const aciklamaWrap = document.getElementById('csInvAciklamaWrap');
+        const aciklama = String(fis.aciklama || rowFallback.aciklama || '').trim();
+        if (aciklama) {
+            document.getElementById('csInvAciklama').textContent = aciklama;
+            aciklamaWrap.hidden = false;
+        } else {
+            aciklamaWrap.hidden = true;
+        }
+
+        if (!lines.length) {
+            document.getElementById('csInvLinesBody').innerHTML =
+                '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:24px;">Satır bulunamadı.</td></tr>';
+        } else {
+            document.getElementById('csInvLinesBody').innerHTML = lines.map(function(line, idx) {
+                const kdvOran = Number(line.kdv_oran) || 0;
+                const miktar = Number(line.miktar) || 0;
+                const birimFiyat = Number(line.birim_fiyat) || 0;
+                const tutar = Number(line.matrah) || 0;
+                const stokAd = line.stok_ad || line.aciklama || '—';
+                return '<tr>' +
+                    '<td>' + (idx + 1) + '</td>' +
+                    '<td>' + escapeHtml(line.stok_kod || '—') + '</td>' +
+                    '<td>' + escapeHtml(stokAd) + '</td>' +
+                    '<td class="col-num">' + (kdvOran ? '<span class="cs-inv-kdv-badge">%' + formatTurkishNumber(kdvOran, 0) + '</span>' : '—') + '</td>' +
+                    '<td class="col-num">' + formatTurkishNumber(miktar, 6) + '</td>' +
+                    '<td class="col-num">' + formatTurkishNumber(birimFiyat, 2) + '</td>' +
+                    '<td class="col-num">' + formatTurkishNumber(tutar, 2) + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        document.getElementById('csInvMatrah').textContent = moneyText(matrah);
+        document.getElementById('csInvKdv').textContent = moneyText(kdv);
+        document.getElementById('csInvNet').textContent = moneyText(net);
+    }
+
+    function openInvoiceModal(index) {
+        const row = hareketRows[index];
+        if (!row || !invOverlay) return;
+        renderInvoiceModalFromRow(row);
+        invOverlay.classList.add('open');
+        invOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+    }
+
+    async function openSatinalmaModal(index) {
+        const row = hareketRows[index];
+        if (!row || !invOverlay) return;
+
+        closeBankModal();
+        closeCariFinansModal();
+        closeKasaModal();
+
+        if (invModal) {
+            invModal.classList.add('cs-inv-modal--satinalma');
+        }
+        document.getElementById('csInvTitle').textContent = 'Yükleniyor…';
+        document.getElementById('csInvIslemNo').textContent = '—';
+        document.getElementById('csInvLinesBody').innerHTML = '';
+        invOverlay.classList.add('open');
+        invOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        const fisId = row.islem_id || '';
+        let url = '/cari-sorusturma/alis-fatura?';
+        if (fisId) url += 'fis_id=' + encodeURIComponent(fisId) + '&';
+        if (selectedCari && selectedCari.id) {
+            url += 'cari_id=' + encodeURIComponent(selectedCari.id);
+        }
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            if (!resp.ok || !data.fis) {
+                console.warn('[ALIS_FATURASI]', data.error || 'API bos');
+                renderInvoiceModalFromRow(row);
+                return;
+            }
+            renderInvoiceModalFromApi(data, row);
+        } catch (err) {
+            console.error('[ALIS_FATURASI]', err);
+            renderInvoiceModalFromRow(row);
+        }
+    }
+
+    function closeInvoiceModal() {
+        if (!invOverlay) return;
+        invOverlay.classList.remove('open');
+        invOverlay.setAttribute('aria-hidden', 'true');
+        if (!anyModalOpen()) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeBankModal() {
+        if (!bankOverlay) return;
+        bankOverlay.classList.remove('open');
+        bankOverlay.setAttribute('aria-hidden', 'true');
+        if (!anyModalOpen()) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeCariFinansModal() {
+        if (!cfOverlay) return;
+        cfOverlay.classList.remove('open');
+        cfOverlay.setAttribute('aria-hidden', 'true');
+        if (!anyModalOpen()) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeKasaModal() {
+        if (!kasOverlay) return;
+        kasOverlay.classList.remove('open');
+        kasOverlay.setAttribute('aria-hidden', 'true');
+        if (!anyModalOpen()) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    function closeAllModals() {
+        closeInvoiceModal();
+        closeBankModal();
+        closeCariFinansModal();
+        closeKasaModal();
+    }
+
+    function renderBankModal(data, row) {
+        const fis = data && data.fis ? data.fis : null;
+        const lines = data && Array.isArray(data.hareketler) ? data.hareketler : [];
+        const parts = [];
+        if (fis && fis.banka_fis_no) parts.push('Fiş No: ' + fis.banka_fis_no);
+        if (fis && fis.banka_fis_tarih) parts.push(fis.banka_fis_tarih);
+        if (fis && fis.hareket_tur_ad) parts.push(fis.hareket_tur_ad);
+        if (!parts.length && row) {
+            if (row.belge_no) parts.push('Belge: ' + row.belge_no);
+            if (row.tarih) parts.push(row.tarih);
+        }
+        bankSub.textContent = parts.length ? parts.join(' - ') : '—';
+
+        let toplamBorc = 0;
+        let toplamAlacak = 0;
+        if (!lines.length) {
+            bankTable.hidden = true;
+            bankEmpty.hidden = false;
+            bankBodyRows.innerHTML = '';
+            bankEmpty.textContent = 'Kayıt bulunamadı.';
+        } else {
+            bankEmpty.hidden = true;
+            bankTable.hidden = false;
+            bankBodyRows.innerHTML = lines.map(function(line) {
+                const borc = Number(line.borc) || 0;
+                const alacak = Number(line.alacak) || 0;
+                toplamBorc += borc;
+                toplamAlacak += alacak;
+                return '<tr>' +
+                    '<td>' + escapeHtml(line.banka_hesap_adi || '—') + '</td>' +
+                    '<td>' + escapeHtml(line.banka_adi || '—') + '</td>' +
+                    '<td>' + escapeHtml(line.firma_kodu || '—') + '</td>' +
+                    '<td>' + escapeHtml(line.firma_adi || '—') + '</td>' +
+                    '<td class="col-num col-borc">' + formatTurkishNumber(borc, 2) + '</td>' +
+                    '<td class="col-num col-alacak">' + formatTurkishNumber(alacak, 2) + '</td>' +
+                    '<td>' + escapeHtml(line.belge_no || '—') + '</td>' +
+                    '<td>' + escapeHtml(line.aciklama || '—') + '</td>' +
+                    '<td>' + escapeHtml(line.ozel_kod || '—') + '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        if (fis) {
+            if (Number(fis.toplam_borc) > 0) toplamBorc = Number(fis.toplam_borc);
+            if (Number(fis.toplam_alacak) > 0) toplamAlacak = Number(fis.toplam_alacak);
+        }
+        bankToplamBorc.textContent = formatTurkishNumber(toplamBorc, 2);
+        bankToplamAlacak.textContent = formatTurkishNumber(toplamAlacak, 2);
+    }
+
+    async function openBankModal(index) {
+        const row = hareketRows[index];
+        if (!row || !bankOverlay) return;
+
+        closeInvoiceModal();
+        closeCariFinansModal();
+        closeKasaModal();
+        bankLoading.hidden = false;
+        bankTable.hidden = true;
+        bankEmpty.hidden = true;
+        bankBodyRows.innerHTML = '';
+        bankSub.textContent = 'Yükleniyor…';
+        bankOverlay.classList.add('open');
+        bankOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        const islemId = row.islem_id || '';
+        const cariFinansId = row.finans_detay_id || '';
+        let url = '/cari-sorusturma/banka-fis?';
+        if (islemId) url += 'islem_id=' + encodeURIComponent(islemId) + '&';
+        if (cariFinansId) url += 'cari_finans_detay_id=' + encodeURIComponent(cariFinansId) + '&';
+        if (selectedCari && selectedCari.id) {
+            url += 'cari_id=' + encodeURIComponent(selectedCari.id);
+        }
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            bankLoading.hidden = true;
+            if (!resp.ok) {
+                bankEmpty.textContent = data.error || 'Banka fiş detayı yüklenemedi.';
+                bankEmpty.hidden = false;
+                return;
+            }
+            renderBankModal(data, row);
+        } catch (err) {
+            console.error('[BANKA_CARI_FIS]', err);
+            bankLoading.hidden = true;
+            bankEmpty.textContent = 'Banka fiş detayı yüklenirken hata oluştu.';
+            bankEmpty.hidden = false;
+        }
+    }
+
+    function renderCariFinansModal(data, row) {
+        const fis = data && data.fis ? data.fis : null;
+        const lines = data && Array.isArray(data.hareketler) ? data.hareketler : [];
+        const parts = [];
+        if (fis && fis.tarih) parts.push(fis.tarih);
+        if (fis && fis.hareket_tur_ad) parts.push(fis.hareket_tur_ad);
+        if (fis && fis.aciklama) parts.push(fis.aciklama);
+        if (!parts.length && row) {
+            if (row.belge_no) parts.push('Belge: ' + row.belge_no);
+            if (row.tarih) parts.push(row.tarih);
+            if (row.islem_turu) parts.push(row.islem_turu);
+        }
+        cfSub.textContent = parts.length ? parts.join(' - ') : '—';
+
+        let toplamBorc = 0;
+        let toplamAlacak = 0;
+        if (!lines.length) {
+            cfTable.hidden = true;
+            cfEmpty.hidden = false;
+            cfBodyRows.innerHTML = '';
+            cfEmpty.textContent = 'Kayıt bulunamadı.';
+            cfToplamBorc.textContent = '0,00';
+            cfToplamAlacak.textContent = '0,00';
+            cfBakiyeBorc.textContent = '0,00';
+            cfBakiyeAlacak.textContent = '0,00';
+            return;
+        }
+
+        cfEmpty.hidden = true;
+        cfTable.hidden = false;
+        cfBodyRows.innerHTML = lines.map(function(line) {
+            const borc = Number(line.borc) || 0;
+            const alacak = Number(line.alacak) || 0;
+            toplamBorc += borc;
+            toplamAlacak += alacak;
+            const kodUnvan = line.cari_kod_unvan ||
+                [line.cari_kod, line.cari_unvan].filter(Boolean).join(' - ') || '—';
+            const borcText = borc > 0 ? formatTurkishNumber(borc, 2) : '';
+            const alacakText = alacak > 0 ? formatTurkishNumber(alacak, 2) : '';
+            return '<tr>' +
+                '<td>' + escapeHtml(kodUnvan) + '</td>' +
+                '<td>' + escapeHtml(line.belge_no || '—') + '</td>' +
+                '<td>' + escapeHtml(line.aciklama || '—') + '</td>' +
+                '<td>' + escapeHtml(line.ozel_kod || '—') + '</td>' +
+                '<td class="col-num col-borc">' + borcText + '</td>' +
+                '<td class="col-num col-alacak">' + alacakText + '</td>' +
+            '</tr>';
+        }).join('');
+
+        if (fis) {
+            if (Number(fis.toplam_borc) > 0) toplamBorc = Number(fis.toplam_borc);
+            if (Number(fis.toplam_alacak) > 0) toplamAlacak = Number(fis.toplam_alacak);
+        }
+
+        const bakiyeBorc = Math.max(0, toplamBorc - toplamAlacak);
+        const bakiyeAlacak = Math.max(0, toplamAlacak - toplamBorc);
+        cfToplamBorc.textContent = formatTurkishNumber(toplamBorc, 2);
+        cfToplamAlacak.textContent = formatTurkishNumber(toplamAlacak, 2);
+        cfBakiyeBorc.textContent = formatTurkishNumber(bakiyeBorc, 2);
+        cfBakiyeAlacak.textContent = formatTurkishNumber(bakiyeAlacak, 2);
+    }
+
+    async function openCariFinansModal(index) {
+        const row = hareketRows[index];
+        if (!row || !cfOverlay) return;
+
+        closeInvoiceModal();
+        closeBankModal();
+        closeKasaModal();
+        cfLoading.hidden = false;
+        cfTable.hidden = true;
+        cfEmpty.hidden = true;
+        cfBodyRows.innerHTML = '';
+        cfSub.textContent = 'Yükleniyor…';
+        cfOverlay.classList.add('open');
+        cfOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        const cariFinansId = row.cari_finans_id || row.islem_id || '';
+        const hareketTurId = row.hareket_tur_id || '';
+        let url = '/cari-sorusturma/cari-finans?';
+        if (cariFinansId) url += 'cari_finans_id=' + encodeURIComponent(cariFinansId) + '&';
+        if (hareketTurId) url += 'hareket_tur_id=' + encodeURIComponent(hareketTurId) + '&';
+        if (selectedCari && selectedCari.id) {
+            url += 'cari_id=' + encodeURIComponent(selectedCari.id);
+        }
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            cfLoading.hidden = true;
+            if (!resp.ok) {
+                cfEmpty.textContent = data.error || 'Cari fiş detayı yüklenemedi.';
+                cfEmpty.hidden = false;
+                return;
+            }
+            renderCariFinansModal(data, row);
+        } catch (err) {
+            console.error('[CARI_FINANS]', err);
+            cfLoading.hidden = true;
+            cfEmpty.textContent = 'Cari fiş detayı yüklenirken hata oluştu.';
+            cfEmpty.hidden = false;
+        }
+    }
+
+    function renderKasaModal(data, row) {
+        const fis = data && data.fis ? data.fis : null;
+        if (!fis) {
+            kasContent.hidden = true;
+            kasEmpty.hidden = false;
+            kasEmpty.textContent = 'Kayıt bulunamadı.';
+            return;
+        }
+
+        kasEmpty.hidden = true;
+        kasContent.hidden = false;
+
+        const title = fis.hareket_tur_ad || (row && row.islem_turu) || 'Kasa Fiş Detayları';
+        kasTitle.textContent = title;
+
+        const subParts = [];
+        if (fis.tarih) subParts.push(fis.tarih);
+        if (fis.saat) subParts.push(fis.saat);
+        if (fis.islem_no) subParts.push('İşlem No: ' + fis.islem_no);
+        kasSub.textContent = subParts.length ? subParts.join(' - ') : '—';
+
+        const tags = [];
+        if (fis.ba) {
+            tags.push('<span class="cs-ba cs-ba--' + String(fis.ba).toLowerCase() + '">' + escapeHtml(fis.ba) + '</span>');
+        }
+        if (fis.para_birim) {
+            tags.push('<span class="cs-inv-tag">' + escapeHtml(fis.para_birim) + '</span>');
+        }
+        if (fis.odeme_turu) {
+            tags.push('<span class="cs-inv-tag cs-inv-tag--accent">' + escapeHtml(fis.odeme_turu) + '</span>');
+        }
+        tags.push('<span class="cs-modul cs-modul--kasa">Kasa</span>');
+        document.getElementById('csKasTags').innerHTML = tags.join('');
+
+        const kasaText = [fis.kasa_kod, fis.kasa_ad].filter(Boolean).join(' - ') || '—';
+        document.getElementById('csKasKasa').textContent = kasaText;
+        document.getElementById('csKasBirim').textContent = displayOrDash(fis.birim_ad);
+        document.getElementById('csKasBelgeNo').textContent = displayOrDash(fis.belge_no || fis.fatura_no);
+        const makbuzParts = [];
+        if (fis.makbuz_seri) makbuzParts.push(fis.makbuz_seri);
+        if (fis.makbuz_tarih) makbuzParts.push(fis.makbuz_tarih);
+        document.getElementById('csKasMakbuz').textContent = makbuzParts.length ? makbuzParts.join(' / ') : '—';
+        document.getElementById('csKasIslemTur').textContent = displayOrDash(fis.islem_form_tur || fis.islem_tur_id);
+        document.getElementById('csKasHareketTur').textContent = displayOrDash(fis.hareket_tur_ad);
+        document.getElementById('csKasCari').textContent = displayOrDash(
+            fis.cari_kod_unvan || [fis.cari_kod, fis.cari_unvan].filter(Boolean).join(' - ')
+        );
+
+        const durumParts = [];
+        if (fis.makbuz_durum) durumParts.push(fis.makbuz_durum);
+        if (fis.yazdirma_durum) durumParts.push(fis.yazdirma_durum);
+        document.getElementById('csKasDurum').textContent = durumParts.length ? durumParts.join(' / ') : '—';
+
+        const aciklamaWrap = document.getElementById('csKasAciklamaWrap');
+        const aciklama = String(fis.aciklama || '').trim();
+        if (aciklama) {
+            document.getElementById('csKasAciklama').textContent = aciklama;
+            aciklamaWrap.hidden = false;
+        } else {
+            aciklamaWrap.hidden = true;
+        }
+
+        const bankWrap = document.getElementById('csKasBankWrap');
+        const bankParts = [];
+        if (fis.banka_adi) bankParts.push(fis.banka_adi);
+        if (fis.banka_sube_ad) bankParts.push(fis.banka_sube_ad);
+        if (fis.banka_hesap_adi) bankParts.push(fis.banka_hesap_adi);
+        if (fis.banka_hesap_no) bankParts.push(fis.banka_hesap_no);
+        if (bankParts.length) {
+            document.getElementById('csKasBank').textContent = bankParts.join(' - ');
+            bankWrap.hidden = false;
+        } else {
+            bankWrap.hidden = true;
+        }
+
+        const tutar = Number(fis.tutar) || 0;
+        const kdv = Number(fis.kdv_tutar) || 0;
+        const net = Number(fis.net_tutar) || tutar;
+        document.getElementById('csKasTutar').textContent = moneyText(tutar);
+        document.getElementById('csKasKdv').textContent = moneyText(kdv);
+        document.getElementById('csKasNet').textContent = moneyText(net);
+    }
+
+    async function openKasaModal(index) {
+        const row = hareketRows[index];
+        if (!row || !kasOverlay) return;
+
+        closeInvoiceModal();
+        closeBankModal();
+        closeCariFinansModal();
+        kasLoading.hidden = false;
+        kasContent.hidden = true;
+        kasEmpty.hidden = true;
+        kasSub.textContent = 'Yükleniyor…';
+        kasOverlay.classList.add('open');
+        kasOverlay.setAttribute('aria-hidden', 'false');
+        document.body.style.overflow = 'hidden';
+
+        const kasaHareketId = row.kasa_hareket_id || row.islem_id || '';
+        let url = '/cari-sorusturma/kasa-fis?';
+        if (kasaHareketId) url += 'kasa_hareket_id=' + encodeURIComponent(kasaHareketId) + '&';
+        if (selectedCari && selectedCari.id) {
+            url += 'cari_id=' + encodeURIComponent(selectedCari.id);
+        }
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            const data = await resp.json();
+            kasLoading.hidden = true;
+            if (!resp.ok) {
+                kasEmpty.textContent = data.error || 'Kasa fiş detayı yüklenemedi.';
+                kasEmpty.hidden = false;
+                return;
+            }
+            renderKasaModal(data, row);
+        } catch (err) {
+            console.error('[KASA_CARI_FIS]', err);
+            kasLoading.hidden = true;
+            kasEmpty.textContent = 'Kasa fiş detayı yüklenirken hata oluştu.';
+            kasEmpty.hidden = false;
+        }
+    }
+
+    function openRowDetail(index) {
+        const row = hareketRows[index];
+        if (!row) return;
+        if (isBankaRow(row)) {
+            openBankModal(index);
+        } else if (isCariRow(row)) {
+            openCariFinansModal(index);
+        } else if (isKasaRow(row)) {
+            openKasaModal(index);
+        } else if (isSatinalmaRow(row)) {
+            openSatinalmaModal(index);
+        } else {
+            closeBankModal();
+            closeCariFinansModal();
+            closeKasaModal();
+            openInvoiceModal(index);
+        }
+    }
+
+    function renderTableRows(rows) {
+        tbody.innerHTML = rows.map(function(row, index) {
+            const ba = String(row.ba || '').toUpperCase();
+            const bakiyeText = String(row.bakiye || '');
+            const bakiyeClass = bakiyeText.indexOf('(A)') >= 0
+                ? 'cs-bakiye-a'
+                : (bakiyeText.indexOf('(B)') >= 0 ? 'cs-bakiye-b' : '');
+            const tutarClass = ba === 'A'
+                ? 'cs-tutar-a'
+                : (ba === 'B'
+                    ? 'cs-tutar-b'
+                    : (bakiyeText.indexOf('(A)') >= 0
+                        ? 'cs-tutar-a'
+                        : (bakiyeText.indexOf('(B)') >= 0 ? 'cs-tutar-b' : '')));
+            const modulText = String(row.modul || '').trim();
+            const modulCell = modulText
+                ? '<button type="button" class="cs-modul cs-modul--' + modulClass(row.modul) +
+                    ' cs-modul-btn" data-row-index="' + index + '" title="' + escapeHtml(modulText) + ' detayı">' +
+                    escapeHtml(modulText) + '</button>'
+                : '—';
+            return '<tr>' +
+                '<td class="col-center">' + (index + 1) + '</td>' +
+                '<td>' + modulCell + '</td>' +
+                '<td>' + escapeHtml(row.tarih || '—') + '</td>' +
+                '<td>' + escapeHtml(row.fatura_no || '—') + '</td>' +
+                '<td>' + escapeHtml(row.belge_no || '—') + '</td>' +
+                '<td>' + escapeHtml(row.belge_tarihi || '—') + '</td>' +
+                '<td>' + escapeHtml(row.vade_tarihi || '—') + '</td>' +
+                '<td class="col-aciklama" title="' + escapeHtml(row.aciklama) + '">' + escapeHtml(row.aciklama || '—') + '</td>' +
+                '<td>' + escapeHtml(row.islem_turu || '—') + '</td>' +
+                '<td class="col-center"><span class="cs-ba cs-ba--' + ba.toLowerCase() + '">' + escapeHtml(ba) + '</span></td>' +
+                '<td class="col-num ' + tutarClass + '">' + formatTurkishNumber(row.tutar, 2) + '</td>' +
+                '<td class="col-num ' + bakiyeClass + '">' + escapeHtml(row.bakiye || '—') + '</td>' +
+                '<td class="col-num">' + escapeHtml(row.doviz_tutar || '—') + '</td>' +
+                '<td class="col-center">' + escapeHtml(row.para_birim || '—') + '</td>' +
+                '<td class="col-birim" title="' + escapeHtml(row.birim_adi) + '">' + escapeHtml(row.birim_adi || '—') + '</td>' +
+                '<td>' + escapeHtml(row.ozel_kod || '—') + '</td>' +
+                '<td>' + escapeHtml(row.odeme_turu || '—') + '</td>' +
+                '</tr>';
+        }).join('');
+    }
+
+    function showEmptyTable(message, icon) {
+        emptyState.innerHTML =
+            '<div class="cs-empty-icon">' + (icon || '📋') + '</div>' +
+            '<div>' + escapeHtml(message) + '</div>';
+        emptyState.hidden = false;
+        table.hidden = true;
+        recordBadge.classList.add('is-hidden');
+    }
+
+    function showTableRows(rows) {
+        hareketRows = rows.slice();
+        renderTableRows(hareketRows);
+        emptyState.hidden = true;
+        table.hidden = false;
+        recordCount.textContent = String(rows.length);
+        recordBadge.classList.remove('is-hidden');
+    }
+
+    async function searchCariler(query) {
+        const token = ++searchToken;
+        const q = String(query || '').trim();
+
+        if (q.length < MIN_SEARCH_LEN) {
+            dropdownItems = [];
+            closeDropdown();
+            return;
+        }
+
+        renderDropdown([], 'Aranıyor…');
+
+        const dateQs = buildDateQuery();
+        let url = '/cari-sorusturma/ara?q=' + encodeURIComponent(q);
+        if (dateQs) url += '&' + dateQs;
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (token !== searchToken) return;
+
+            const data = await resp.json();
+            dropdownItems = Array.isArray(data.cariler) ? data.cariler : [];
+            renderDropdown(dropdownItems, 'Sonuç bulunamadı');
+            activeIndex = dropdownItems.length ? 0 : -1;
+        } catch (err) {
+            if (token !== searchToken) return;
+            console.error('[CARI_FIRMA_ARAMA]', err);
+            dropdownItems = [];
+            renderDropdown([], 'Arama sırasında hata oluştu');
+        }
+    }
+
+    function scheduleSearch() {
+        if (searchTimer) clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            searchCariler(searchInput.value);
+        }, SEARCH_DEBOUNCE_MS);
+    }
+
+    async function loadHareketler(cari) {
+        const token = ++fetchToken;
+        showEmptyTable('Hareketler yükleniyor…', '⏳');
+        setSummaryCari(cari);
+
+        const dateQs = buildDateQuery();
+        let url = '/cari-sorusturma/hareketler?cari_id=' + encodeURIComponent(cari.id || cari.kod);
+        if (dateQs) url += '&' + dateQs;
+
+        try {
+            const resp = await fetch(url, { headers: { 'Accept': 'application/json' } });
+            if (token !== fetchToken) return;
+
+            const data = await resp.json();
+            if (!resp.ok) {
+                showEmptyTable(data.error || 'Hareketler yüklenirken hata oluştu.', '⚠️');
+                return;
+            }
+
+            const rows = Array.isArray(data.hareketler) ? data.hareketler : [];
+            if (!rows.length) {
+                showEmptyTable('Seçilen cari ve dönem için kayıt bulunamadı.', '📋');
+                return;
+            }
+            showTableRows(rows);
+        } catch (err) {
+            if (token !== fetchToken) return;
+            console.error('[CARI_FIRMA_SORUSTURMA]', err);
+            showEmptyTable('Hareketler yüklenirken bağlantı hatası oluştu.', '⚠️');
+        }
+    }
+
+    function selectCari(cari) {
+        selectedCari = cari;
+        searchInput.value = cari.unvan;
+        clearBtn.disabled = false;
+        closeDropdown();
+        persistSelection(cari);
+        loadHareketler(cari);
+    }
+
+    function clearSelection() {
+        fetchToken += 1;
+        searchToken += 1;
+        if (searchTimer) clearTimeout(searchTimer);
+        closeAllModals();
+        selectedCari = null;
+        hareketRows = [];
+        dropdownItems = [];
+        searchInput.value = '';
+        clearBtn.disabled = true;
+        closeDropdown();
+        clearPersistedSelection();
+        setSummaryEmpty();
+        showEmptyTable('Henüz cari seçilmedi. Üstteki arama alanından firma arayın.', '🏢');
+        searchInput.focus();
+    }
+
+    searchInput.addEventListener('focus', function() {
+        const q = searchInput.value.trim();
+        if (q.length >= MIN_SEARCH_LEN) {
+            scheduleSearch();
+        } else if (q.length) {
+            renderDropdown([], 'En az ' + MIN_SEARCH_LEN + ' karakter yazın');
+        }
+    });
+
+    searchInput.addEventListener('input', function() {
+        selectedCari = null;
+        clearBtn.disabled = !searchInput.value.trim();
+        const q = searchInput.value.trim();
+        if (q.length < MIN_SEARCH_LEN) {
+            dropdownItems = [];
+            if (q.length) {
+                renderDropdown([], 'En az ' + MIN_SEARCH_LEN + ' karakter yazın');
+            } else {
+                closeDropdown();
+            }
+            return;
+        }
+        scheduleSearch();
+    });
+
+    searchInput.addEventListener('keydown', function(event) {
+        const options = dropdown.querySelectorAll('.cs-cari-option');
+        if (!options.length) return;
+
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            activeIndex = Math.min(activeIndex + 1, options.length - 1);
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            activeIndex = Math.max(activeIndex - 1, 0);
+        } else if (event.key === 'Enter') {
+            event.preventDefault();
+            if (activeIndex >= 0 && dropdownItems[activeIndex]) {
+                selectCari(dropdownItems[activeIndex]);
+            }
+            return;
+        } else if (event.key === 'Escape') {
+            closeDropdown();
+            return;
+        } else {
+            return;
+        }
+
+        options.forEach(function(opt, idx) {
+            opt.classList.toggle('active', idx === activeIndex);
+        });
+        if (activeIndex >= 0 && options[activeIndex]) {
+            options[activeIndex].scrollIntoView({ block: 'nearest' });
+        }
+    });
+
+    dropdown.addEventListener('click', function(event) {
+        const btn = event.target.closest('.cs-cari-option');
+        if (!btn) return;
+        const idx = parseInt(btn.getAttribute('data-index'), 10);
+        const cari = dropdownItems[idx];
+        if (cari) selectCari(cari);
+    });
+
+    clearBtn.addEventListener('click', clearSelection);
+
+    tbody.addEventListener('click', function(event) {
+        const btn = event.target.closest('.cs-modul-btn[data-row-index]');
+        if (!btn) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const index = parseInt(btn.getAttribute('data-row-index'), 10);
+        if (!Number.isNaN(index)) openRowDetail(index);
+    });
+
+    if (invClose) invClose.addEventListener('click', closeInvoiceModal);
+    if (invCloseBtn) invCloseBtn.addEventListener('click', closeInvoiceModal);
+    if (bankClose) bankClose.addEventListener('click', closeBankModal);
+    if (bankCloseBtn) bankCloseBtn.addEventListener('click', closeBankModal);
+    if (cfClose) cfClose.addEventListener('click', closeCariFinansModal);
+    if (cfCloseBtn) cfCloseBtn.addEventListener('click', closeCariFinansModal);
+    if (cfPrint) {
+        cfPrint.addEventListener('click', function() {
+            window.print();
+        });
+    }
+    if (cfOverlay) {
+        cfOverlay.addEventListener('click', function(event) {
+            if (event.target === cfOverlay) closeCariFinansModal();
+        });
+    }
+    if (kasClose) kasClose.addEventListener('click', closeKasaModal);
+    if (kasCloseBtn) kasCloseBtn.addEventListener('click', closeKasaModal);
+    if (kasPrint) {
+        kasPrint.addEventListener('click', function() {
+            window.print();
+        });
+    }
+    if (kasOverlay) {
+        kasOverlay.addEventListener('click', function(event) {
+            if (event.target === kasOverlay) closeKasaModal();
+        });
+    }
+    if (bankPrint) {
+        bankPrint.addEventListener('click', function() {
+            window.print();
+        });
+    }
+    if (bankOverlay) {
+        bankOverlay.addEventListener('click', function(event) {
+            if (event.target === bankOverlay) closeBankModal();
+        });
+    }
+    if (invPrint) {
+        invPrint.addEventListener('click', function() {
+            window.print();
+        });
+    }
+    if (invOverlay) {
+        invOverlay.addEventListener('click', function(event) {
+            if (event.target === invOverlay) closeInvoiceModal();
+        });
+    }
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') closeAllModals();
+    });
+
+    document.addEventListener('click', function(event) {
+        if (!picker.contains(event.target)) {
+            closeDropdown();
+        }
+    });
+
+    restoreSelection();
+})();
+</script>
 {% endblock %}
