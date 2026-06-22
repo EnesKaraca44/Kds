@@ -45,14 +45,14 @@
 
 <!-- Kategori Navigasyonu (Sekmeler) -->
 <div class="tabs">
-    <a class="tab-btn {% if active_kategori == '7' %}active{% endif %}" data-t="🧪 Miad Seviye Denetim" href="{{ url_for('malzeme.malzeme', kategori='7', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🧪 Miad Seviye Denetim</a>
-    <a class="tab-btn {% if active_kategori == '6' %}active{% endif %}" data-t="🧭 Malzeme Mevcut Durum" href="{{ url_for('malzeme.malzeme', kategori='6', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🧭 Malzeme Mevcut Durum</a>
-    <a class="tab-btn {% if active_kategori == '1' %}active{% endif %}" data-t="📊 Günlük Tüketim ve Hız Analizi" href="{{ url_for('malzeme.malzeme', kategori='1', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">📊 Günlük Tüketim ve Hız Analizi</a>
-    <a class="tab-btn {% if active_kategori == '2' %}active{% endif %}" data-t="🔗 Tetkik (İşlem) Bazlı Malzeme Detayı" href="{{ url_for('malzeme.malzeme', kategori='2', tetkik=selected_tetkik, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🔗 Tetkik (İşlem) Bazlı Malzeme Detayı</a>
-    <a class="tab-btn {% if active_kategori == '3' %}active{% endif %}" data-t="🩺 Branş ve Branş İçi Hekim Analizi" href="{{ url_for('malzeme.malzeme', kategori='3', brans=selected_brans, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🩺 Branş ve Branş İçi Hekim Analizi</a>
-    <a class="tab-btn {% if active_kategori == '4' %}active{% endif %}" data-t="🎈 Maliyet & Hasta İlişkisi" href="{{ url_for('malzeme.malzeme', kategori='4', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">🎈 Maliyet & Hasta İlişkisi</a>
+    <a class="tab-btn {% if active_kategori == '7' %}active{% endif %}" data-t="🧪 Miad Seviye Denetim" href="{{ url_for('malzeme.malzeme', kategori='7', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">🧪 Miad Seviye Denetim</a>
+    <a class="tab-btn {% if active_kategori == '6' %}active{% endif %}" data-t="🧭 Malzeme Mevcut Durum" href="{{ url_for('malzeme.malzeme', kategori='6', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">🧭 Malzeme Mevcut Durum</a>
+    <a class="tab-btn {% if active_kategori == '1' %}active{% endif %}" data-t="📊 Günlük Tüketim ve Hız Analizi" href="{{ url_for('malzeme.malzeme', kategori='1', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">📊 Günlük Tüketim ve Hız Analizi</a>
+    <a class="tab-btn {% if active_kategori == '2' %}active{% endif %}" data-t="🔗 Tetkik (İşlem) Bazlı Malzeme Detayı" href="{{ url_for('malzeme.malzeme', kategori='2', tetkik=selected_tetkik, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">🔗 Tetkik (İşlem) Bazlı Malzeme Detayı</a>
+    <a class="tab-btn {% if active_kategori == '3' %}active{% endif %}" data-t="🩺 Branş ve Branş İçi Hekim Analizi" href="{{ url_for('malzeme.malzeme', kategori='3', brans=selected_brans, depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">🩺 Branş ve Branş İçi Hekim Analizi</a>
+    <a class="tab-btn {% if active_kategori == '4' %}active{% endif %}" data-t="🎈 Maliyet & Hasta İlişkisi" href="{{ url_for('malzeme.malzeme', kategori='4', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">🎈 Maliyet & Hasta İlişkisi</a>
     <!-- Kategori 5: Genel stok sıralaması sekmesi -->
-    <a class="tab-btn {% if active_kategori == '5' %}active{% endif %}" data-t="📋 Genel Stok Tüketim Sıralaması" href="{{ url_for('malzeme.malzeme', kategori='5', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bu-ay'), start=request.args.get('start'), end=request.args.get('end')) }}">📋 Genel Stok Tüketim Sıralaması</a>
+    <a class="tab-btn {% if active_kategori == '5' %}active{% endif %}" data-t="📋 Genel Stok Tüketim Sıralaması" href="{{ url_for('malzeme.malzeme', kategori='5', depo=request.args.get('depo', ''), quick=request.args.get('quick', 'bugun'), start=request.args.get('start'), end=request.args.get('end')) }}">📋 Genel Stok Tüketim Sıralaması</a>
 </div>
 <!-- Sekme alanı sonu -->
 
@@ -62,7 +62,7 @@
 <form method="get" class="mb-3 malzeme-inline-filter depo-inline-filter">
     <!-- Sayfa değişse bile tarih/kategori filtresinin korunması için gizli (hidden) alanlar kullanılır -->
     <input type="hidden" name="kategori" value="7">
-    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bugun') }}">
     <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
     <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
     <div class="tetkik-filter-card depo-filter-card">
@@ -159,7 +159,7 @@
 <!-- Depo bazlı filtreleme formu: GET metodu parametreleri URL üzerinden taşır -->
 <form method="get" class="mb-3 malzeme-inline-filter depo-inline-filter">
     <input type="hidden" name="kategori" value="6">
-    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+    <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bugun') }}">
     <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
     <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
     <div class="tetkik-filter-card depo-filter-card">
@@ -271,7 +271,7 @@
     <form method="get" class="mb-3 malzeme-inline-filter">
         <input type="hidden" name="kategori" value="2">
         <input type="hidden" name="depo" value="{{ request.args.get('depo', '') }}">
-        <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+        <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bugun') }}">
         <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
         <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
         <div class="tetkik-filter-card">
@@ -355,7 +355,7 @@
             <form method="get" class="mb-3">
                 <input type="hidden" name="kategori" value="3">
                 <input type="hidden" name="depo" value="{{ request.args.get('depo', '') }}">
-                <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bu-ay') }}">
+                <input type="hidden" name="quick" value="{{ request.args.get('quick', 'bugun') }}">
                 <input type="hidden" name="start" value="{{ request.args.get('start', '') }}">
                 <input type="hidden" name="end" value="{{ request.args.get('end', '') }}">
                 <label for="bransSelect" class="metric-label" data-t="Branş içi hekim dağılımı için seçin:">Branş içi hekim dağılımı için seçin:</label>

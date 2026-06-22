@@ -77,6 +77,7 @@ def create_app():
             {'url': '/tedavi', 'icon': '🧪', 'label': 'Tedavi Grupları Analizi'},
             {'url': '/tedavi-kartlari', 'icon': '🧾', 'label': 'Tedavi Kartları Analizi'},
             {'url': '/malzeme', 'icon': '📦', 'label': 'Kurum Malzeme Tüketim'},
+            {'url': '/stok-durum', 'icon': '📊', 'label': 'Stok Durum'},
             {'url': '/yabanci-hasta', 'icon': '🌐', 'label': 'Yabancı Hasta Analizi'},
             {'url': '/randevu', 'icon': '📅', 'label': 'Hekim Randevu Analizi'},
             {'url': '/gelir', 'icon': '💰', 'label': 'Kurum Gelir Analiz'},
@@ -161,6 +162,33 @@ def create_app():
                                 dict(target_item),
                             )
 
+                # Gecis donemi: "Stok Durum" menusu DB'de henuz tanimli degilse,
+                # "Kurum Malzeme Tüketim" yetkisi olan kullanicilara yeni sayfayi da goster.
+                _, malzeme_db_key = _menu_lookup(menu_dict, "Kurum Malzeme Tüketim")
+                if malzeme_db_key is not None:
+                    stok_durum_item = None
+                    for group_name, items in default_nav_items.items():
+                        for item in items:
+                            if item.get('label') == 'Stok Durum':
+                                stok_durum_item = (group_name, item)
+                                break
+                        if stok_durum_item:
+                            break
+
+                    if stok_durum_item:
+                        target_group, target_item = stok_durum_item
+                        filtered_nav.setdefault(target_group, [])
+                        already_exists = any(
+                            _nav_compare_key(i.get('label', '')) == _nav_compare_key('Stok Durum')
+                            for i in filtered_nav[target_group]
+                        )
+                        if not already_exists:
+                            _nav_insert_after(
+                                filtered_nav[target_group],
+                                "Kurum Malzeme Tüketim",
+                                dict(target_item),
+                            )
+
                 # Gecis donemi: "Protez Takibi" menusu DB'de henuz tanimli degilse,
                 # "Protez Analizi" yetkisi olan kullanicilara yeni sayfayi da goster.
                 _, protez_db_key = _menu_lookup(menu_dict, "Protez Analizi")
@@ -228,6 +256,7 @@ def create_app():
     from routes.rontgen import rontgen_bp
     from routes.personel_sorgulama import personel_sorgulama_bp
     from routes.cari_sorusturma import cari_sorusturma_bp
+    from routes.stok_durum import stok_durum_bp
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(dashboard_bp)
@@ -247,6 +276,7 @@ def create_app():
     app.register_blueprint(rontgen_bp)
     app.register_blueprint(personel_sorgulama_bp)
     app.register_blueprint(cari_sorusturma_bp)
+    app.register_blueprint(stok_durum_bp)
 
     # Kök URL yönlendirmesi
     @app.route('/')

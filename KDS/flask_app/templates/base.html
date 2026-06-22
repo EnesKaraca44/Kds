@@ -101,14 +101,14 @@
                 </button>
                 <form class="date-filter" id="dateFilter" method="GET">
                     <select name="quick" id="quickSelect" class="filter-select">
-                        <option value="bugun" {% if request.args.get('quick')=='bugun' %}selected{% endif %} data-t="Bugün">Bugün
+                        <option value="bugun" {% if request.args.get('quick','bugun')=='bugun' %}selected{% endif %} data-t="Bugün">Bugün
                         </option>
                         <option value="dun" {% if request.args.get('quick')=='dun' %}selected{% endif %} data-t="Dün">Dün</option>
                         <option value="son-7" {% if request.args.get('quick')=='son-7' %}selected{% endif %} data-t="Son 7 Gün">Son 7 Gün
                         </option>
                         <option value="son-30" {% if request.args.get('quick')=='son-30' %}selected{% endif %} data-t="Son 30 Gün">Son 30
                             Gün</option>
-                        <option value="bu-ay" {% if request.args.get('quick','bu-ay')=='bu-ay' %}selected{% endif %} data-t="Bu Ay">Bu
+                        <option value="bu-ay" {% if request.args.get('quick')=='bu-ay' %}selected{% endif %} data-t="Bu Ay">Bu
                             Ay</option>
                         <option value="gecen-ay" {% if request.args.get('quick')=='gecen-ay' %}selected{% endif %} data-t="Geçen Ay">Geçen
                             Ay</option>

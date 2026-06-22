@@ -32,7 +32,7 @@ def get_date_range():
                 return sd, ed
             except ValueError:
                 pass
-        quick = 'bu-ay'
+        quick = 'bugun'
     
     if quick == 'bugun':
         sd, ed = today, today
@@ -118,6 +118,6 @@ def dashboard():
         query_time=query_time,
         db_status=db_status,
         current_time=datetime.datetime.now().strftime("%H:%M:%S"),
-        quick_choice=request.args.get('quick', 'bu-ay'),
+        quick_choice=request.args.get('quick', 'bugun'),
         page_sql_kodlari=PAGE_SQL_KODLARI,
     )
