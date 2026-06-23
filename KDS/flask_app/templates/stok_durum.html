@@ -61,16 +61,6 @@
     text-align: center !important;
   }
 
-  .stok-durum-table tbody tr {
-    cursor: pointer;
-    transition: background 0.15s ease;
-  }
-
-  .stok-durum-table tbody tr.selected {
-    background: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-card)) !important;
-    box-shadow: inset 3px 0 0 var(--accent-primary);
-  }
-
   .stok-durum-table tbody tr.sd-row-kritik {
     background: color-mix(in srgb, #ef4444 6%, var(--bg-card));
   }
@@ -114,85 +104,33 @@
     border-color: rgba(139, 92, 246, 0.35);
   }
 
-  .sd-toolbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    flex-wrap: wrap;
-    margin: 4px 6px 14px;
-    padding: 12px 14px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    background: linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(255, 255, 255, 0.95));
-    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
-  }
-
-  .theme-dark .sd-toolbar {
-    background: rgba(15, 23, 42, 0.55);
-    border-color: rgba(45, 74, 138, 0.45);
-  }
-
-  .sd-toolbar-group {
+  .sd-period-wrap {
+    flex: 0 0 auto;
+    margin-left: auto;
     display: flex;
     align-items: center;
     gap: 8px;
-    flex-wrap: wrap;
   }
 
-  .sd-toolbar-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 9px 16px;
-    border-radius: var(--radius-sm);
-    font-family: var(--font-family);
-    font-size: 0.86rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: var(--transition);
-    border: 1px solid var(--border-color);
-    background: var(--bg-card);
-    color: var(--text-primary);
-  }
-
-  .sd-toolbar-btn:hover {
-    border-color: var(--accent-primary);
-    color: var(--accent-primary);
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.12);
-  }
-
-  .sd-toolbar-btn.primary {
-    background: var(--gradient-primary);
-    border: none;
-    color: #fff;
-    box-shadow: var(--shadow-sm);
-  }
-
-  .sd-toolbar-btn.primary:hover {
-    color: #fff;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
-  }
-
-  .sd-toolbar-btn svg {
-    width: 16px;
-    height: 16px;
-    flex-shrink: 0;
-  }
-
-  .sd-selected-hint {
+  .sd-period-label {
     font-size: 0.8rem;
-    color: var(--text-muted);
     font-weight: 600;
+    color: var(--text-muted);
+    white-space: nowrap;
   }
 
-  .sd-selected-hint strong {
+  .sd-period-chip {
+    font-size: 0.78rem;
+    font-weight: 700;
     color: var(--accent-primary);
+    background: color-mix(in srgb, var(--accent-primary) 10%, var(--bg-card));
+    border: 1px solid color-mix(in srgb, var(--accent-primary) 22%, transparent);
+    padding: 6px 12px;
+    border-radius: 999px;
+    white-space: nowrap;
   }
 
   @media print {
-    .sd-toolbar,
     .table-search-limit-row {
       display: none !important;
     }
@@ -207,6 +145,10 @@
 {% block content %}
 <div class="malzeme-dashboard stok-durum-dashboard">
 
+  {% if no_data %}
+  <div class="alert alert-warning" data-t="⚠️ Seçilen tarih aralığında stok kaydı bulunamadı.">⚠️ Seçilen tarih aralığında stok kaydı bulunamadı.</div>
+  {% endif %}
+
   <div class="chart-section malzeme-panel">
     <h4 data-t="📊 Stok Durum Tablosu">📊 Stok Durum Tablosu</h4>
 
@@ -219,15 +161,12 @@
         <span id="searchStokDurumCount" class="table-search-count"></span>
       </div>
       <button type="button" class="filter-btn" id="sdSearchBtn" style="flex-shrink:0;" data-t="Ara">Ara</button>
-      <div class="table-limit-wrapper">
-        <span class="table-limit-label" data-t="Göster">Göster:</span>
-        <div id="limitStokDurumSeg" class="table-limit-seg" role="group" aria-label="Göster">
-          <button type="button" class="table-limit-btn" data-limit="25">25</button>
-          <button type="button" class="table-limit-btn active" data-limit="50">50</button>
-          <button type="button" class="table-limit-btn" data-limit="100">100</button>
-          <button type="button" class="table-limit-btn" data-limit="all" data-t="Tümü">Tümü</button>
-        </div>
+      {% if start_date and end_date %}
+      <div class="sd-period-wrap">
+        <span class="sd-period-label" data-t="Aktif Dönem">Aktif Dönem</span>
+        <span class="sd-period-chip">{{ start_date.strftime('%d.%m.%Y') }} – {{ end_date.strftime('%d.%m.%Y') }}</span>
       </div>
+      {% endif %}
     </div>
 
     <div class="table-wrapper malzeme-detail-table stok-durum-table-wrap">
@@ -257,17 +196,17 @@
             <th data-t="Seri / Lot Numarası">Seri / Lot Numarası</th>
           </tr>
         </thead>
-        <tbody id="sdTableBody">
+        <tbody>
           {% for row in satirlar %}
           <tr class="{% if row.durum == 'Kritik' %}sd-row-kritik{% elif row.durum == 'Tedarik Edilmeli' %}sd-row-tedarik{% endif %}"
               data-malzeme="{{ row.malzeme_adi | lower }}"
               data-kod="{{ row.malzeme_kodu | lower }}">
             <td class="sd-col-no">{{ loop.index }}</td>
             <td class="sd-col-hareket">
-              {% if row.hareket_turu == 'Satınalma' %}
-              <span class="hareket-chip hareket-chip--satinalma">{{ row.hareket_turu }}</span>
-              {% else %}
+              {% if row.hareket_turu and ('devir' in row.hareket_turu|lower) %}
               <span class="hareket-chip hareket-chip--devir">{{ row.hareket_turu }}</span>
+              {% else %}
+              <span class="hareket-chip hareket-chip--satinalma">{{ row.hareket_turu }}</span>
               {% endif %}
             </td>
             <td class="sd-col-text sd-col-kod">{{ row.malzeme_kodu }}</td>
@@ -295,28 +234,13 @@
             <td class="sd-col-text" style="text-align:center!important;">{{ row.seri_lot or '—' }}</td>
           </tr>
           {% endfor %}
+          {% if satirlar|length == 0 %}
+          <tr>
+            <td colspan="17" class="malzeme-empty-cell" data-t="Kayıt bulunamadı.">Kayıt bulunamadı.</td>
+          </tr>
+          {% endif %}
         </tbody>
       </table>
-    </div>
-
-    <div class="sd-toolbar">
-      <div class="sd-toolbar-group">
-        <button type="button" class="sd-toolbar-btn" id="sdExportBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 12l3 3 5-6"/></svg>
-          <span data-t="Excel'e Aktar">Excel'e Aktar</span>
-        </button>
-        <button type="button" class="sd-toolbar-btn" id="sdPrintBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-          <span data-t="Baskı Önizleme">Baskı Önizleme</span>
-        </button>
-      </div>
-      <div class="sd-toolbar-group">
-        <span class="sd-selected-hint" id="sdSelectedHint" data-t="Satır seçmek için tabloya tıklayın">Satır seçmek için tabloya tıklayın</span>
-        <button type="button" class="sd-toolbar-btn primary" id="sdDocsBtn">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
-          <span data-t="Malzemenin Belgelerini Görüntüle">Malzemenin Belgelerini Görüntüle</span>
-        </button>
-      </div>
     </div>
   </div>
 </div>
@@ -333,10 +257,9 @@
       .toLowerCase();
   }
 
-  function setupTableSearch(inputId, countId, tableSelector, limitControlId) {
+  function setupTableSearch(inputId, countId, tableSelector) {
     var input = document.getElementById(inputId);
     var countEl = document.getElementById(countId);
-    var limitControl = limitControlId ? document.getElementById(limitControlId) : null;
     if (!input) return null;
 
     var panel = input.closest('.malzeme-panel');
@@ -344,91 +267,37 @@
     var tbody = panel.querySelector(tableSelector + ' tbody');
     if (!tbody) return null;
 
-    var filterableRows = Array.from(tbody.querySelectorAll('tr'));
+    var filterableRows = Array.from(tbody.querySelectorAll('tr')).filter(function (r) {
+      return !r.querySelector('.malzeme-empty-cell');
+    });
 
-    function getLimit() {
-      if (!limitControl) return Infinity;
-      var activeBtn = limitControl.querySelector('.table-limit-btn.active');
-      var val = activeBtn ? activeBtn.getAttribute('data-limit') : 'all';
-      if (!val || val === 'all') return Infinity;
-      var n = parseInt(val, 10);
-      return isNaN(n) ? Infinity : n;
-    }
-
-    function applySearchAndLimit() {
+    function applySearch() {
       var query = turkishLower(input.value.trim());
-      var limit = getLimit();
-      var matchingRows = [];
+      var visible = 0;
 
-      filterableRows.forEach(function (row) { row.style.display = 'none'; });
       filterableRows.forEach(function (row) {
         var malzeme = turkishLower(row.getAttribute('data-malzeme') || '');
         var kod = turkishLower(row.getAttribute('data-kod') || '');
         var text = malzeme + ' ' + kod + ' ' + turkishLower(row.textContent);
-        if (!query || text.indexOf(query) !== -1) matchingRows.push(row);
+        var match = !query || text.indexOf(query) !== -1;
+        row.style.display = match ? '' : 'none';
+        if (match) visible++;
       });
 
-      matchingRows.slice(0, limit).forEach(function (row) { row.style.display = ''; });
       if (countEl) {
-        var shown = Math.min(matchingRows.length, limit === Infinity ? matchingRows.length : limit);
-        countEl.textContent = shown + ' / ' + matchingRows.length;
+        countEl.textContent = visible + ' / ' + filterableRows.length;
         countEl.classList.add('visible');
       }
     }
 
-    input.addEventListener('input', applySearchAndLimit);
-    if (limitControl) {
-      limitControl.querySelectorAll('.table-limit-btn').forEach(function (btn) {
-        btn.addEventListener('click', function () {
-          limitControl.querySelectorAll('.table-limit-btn').forEach(function (b) { b.classList.remove('active'); });
-          btn.classList.add('active');
-          applySearchAndLimit();
-        });
-      });
-    }
-    applySearchAndLimit();
-    return applySearchAndLimit;
+    input.addEventListener('input', applySearch);
+    applySearch();
+    return applySearch;
   }
 
-  var applySearch = setupTableSearch('searchStokDurum', 'searchStokDurumCount', '.stok-durum-table', 'limitStokDurumSeg');
+  var applySearch = setupTableSearch('searchStokDurum', 'searchStokDurumCount', '.stok-durum-table');
   var searchBtn = document.getElementById('sdSearchBtn');
   if (searchBtn && applySearch) searchBtn.addEventListener('click', applySearch);
-
-  var selectedRow = null;
-  var selectedHint = document.getElementById('sdSelectedHint');
-  var tableBody = document.getElementById('sdTableBody');
-
-  function selectRow(tr) {
-    if (selectedRow) selectedRow.classList.remove('selected');
-    selectedRow = tr;
-    if (tr) {
-      tr.classList.add('selected');
-      var ad = tr.cells[3] ? tr.cells[3].textContent.trim() : '';
-      if (selectedHint) selectedHint.innerHTML = 'Seçili: <strong>' + ad + '</strong>';
-    }
-  }
-
-  if (tableBody) {
-    tableBody.addEventListener('click', function (e) {
-      var tr = e.target.closest('tr');
-      if (tr && tr.style.display !== 'none') selectRow(tr);
-    });
-  }
-
-  document.getElementById('sdExportBtn').addEventListener('click', function () {
-    alert('Excel aktarımı SQL bağlantısı eklendiğinde aktif olacaktır.');
-  });
-  document.getElementById('sdPrintBtn').addEventListener('click', function () {
-    window.print();
-  });
-  document.getElementById('sdDocsBtn').addEventListener('click', function () {
-    if (!selectedRow) {
-      alert('Lütfen önce tablodan bir malzeme satırı seçin.');
-      return;
-    }
-    var ad = selectedRow.cells[3] ? selectedRow.cells[3].textContent.trim() : '';
-    alert('"' + ad + '" belgeleri SQL bağlantısı eklendiğinde görüntülenecektir.');
-  });
 })();
 </script>
 {% endblock %}

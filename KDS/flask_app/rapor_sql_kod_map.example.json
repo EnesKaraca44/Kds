@@ -122,5 +122,8 @@
   ],
   "cari_sorusturma.alis_faturasi_detay": [
     "ALIS_FATURASI_DETAY"
+  ],
+  "stok_durum.stok_durum_verisi_yukle": [
+    "STOK_DURUM"
   ]
 }
