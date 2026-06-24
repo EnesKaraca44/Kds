@@ -1,12 +1,13 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, jsonify, render_template, request
 import sys
 import os
+from datetime import date
 import pandas as pd
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from app import login_required
 from routes.dashboard import get_date_range
-from database.stok_durum_sorgular import stok_durum_verisi_yukle
+from database.stok_durum_sorgular import stok_durum_verisi_yukle, stok_durum_detay_yukle
 
 stok_durum_bp = Blueprint('stok_durum', __name__)
 
@@ -36,6 +37,12 @@ def _stok_kpi_ozet(satirlar: list) -> dict:
 
 
 def _str_val(val) -> str:
+    if isinstance(val, pd.Series):
+        for item in val:
+            s = _str_val(item)
+            if s:
+                return s
+        return ''
     if val is None or (isinstance(val, float) and pd.isna(val)):
         return ''
     return str(val).strip()
@@ -78,6 +85,7 @@ def _dataframe_to_satirlar(df: pd.DataFrame) -> list:
         stok_fazlasi = max(0.0, mevcut - maximum) if maximum > 0 else 0.0
 
         satirlar.append({
+            'stok_kart_id': _str_val(row.get('shStokKartId')),
             'hareket_turu': _str_val(row.get('hareketTurBelgeAd')) or '—',
             'malzeme_kodu': _str_val(row.get('shStokKod')),
             'malzeme_adi': _str_val(row.get('shStokAd')),
@@ -95,6 +103,29 @@ def _dataframe_to_satirlar(df: pd.DataFrame) -> list:
             'seri_lot': _seri_lot(row),
         })
     return satirlar
+
+
+def _son_bir_yil_araligi():
+    ed = date.today()
+    try:
+        sd = ed.replace(year=ed.year - 1)
+    except ValueError:
+        sd = ed.replace(year=ed.year - 1, day=28)
+    return sd.isoformat(), ed.isoformat()
+
+
+@stok_durum_bp.route('/stok-durum/detay')
+@login_required
+def stok_durum_detay_api():
+    stok_id = (request.args.get('stok_id') or request.args.get('stok_kart_id') or '').strip()
+    if not stok_id:
+        return jsonify({'ozet': {}, 'satirlar': [], 'count': 0, 'error': 'stok_id gerekli'}), 400
+
+    start_str, end_str = _son_bir_yil_araligi()
+    data = stok_durum_detay_yukle(stok_id, start_str, end_str)
+    data['start_date'] = start_str
+    data['end_date'] = end_str
+    return jsonify(data)
 
 
 @stok_durum_bp.route('/stok-durum')
