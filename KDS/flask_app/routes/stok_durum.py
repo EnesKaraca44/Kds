@@ -15,13 +15,10 @@ PAGE_SQL_KODLARI = ["stok_durum.stok_durum_verisi_yukle"]
 
 
 def _stok_durum_hesapla(row: dict) -> str:
+    # Tabloda mevcut tam sayiya yuvarlaniyor (turkish_number(0)); durum ayni kurala uymali.
     mevcut = float(row.get('mevcut') or 0)
-    kritik = float(row.get('kritik') or 0)
-    minimum = float(row.get('minimum') or 0)
-    if mevcut <= kritik or mevcut <= 0:
+    if round(mevcut) <= 0:
         return 'Kritik'
-    if mevcut <= minimum:
-        return 'Tedarik Edilmeli'
     return 'Yeterli'
 
 

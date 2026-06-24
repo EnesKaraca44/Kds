@@ -686,6 +686,13 @@
     return '<span class="sd-tip-chip sd-tip-chip--' + tip + '">' + label + '</span>';
   }
 
+  function satisKaynakLabel(k) {
+    if (k === 'net_satis') return 'net satış';
+    if (k === 'cikis_mlyt') return 'çıkış maliyeti';
+    if (k === 'sh_fiyat_yedek') return 'birim fiyat (yedek)';
+    return k || '';
+  }
+
   function renderDetay(data, rowInfo) {
     var ozet = data.ozet || {};
     var satirlar = data.satirlar || [];
@@ -699,7 +706,8 @@
     cards += '<div class="sd-card sd-card--satis">'
       + '<div class="sd-card-label" data-t="Son Satış Fiyatı">Son Satış Fiyatı</div>'
       + '<div class="sd-card-value">' + (ozet.son_satis_fiyat != null ? fmtPara(ozet.son_satis_fiyat) : '—') + '</div>'
-      + '<div class="sd-card-meta">' + (ozet.son_satis_tarih ? esc(ozet.son_satis_tarih) : '') + '</div>'
+      + '<div class="sd-card-meta">' + (ozet.son_satis_tarih ? esc(ozet.son_satis_tarih) : '')
+      + (ozet.son_satis_kaynak ? ' · ' + esc(satisKaynakLabel(ozet.son_satis_kaynak)) : '') + '</div>'
       + '</div>';
     cards += '<div class="sd-card sd-card--mevcut">'
       + '<div class="sd-card-label" data-t="Mevcut / Durum">Mevcut / Durum</div>'
@@ -724,7 +732,7 @@
           + '<td>' + esc(s.cari || '—') + '</td>'
           + '<td>' + esc(s.belge_no || '—') + '</td>'
           + '<td class="num">' + fmtNum(s.miktar, 0) + ' ' + esc(s.birim || '') + '</td>'
-          + '<td class="num">' + fmtPara(s.fiyat) + '</td>'
+          + '<td class="num">' + fmtPara(s.birim_fiyat != null ? s.birim_fiyat : s.fiyat) + '</td>'
           + '<td class="num">' + fmtNum(s.kdv_oran, 0) + '</td>'
           + '<td class="num">' + fmtPara(s.toplam) + '</td>'
           + '</tr>';

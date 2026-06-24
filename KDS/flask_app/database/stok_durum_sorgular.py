@@ -305,6 +305,24 @@ def _detay_num(val) -> float:
     return float(num) if pd.notna(num) else 0.0
 
 
+def _detay_satis_birim_fiyat(miktar, net_satis, cikis_mlyt, fallback_fiyat=0.0):
+    """
+    Satış birim fiyatı ve kaynağı.
+    net_satis / cikis_mlyt yoksa None döner (shFiyat ile aynı göstermeyelim).
+    """
+    miktar = _detay_num(miktar)
+    net_satis = _detay_num(net_satis)
+    cikis_mlyt = _detay_num(cikis_mlyt)
+    if miktar > 0 and net_satis > 0:
+        return net_satis / miktar, "net_satis"
+    if miktar > 0 and cikis_mlyt > 0:
+        return cikis_mlyt / miktar, "cikis_mlyt"
+    fb = _detay_num(fallback_fiyat)
+    if fb > 0:
+        return fb, "sh_fiyat_yedek"
+    return None, "yok"
+
+
 def _detay_tarih(val) -> str:
     if val is None or (isinstance(val, float) and pd.isna(val)):
         return ""
@@ -368,29 +386,58 @@ def stok_durum_detay_yukle(stok_kart_id, start_date_str, end_date_str, butce_tur
         satirlar = []
         for _, row in df.iterrows():
             belge = str(row.get("belgeAd") or "").strip()
+            miktar = _detay_num(row.get("shMiktar"))
+            fiyat = _detay_num(row.get("shFiyat"))
+            net_satis = _detay_num(row.get("shNetSatisTutar"))
+            cikis_mlyt = _detay_num(row.get("shCikisMlytTutar"))
+            tip = _detay_satir_tipi(
+                row.get("stokHareketTip"),
+                row.get("hareketEnvanterTip"),
+                belge,
+            )
+            satis_birim, satis_kaynak = _detay_satis_birim_fiyat(miktar, net_satis, cikis_mlyt, fiyat)
+            if tip == "satis" and satis_birim is not None:
+                birim_fiyat = satis_birim
+            else:
+                birim_fiyat = fiyat
             satirlar.append(
                 {
                     "tarih": _detay_tarih(row.get("sfTarih")) or _detay_tarih(row.get("shTarih")),
                     "belge": belge,
-                    "tip": _detay_satir_tipi(
-                        row.get("stokHareketTip"),
-                        row.get("hareketEnvanterTip"),
-                        belge,
-                    ),
+                    "tip": tip,
                     "cari": str(row.get("cariKartAdi") or "").strip(),
                     "birim": str(row.get("shOlcuBirimAd") or "").strip(),
-                    "miktar": _detay_num(row.get("shMiktar")),
-                    "fiyat": _detay_num(row.get("shFiyat")),
+                    "miktar": miktar,
+                    "fiyat": fiyat,
+                    "satis_birim_fiyat": satis_birim,
+                    "satis_fiyat_kaynak": satis_kaynak,
+                    "birim_fiyat": birim_fiyat,
                     "kdvsiz_fiyat": _detay_num(row.get("kdvsizShFiyat")),
                     "kdv_oran": _detay_num(row.get("shKdvOran")),
                     "toplam": _detay_num(row.get("shToplam")),
                     "net_tutar": _detay_num(row.get("shKdvNetTutar")),
+                    "net_satis_tutar": net_satis,
+                    "cikis_mlyt_tutar": cikis_mlyt,
                     "belge_no": str(row.get("sfBelgeNo") or row.get("sfFaturaNo") or "").strip(),
                 }
             )
 
         son_alis = next((s for s in reversed(satirlar) if s["tip"] == "alis"), None)
         son_satis = next((s for s in reversed(satirlar) if s["tip"] == "satis"), None)
+        if son_satis:
+            print(
+                f"[STOK_DURUM_DETAY] son satis ornek stok_id={sid}: "
+                f"shFiyat={son_satis.get('fiyat')} "
+                f"netSatis={son_satis.get('net_satis_tutar')} "
+                f"cikisMlyt={son_satis.get('cikis_mlyt_tutar')} "
+                f"hesaplanan={son_satis.get('satis_birim_fiyat')} "
+                f"kaynak={son_satis.get('satis_fiyat_kaynak')}"
+            )
+        if son_alis:
+            print(
+                f"[STOK_DURUM_DETAY] son alis ornek stok_id={sid}: "
+                f"shFiyat={son_alis.get('fiyat')} toplam={son_alis.get('toplam')}"
+            )
         ilk = df.iloc[0]
 
         # Gosterimde en son islem en ustte olsun (yeni -> eski).
@@ -404,8 +451,9 @@ def stok_durum_detay_yukle(stok_kart_id, start_date_str, end_date_str, butce_tur
             "son_alis_fiyat": son_alis["fiyat"] if son_alis else None,
             "son_alis_tarih": son_alis["tarih"] if son_alis else "",
             "son_alis_cari": son_alis["cari"] if son_alis else "",
-            "son_satis_fiyat": son_satis["fiyat"] if son_satis else None,
+            "son_satis_fiyat": son_satis["satis_birim_fiyat"] if son_satis else None,
             "son_satis_tarih": son_satis["tarih"] if son_satis else "",
+            "son_satis_kaynak": son_satis.get("satis_fiyat_kaynak", "") if son_satis else "",
         }
 
         return {"ozet": ozet, "satirlar": satirlar, "count": len(satirlar)}
