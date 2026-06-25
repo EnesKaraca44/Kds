@@ -131,5 +131,8 @@
   ],
   "stok_durum.stok_durum_verisi_yukle": [
     "STOK_DURUM"
+  ],
+  "stok_durum.stok_durum_detay_yukle": [
+    "STOK_ALIS_SATIS"
   ]
 }
