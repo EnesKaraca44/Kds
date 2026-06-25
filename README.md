@@ -15,14 +15,18 @@ Uygulama aşağıdaki ana analiz ve raporlama modüllerini içermektedir:
 - **🏵️ Hekim Hizmet Puan Analizi:** Hekimlerin sunduğu hizmetlerin puan bazlı takibi.
 - **👥 Poliklinik & Hasta Analizi:** Poliklinik yoğunluğu ve hasta trafiği raporları.
 - **🩺 Tedavi Grupları Analizi:** Yapılan tedavilerin gruplandırılmış maliyet ve sayı analizi.
+- **🧾 Tedavi Kartları Analizi:** Tedavi kartı bazlı dağılım ve detay analizi.
 - **📦 Kurum Malzeme Tüketim:** Stok ve malzeme kullanım verimliliği takibi.
+- **📊 Stok Durum:** Stok mevcut durum listesi, kritik/yeterli durum takibi ve hareket detayı pop-up (son alış/satış fiyatı).
 - **🌐 Yabancı Hasta Analizi:** Uluslararası hasta trafiği ve gelir raporlaması.
 - **📅 Randevu & Sadakat Analizi:** Randevu doluluk oranları ve hasta devamlılık verileri.
 - **💰 Kurum Gelir Analizi:** Finansal durum ve gelir kaynaklarının detaylı dökümü.
+- **📒 Cari Soruşturma:** Cari firma hareketleri, finans ve fatura detay sorgulama.
 - **💉 Sterilizasyon Maliyet Analizi:** Sterilizasyon birimi operasyonel maliyet takibi.
 - **📤 Hekim Sevk Sayıları:** Kurum içi ve dışı sevk trafiği.
 - **⚗️ Tıbbi Atık Analizi:** Atık yönetimi ve çevresel veri takibi.
-- **🦷 Protez Takibi & Analizi:** Diş protez süreçlerinin uçtan uca yönetimi ve analizi.
+- **🦷 Protez Analizi:** Diş protez süreçlerinin analizi ve raporlaması.
+- **🧾 Protez Takibi:** Protez süreçlerinin uçtan uca takibi ve hasta listeleri.
 - **🩻 Röntgen Analizi:** Görüntüleme birimi işlem hacmi ve raporlaması.
 
 ## 💻 Teknoloji Yığını
@@ -40,8 +44,12 @@ Projeyi yerel ortamınızda çalıştırmak için aşağıdaki adımları izleye
 
 1.  **Depoyu Klonlayın:**
     ```bash
+    git clone https://github.com/EnesKaraca44/Kds.git
+    cd Kds
+    ```
+    Alternatif (GitLab):
+    ```bash
     git clone https://gitlab.com/EnesKaraca44/kds.git
-    cd kds
     ```
 
 2.  **Sanal Ortam Oluşturun ve Aktifleştirin:**
